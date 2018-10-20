@@ -1,0 +1,14 @@
+image: mkenney/npm
+
+cache:
+  paths:
+  - ./node_modules/
+
+build:
+  artifacts:
+    expire_in: 1 week
+    paths:
+    - ./build
+  script:
+  - npm install
+  - npm build
