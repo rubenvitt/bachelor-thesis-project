@@ -1,10 +1,9 @@
-image: mkenney/npm
-
 cache:
   paths:
   - ./node_modules/
 
 build:
+  image: node:latest
   artifacts:
     expire_in: 1 week
     paths:
