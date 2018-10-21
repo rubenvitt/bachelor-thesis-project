@@ -14,8 +14,7 @@
   }
 
   button {
-    background-color: $default-white;
-    background-image: none;
+    background: $default-white none;
     height: 37px;
     padding: 0 15px;
     color: darken($default-text-color, 10%);
@@ -63,6 +62,10 @@
   }
 }
 
+.fc-today {
+  background-color: $inverse-primary;
+}
+
 .fc-basic-view {
   .fc-day-number {
     &.fc-today {
@@ -80,13 +83,21 @@
 
 .fc-event-container {
   .fc-event {
-    border-radius: 0;
     border: 0;
     background-color: $inverse-info;
     color: $default-info !important;
     font-size: 12px;
     line-height: 2.5;
     padding: 0 15px;
+
+    &.fc-event-danger {
+      background-color: $default-danger;
+      color: $default-dark !important;
+    }
+    &.fc-event-warning {
+      background-color: $default-warning;
+      color: $default-dark !important;
+    }
   }
 
   .fc-day-grid-event {

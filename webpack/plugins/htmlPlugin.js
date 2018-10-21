@@ -16,7 +16,6 @@ const titles = {
   'forms': 'Forms',
   'google-maps': 'Google Maps',
   'signin': 'Signin',
-  'signup': 'Signup',
   'ui': 'UI',
   'vector-maps': 'Vector Maps',
   '404': '404',
