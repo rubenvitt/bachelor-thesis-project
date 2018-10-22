@@ -3,7 +3,7 @@ cache:
   - ./node_modules/
 
 services:
-  - docker:dind
+- docker:dind
 
 stages:
 - build
@@ -24,8 +24,8 @@ deploy-docker:
   image: docker:latest
   stage: deploy
   script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.rubeen.me
-    - docker build -t docker.rubeen.me/studium/bsc/frontend .
-    - docker push docker.rubeen.me/studium/bsc/frontend
-    tags:
-    - docker
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.rubeen.me
+  - docker build -t docker.rubeen.me/studium/bsc/frontend .
+  - docker push docker.rubeen.me/studium/bsc/frontend
+  tags:
+  - docker
