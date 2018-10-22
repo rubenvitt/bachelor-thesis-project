@@ -2,8 +2,16 @@ cache:
   paths:
   - ./node_modules/
 
+services:
+  - docker:dind
+
+stages:
+- build
+- deploy
+
 build:
   image: node:latest
+  stage: build
   artifacts:
     expire_in: 1 week
     paths:
@@ -11,3 +19,13 @@ build:
   script:
   - npm install
   - npm run build || true
+
+deploy-docker:
+  image: docker:latest
+  stage: deploy
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.rubeen.me
+    - docker build -t docker.rubeen.me/studium/bsc/frontend .
+    - docker push docker.rubeen.me/studium/bsc/frontend
+    tags:
+    - docker
