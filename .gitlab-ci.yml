@@ -12,6 +12,7 @@ stages:
 build:
   image: node:latest
   stage: build
+  tags: docker-fast
   artifacts:
     expire_in: 1 week
     paths:
@@ -28,4 +29,4 @@ deploy-docker:
   - docker build -t docker.rubeen.me/studium/bsc/frontend .
   - docker push docker.rubeen.me/studium/bsc/frontend
   tags:
-  - docker
+  - docker-fast
