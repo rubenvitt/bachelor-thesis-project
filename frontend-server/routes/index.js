@@ -13,11 +13,8 @@ router.get('/', function (req, res, next) {
         debug("I know you!");
         res.render('index');
     } else {
-        debug("You are new!");
-        var entry = {key: req.session.id, val: crypto.randomBytes(64).toString('hex')};
-        sessions.keys.push(entry);
-        res.cookie(cookieNamePrivateKey, entry.val, {httpOnly: true});
-        res.render("signin");
+        debug("You are new! Redirecting to login...");
+        res.redirect("/login");
     }
 });
 
@@ -25,9 +22,15 @@ router.get('/abc', function (req, res) {
     res.render("forms");
 });
 
-router.get("/test", function (req, res) {
-    //res.sendFile(path.join(__dirname, '../public/signin.html'));
-    res.render('signin');
+router.get("/login", function (req, res) {
+    if (showLoginIfNecessary(req)) {
+        res.render('signin');
+        const entry = {key: req.session.id, val: crypto.randomBytes(64).toString('hex')};
+        sessions.keys.push(entry);
+        res.cookie(cookieNamePrivateKey, entry.val, {httpOnly: true});
+    }
+    else
+        res.redirect("../");
 });
 
 function showLoginIfNecessary(req) {
