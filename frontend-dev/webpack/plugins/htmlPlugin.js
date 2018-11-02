@@ -20,7 +20,9 @@ const titles = {
     'ui': 'UI',
     'vector-maps': 'Vector Maps',
     '404': '404',
+    '403': '403',
     '500': '500',
+    'rooms':'rooms',
     'basic-table': 'Basic Table',
 };
 
