@@ -1,6 +1,7 @@
 cache:
   paths:
-  - ./node_modules/
+  - ./frontend-dev/node_modules/
+  - ./frontend-server/node_modules/
 
 services:
 - docker:dind

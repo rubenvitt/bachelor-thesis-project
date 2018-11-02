@@ -1,15 +1,18 @@
 {
-  "name": "test",
-  "version": "0.0.0",
+  "name": "my-business-day",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "cookie-parser": "~1.4.3",
+    "consolidate": "~0.15.1",
+    "cookie-parser": "^1.4.3",
+    "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "express": "~4.16.0",
+    "express-session": "^1.15.6",
     "morgan": "~1.9.0",
-    "node-sass-middleware": "0.11.0"
+    "mustache": "~3.0.0"
   }
 }
