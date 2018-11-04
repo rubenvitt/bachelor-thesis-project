@@ -1,5 +1,6 @@
 import '../styles/index.scss';
 
+import './auth';
 import './masonry';
 import './charts';
 import './popover';

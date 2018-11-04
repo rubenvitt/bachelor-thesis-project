@@ -1,11 +1,7 @@
 var express = require('express');
 var debug = require('debug')('frontend-server:server');
-var crypto = require('crypto');
 var router = express.Router();
-
-var sessions = {};
-sessions.keys = [];
-const cookieNamePrivateKey = 'PRIVATE-TOKEN';
+const sessions = require('../modules/sessionsArray');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -25,9 +21,6 @@ router.get('/abc', function (req, res) {
 router.get("/login", function (req, res) {
     if (showLoginIfNecessary(req)) {
         res.render('signin');
-        const entry = {key: req.session.id, val: crypto.randomBytes(64).toString('hex')};
-        sessions.keys.push(entry);
-        res.cookie(cookieNamePrivateKey, entry.val, {httpOnly: true});
     }
     else
         res.redirect("../");
@@ -36,12 +29,12 @@ router.get("/login", function (req, res) {
 function showLoginIfNecessary(req) {
     debug("sessionID: " + req.session.id);
     //read cookie
-    const cookieValue = req.cookies[cookieNamePrivateKey];
+    const cookieValue = req.cookies[sessions.cookie.cookieNamePrivateKey];
     debug("Read cookie: " + cookieValue);
 
     //get list and check, if session exist already...
     let keyValuePair;
-    sessions.keys.forEach(value => keyValuePair = value.key === req.session.id ? value : keyValuePair);
+    sessions.sessionArray.keys.forEach(value => keyValuePair = value.key === req.session.id ? value : keyValuePair);
     if (keyValuePair === undefined)
         debug("It is a new session!");
     else
