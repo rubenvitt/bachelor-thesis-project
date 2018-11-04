@@ -19,9 +19,4 @@ if (document.getElementById('login-failure-alert') !== null) {
                 }
             });
     });
-
-}
-
-function sendLoginForm(username, password) {
-
 }

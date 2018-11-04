@@ -314,6 +314,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__utils__ = __webpack_require__(247);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__dropdownHandler__ = __webpack_require__(248);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__dropdownHandler___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_17__dropdownHandler__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__dashboard__ = __webpack_require__(249);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__dashboard___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_18__dashboard__);
+
 
 
 
@@ -483,8 +486,6 @@ module.exports = __webpack_require__.p + "assets/36d50c1381fda7c71d12b6643cbe1ee
         });
     });
 }
-
-function sendLoginForm(username, password) {}
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
@@ -1545,6 +1546,30 @@ const Skycons = __WEBPACK_IMPORTED_MODULE_0_skycons___default()(window);
 
 /* WEBPACK VAR INJECTION */(function($) {function testFunction(text) {
     $('#dropdownMenuButton').text(text);
+}
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ }),
+
+/***/ 249:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function($) {const weekday = new Array(7);
+weekday[0] = "Sunday";
+weekday[1] = "Monday";
+weekday[2] = "Tuesday";
+weekday[3] = "Wednesday";
+weekday[4] = "Thursday";
+weekday[5] = "Friday";
+weekday[6] = "Saturday";
+
+if ($('dashboard-todayMeetings-dayDate') !== undefined) {
+    setInterval(function () {
+        const now = new Date();
+        $('#dashboard-todayMeetings-dayName').text(weekday[now.getDay()]);
+        $('#dashboard-todayMeetings-dayDate').text(now.getFullYear() + "-" + (now.getMonth() < 10 ? "0" + now.getMonth() : now.getMonth()) + "-" + (now.getDate() < 10 ? "0" + now.getDate() : now.getDate()));
+        $('#dashboard-todayMeetings-time').text(`${now.getHours()}:${now.getMinutes()}`);
+    }, 2000);
 }
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 

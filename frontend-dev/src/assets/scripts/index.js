@@ -17,3 +17,4 @@ import './fullcalendar';
 import './googleMaps';
 import './utils';
 import './dropdownHandler';
+import './dashboard';
