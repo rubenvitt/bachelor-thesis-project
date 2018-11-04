@@ -312,10 +312,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__fullcalendar__ = __webpack_require__(242);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__googleMaps__ = __webpack_require__(245);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__utils__ = __webpack_require__(247);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__dropdownHandler__ = __webpack_require__(248);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__dropdownHandler___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_17__dropdownHandler__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__dashboard__ = __webpack_require__(249);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__dashboard___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_18__dashboard__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__dashboard__ = __webpack_require__(248);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__dashboard___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_17__dashboard__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__meeting_creation__ = __webpack_require__(249);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__meeting_creation___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_18__meeting_creation__);
 
 
 
@@ -486,6 +486,10 @@ module.exports = __webpack_require__.p + "assets/36d50c1381fda7c71d12b6643cbe1ee
         });
     });
 }
+
+/*function testtesttest() {
+    console.log("TEST SUCCESS");
+}*/
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
@@ -1544,16 +1548,6 @@ const Skycons = __WEBPACK_IMPORTED_MODULE_0_skycons___default()(window);
 /***/ 248:
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function($) {function testFunction(text) {
-    $('#dropdownMenuButton').text(text);
-}
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
-
-/***/ }),
-
-/***/ 249:
-/***/ (function(module, exports, __webpack_require__) {
-
 /* WEBPACK VAR INJECTION */(function($) {const weekday = new Array(7);
 weekday[0] = "Sunday";
 weekday[1] = "Monday";
@@ -1571,6 +1565,25 @@ if ($('dashboard-todayMeetings-dayDate') !== undefined) {
         $('#dashboard-todayMeetings-time').text(`${now.getHours()}:${now.getMinutes()}`);
     }, 2000);
 }
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ }),
+
+/***/ 249:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function($) {$('#new-meeting-dd-intelligentTimeDuration').find('a').click(evt => {
+    const targetLink = $(evt.target);
+    $('#new-meeting-dd-intelligentTimeDuration-btn').text(targetLink.text());
+});
+
+$(function () {
+    $('input[name="daterange"]').daterangepicker({
+        opens: 'left'
+    }, function (start, end, label) {
+        console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+    });
+});
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ })

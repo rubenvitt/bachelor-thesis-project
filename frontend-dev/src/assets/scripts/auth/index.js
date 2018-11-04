@@ -20,3 +20,8 @@ if (document.getElementById('login-failure-alert') !== null) {
             });
     });
 }
+
+
+/*function testtesttest() {
+    console.log("TEST SUCCESS");
+}*/
