@@ -26,5 +26,5 @@
  */
 
 if ($('#settings-workingHours') !== undefined) {
-    alert("Settings-Page");
+    alert($('#settings-workingHours'));
 }
