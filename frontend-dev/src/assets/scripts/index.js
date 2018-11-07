@@ -18,3 +18,4 @@ import './googleMaps';
 import './utils';
 import './dashboard';
 import './meeting-creation'
+import './settings';
