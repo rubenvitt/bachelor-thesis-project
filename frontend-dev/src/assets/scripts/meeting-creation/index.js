@@ -3,10 +3,19 @@ $('#new-meeting-dd-intelligentTimeDuration').find('a').click((evt) => {
     $('#new-meeting-dd-intelligentTimeDuration-btn').text(targetLink.text())
 });
 
-$(function() {
-    $('input[name="daterange"]').daterangepicker({
-        opens: 'left'
-    }, function(start, end, label) {
-        console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+$(function () {
+    $('.input-daterange input').each(function () {
+        $(this).datepicker({
+            calendarWeeks: true,
+            assumeNearbyYear: true,
+
+        });
+        $(this).on('changeDate', () => {
+            $(this).datepicker('hide');
+            $("input:nth-of-type(2)", $(this).parent()).focus();
+        });
     });
+
+    $('.input-daterange').datepicker({});
+    //$('.input-daterange input').datepicker().on('dateChanged', () => alert("test"));
 });

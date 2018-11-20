@@ -370,8 +370,8 @@
                 <div class="row gap-20 masonry pos-r">
                     <div class="masonry-sizer col-md-6"></div>
                     <div class="masonry-item col-12">
-                        <div class="bd bgc-white ta-c p-20">
-                            <h3 class="lh-1">Schedule a meeting</h3>
+                        <div class="layer w-100 p-20 bgc-deep-orange-500 ta-c c-white lh-1">
+                            <h3>Schedule a meeting</h3>
                         </div>
                     </div>
                 </div>
@@ -452,11 +452,14 @@
                                     <div class="form-group">
                                         <label>Date of the meeting</label>
                                         <div class="input-group">
-                                            <input data-provide="datepicker" data-date-format="yyyy-mm-dd" class="form-control"
-                                                   placeholder="Sending invitations not to late and to early...">
-
                                             <!-- todo: not working... ad daterange picker -->
-                                            <input type="text" name="daterange" value="01/01/2018 - 01/15/2018" />
+                                            <div class="input-group input-daterange">
+                                                <input type="text" class="form-control" data-date-format="yyyy-mm-dd"
+                                                       placeholder="Send invitations not too early...">
+                                                <div class="input-group-addon ml-1 mr-1" style="line-height: 35px">to</div>
+                                                <input type="text" class="form-control" data-date-format="yyyy-mm-dd"
+                                                       placeholder="and not too late.">
+                                            </div>
                                         </div>
                                         <small class="form-text text-muted">
                                             In which Date-Span do you wish to have this meeting?
