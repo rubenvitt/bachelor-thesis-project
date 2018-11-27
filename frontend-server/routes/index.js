@@ -14,6 +14,17 @@ router.get('/', function (req, res, next) {
     }
 });
 
+router.get("/create-meeting", function (req, res) {
+    if (!showLoginIfNecessary(req)) {
+        debug("I know you!");
+        debug("TEEEST");
+        res.render('new_meeting');
+    } else {
+        debug("You are new! Redirecting to login...");
+        res.redirect("/login");
+    }
+});
+
 router.get("/settings", function (req, res, next) {
     if (!showLoginIfNecessary(req)) {
         debug("I know you!");
@@ -31,7 +42,7 @@ router.get('index.html', function (req, res) {
 
 router.get('settings.html', function (req, res) {
     debug("SETTINGS");
-   res.redirect("/index.html");
+    res.redirect("/index.html");
 });
 
 router.get('/abc', function (req, res) {
@@ -41,8 +52,7 @@ router.get('/abc', function (req, res) {
 router.get("/login", function (req, res) {
     if (showLoginIfNecessary(req)) {
         res.render('signin');
-    }
-    else
+    } else
         res.redirect("../");
 });
 
