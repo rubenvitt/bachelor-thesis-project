@@ -22,7 +22,7 @@ build:
   - npm install
   - npm run build || true #true, because build will "fail"
   tags:
-  - docker
+  - docker-fast
 
 deploy-docker:
   image: docker:latest
@@ -33,4 +33,4 @@ deploy-docker:
   - docker build -t docker.rubeen.me/studium/bsc/frontend .
   - docker push docker.rubeen.me/studium/bsc/frontend
   tags:
-  - docker
+  - docker-fast
