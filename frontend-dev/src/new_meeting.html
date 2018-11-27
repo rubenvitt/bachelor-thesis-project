@@ -63,7 +63,7 @@
             <div class="sidebar-logo">
                 <div class="peers ai-c as-c fxw-nw">
                     <div class="peer peer-greed">
-                        <a class="sidebar-link td-n" href="index.html">
+                        <a class="sidebar-link td-n" href="/">
                             <div class="peers ai-c fxw-nw">
                                 <div class="peer">
                                     <div class="logo">
@@ -89,7 +89,7 @@
             <!-- ### $Sidebar Menu ### -->
             <ul class="sidebar-menu scrollable pos-r">
                 <li class="nav-item mT-30 active">
-                    <a class="sidebar-link" href="index.html">
+                    <a class="sidebar-link" href="/">
                 <span class="icon-holder">
                   <i class="c-blue-500 ti-home"></i>
                 </span>
@@ -334,7 +334,7 @@
                         </a>
                         <ul class="dropdown-menu fsz-sm">
                             <li>
-                                <a href="" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700">
+                                <a href="/settings" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700">
                                     <i class="ti-settings mR-10"></i>
                                     <span>Settings</span>
                                 </a>
@@ -376,7 +376,7 @@
                     </div>
                 </div>
                 <div class="row gap-20 masonry pos-r">
-                    <div class="masonry-item col-4">
+                    <div class="masonry-item col-md-4">
                         <div class="bg-white bd">
                             <div class="layer 2-100 pX-20 pT-20">
                                 <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
@@ -405,7 +405,7 @@
                         </div>
                     </div>
 
-                    <div class="masonry-item col-8">
+                    <div class="masonry-item col-md-8">
                         <div class="bg-white bd">
                             <div class="layer 2-100 pX-20 pT-20">
                                 <h6 class="lh-1 c-grey-900 ta-l">Time organisation</h6>
@@ -438,9 +438,9 @@
                                                     <div id="new-meeting-dd-intelligentTimeDuration"
                                                          class="dropdown-menu"
                                                          aria-labelledby="new-meeting-dd-intelligentTimeDuration-btn">
-                                                        <a class="dropdown-item" href="#">Minutes</a>
-                                                        <a class="dropdown-item" href="#">Hours</a>
-                                                        <a class="dropdown-item" href="#">Days</a>
+                                                        <a class="dropdown-item" href="javascript:void {}">Minutes</a>
+                                                        <a class="dropdown-item" href="javascript:void {}">Hours</a>
+                                                        <a class="dropdown-item" href="javascript:void {}">Days</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -456,7 +456,8 @@
                                             <div class="input-group input-daterange">
                                                 <input type="text" class="form-control" data-date-format="yyyy-mm-dd"
                                                        placeholder="Send invitations not too early...">
-                                                <div class="input-group-addon ml-1 mr-1" style="line-height: 35px">to</div>
+                                                <div class="input-group-addon ml-1 mr-1" style="line-height: 35px">to
+                                                </div>
                                                 <input type="text" class="form-control" data-date-format="yyyy-mm-dd"
                                                        placeholder="and not too late.">
                                             </div>
@@ -470,67 +471,285 @@
                         </div>
                     </div>
 
+                    <div class="masonry-item col-md-3">
+                        <div class="bg-white bd">
+                            <div class="layer 2-100 pX-20 pT-20">
+                                <h6 class="lh-1 c-grey-900 ta-l">Type of meeting</h6>
+                            </div>
+                            <div class="layer w-100 pX-20 pY-20">
+                                <div class="list-group" id="newMeeting-chooseMeetingType">
+                                    <a href="javascript:void {}" class="list-group-item list-group-item-action active"
+                                       data-toggle="tooltip" data-placement="right" title="Person-to-person in a room">
+                                        Regular meeting
+                                    </a>
+                                    <a href="javascript:void {}" class="list-group-item list-group-item-action"
+                                       data-toggle="tooltip" data-placement="right"
+                                       title="You call the person by phone or with Skype">
+                                        Phone / Skype meeting</a>
+                                    <a href="javascript:void {}" class="list-group-item list-group-item-action"
+                                       data-toggle="tooltip" data-placement="right"
+                                       title="Online meeting with f.e. goToMeeting">
+                                        Online-meeting</a>
+                                    <a href="javascript:void {}" class="list-group-item list-group-item-action"
+                                       data-toggle="tooltip" data-placement="right"
+                                       title="f.e. appointment which is not a meeting">
+                                        Another Appointment</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="masonry-item col-md-6">
                         <div class="bg-white bd">
                             <div class="layer 2-100 pX-20 pT-20">
-                                <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
+                                <h6 class="lh-1 c-grey-900 ta-l">Attendees</h6>
                             </div>
-                            <div class="layer w-100 pX-20 pY-20">
-                                <form>
-                                    <div class="form-group">
-                                        <label>Subject for your meeting</label>
-                                        <input type="text" class="form-control"
-                                               placeholder="Enter subject">
-                                        <small class="form-text text-muted">
-                                            The right subject for the meeting is essentially.
-                                        </small>
+                            <div class="layer w-100 pX-20 pY-20 container">
+                                <div class="row form-group col-12">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                                <i class="fa fa-filter"></i>
+                                            </div>
+                                        </div>
+                                        <input type="search" class="form-control" data-date-format="yyyy-mm-dd"
+                                               placeholder="Filter for attendees...">
                                     </div>
-                                    <div class="form-group">
-                                        <label>Describe your
-                                            meeting</label>
-                                        <textarea class="form-control" rows="3"
-                                                  placeholder="Some text"></textarea>
-                                        <small class="form-text text-muted">
-                                            Give the attendees first insights what you will do in this meeting.
-                                        </small>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div id="newMeeting-attendee-list" class="list-group pre-scrollable">
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="assets/static/demo-data/person-1.png">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">Ruben Vitt</h6>
+                                                                <!--<p class="mb-0 fsz-lg">Ruben Vitt</p>-->
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Student</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="https://randomuser.me/api/portraits/men/85.jpg">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">Marko Boehm</h6>
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Software Engineer</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="https://randomuser.me/api/portraits/women/23.jpg">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">Corina Gainey</h6>
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Senior Consultant</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="https://randomuser.me/api/portraits/men/73.jpg">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">Paul Cole</h6>
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Consultant</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="https://randomuser.me/api/portraits/women/59.jpg">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">Kelly Patterson</h6>
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Human Resources</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="https://randomuser.me/api/portraits/women/21.jpg">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">Thea Jennings</h6>
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Managing Consultant</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="https://randomuser.me/api/portraits/men/79.jpg">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">René Beckenbauer</h6>
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Apprentice</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="https://randomuser.me/api/portraits/men/74.jpg">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">Szabolcs Pálffy</h6>
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Software Engineer</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item list-group-item-action container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <img class="w-100p rounded-circle"
+                                                             src="https://randomuser.me/api/portraits/men/40.jpg">
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <div class="container">
+                                                            <div class="row">
+                                                                <h6 class="mb-0">Peter Blume</h6>
+                                                            </div>
+                                                            <div class="row">
+                                                                <small>Director</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
                                     </div>
-                                </form>
+                                    <div class="col-md-6">
+                                        <div id="newMeeting-attendee-selected-list" class="list-group pre-scrollable">
+                                            <a href="javascript:void {}"
+                                               class="list-group-item-action list-group-item list-group-item-danger">
+                                                Marko Boehm
+                                            </a>
+                                            <a href="javascript:void {}"
+                                               class="list-group-item-action list-group-item list-group-item-danger">
+                                                Heike Baer
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="masonry-item col-md-6">
+                    <div id="newMeeting-settingsBox-regular" class="masonry-item col-md-3">
                         <div class="bg-white bd">
                             <div class="layer 2-100 pX-20 pT-20">
-                                <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
+                                <h6 class="lh-1 c-grey-900 ta-l">Settings for regular meeting</h6>
                             </div>
+                            <ul class="nav nav-tabs">
+                                <li role="presentation" class="nav-item"><a class="nav-link active"
+                                                                            href="javascript: void {}">
+                                    Intelligent</a></li>
+                                <li role="presentation" class="nav-item"><a class="nav-link" href="javascript: void {}">
+                                    Manual</a></li>
+                            </ul>
                             <div class="layer w-100 pX-20 pY-20">
                                 <form>
                                     <div class="form-group">
-                                        <label>Subject for your meeting</label>
-                                        <input type="text" class="form-control"
-                                               placeholder="Enter subject">
-                                        <small class="form-text text-muted">
-                                            The right subject for the meeting is essentially.
-                                        </small>
+                                        <h6>Nothing to do!</h6>
+                                        <p>
+                                            The system will automatically search a room with correct size.
+                                        </p>
                                     </div>
                                     <div class="form-group">
-                                        <label>Describe your
-                                            meeting</label>
-                                        <textarea class="form-control" rows="3"
-                                                  placeholder="Some text"></textarea>
+                                        <label>Special needs for the room:</label>
+                                        <select title="Select an option" class="selectpicker show-tick" multiple
+                                                data-live-search="true" data-selected-text-format="count > 2">
+                                            <option>Beamer</option>
+                                            <option>TV</option>
+                                            <option>Whiteboard</option>
+                                            <option>Height-adjustable desk</option>
+                                            <option>Windows</option>
+                                        </select>
                                         <small class="form-text text-muted">
-                                            Give the attendees first insights what you will do in this meeting.
+                                            The system will try to search for a room which fits all your needs.
                                         </small>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
-
-                    <div class="masonry-item col-4">
+                    <div id="newMeeting-settingsBox-phone" class="masonry-item col-md-3 d-none">
                         <div class="bg-white bd">
                             <div class="layer 2-100 pX-20 pT-20">
-                                <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
+                                <h6 class="lh-1 c-grey-900 ta-l">Settings for phone / skype meeting</h6>
                             </div>
                             <div class="layer w-100 pX-20 pY-20">
                                 <form>
@@ -555,11 +774,10 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="masonry-item col-8">
+                    <div id="newMeeting-settingsBox-online" class="masonry-item col-md-3 d-none">
                         <div class="bg-white bd">
                             <div class="layer 2-100 pX-20 pT-20">
-                                <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
+                                <h6 class="lh-1 c-grey-900 ta-l">Settings for online meeting</h6>
                             </div>
                             <div class="layer w-100 pX-20 pY-20">
                                 <form>
@@ -584,37 +802,34 @@
                             </div>
                         </div>
                     </div>
-
-                    <!--<div class="masonry-item col-12">
-                        <div class="bgc-white p-20 bd">
-                            <h6 class="c-grey-900">Basic Form</h6>
-                            <div class="mT-30">
+                    <div id="newMeeting-settingsBox-other" class="masonry-item col-md-3 d-none">
+                        <div class="bg-white bd">
+                            <div class="layer 2-100 pX-20 pT-20">
+                                <h6 class="lh-1 c-grey-900 ta-l">Settings for another appointment</h6>
+                            </div>
+                            <div class="layer w-100 pX-20 pY-20">
                                 <form>
                                     <div class="form-group">
-                                        <label for="exampleInputEmail1">Email address</label>
-                                        <input type="email" class="form-control" id="exampleInputEmail1"
-                                               aria-describedby="emailHelp" placeholder="Enter email">
-                                        <small id="emailHelp" class="form-text text-muted">We'll never share your email
-                                            with anyone else.
+                                        <label>Subject for your meeting</label>
+                                        <input type="text" class="form-control"
+                                               placeholder="Enter subject">
+                                        <small class="form-text text-muted">
+                                            The right subject for the meeting is essentially.
                                         </small>
                                     </div>
                                     <div class="form-group">
-                                        <label for="exampleInputPassword1">Password</label>
-                                        <input type="password" class="form-control" id="exampleInputPassword1"
-                                               placeholder="Password">
+                                        <label>Describe your
+                                            meeting</label>
+                                        <textarea class="form-control" rows="3"
+                                                  placeholder="Some text"></textarea>
+                                        <small class="form-text text-muted">
+                                            Give the attendees first insights what you will do in this meeting.
+                                        </small>
                                     </div>
-                                    <div class="checkbox checkbox-circle checkbox-info peers ai-c mB-15">
-                                        <input type="checkbox" id="inputCall1" name="inputCheckboxesCall" class="peer">
-                                        <label for="inputCall1" class=" peers peer-greed js-sb ai-c">
-                                            <span class="peer peer-greed">Call John for Dinner</span>
-                                        </label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                </div>-->
                 </div>
             </div>
         </main>

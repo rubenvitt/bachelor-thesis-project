@@ -316,6 +316,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__dashboard___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_17__dashboard__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__meeting_creation__ = __webpack_require__(249);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__meeting_creation___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_18__meeting_creation__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__settings__ = __webpack_require__(250);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__settings___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_19__settings__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__clockpicker__ = __webpack_require__(251);
+
+
 
 
 
@@ -1572,19 +1577,116 @@ if ($('dashboard-todayMeetings-dayDate') !== undefined) {
 /***/ 249:
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function($) {$('#new-meeting-dd-intelligentTimeDuration').find('a').click(evt => {
-    const targetLink = $(evt.target);
-    $('#new-meeting-dd-intelligentTimeDuration-btn').text(targetLink.text());
-});
-
-$(function () {
-    $('input[name="daterange"]').daterangepicker({
-        opens: 'left'
-    }, function (start, end, label) {
-        console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+/* WEBPACK VAR INJECTION */(function($) {if (document.getElementById("newMeeting-chooseMeetingType")) {
+    $('#new-meeting-dd-intelligentTimeDuration').find('a').click(evt => {
+        const targetLink = $(evt.target);
+        $('#new-meeting-dd-intelligentTimeDuration-btn').text(targetLink.text());
     });
-});
+
+    const meetingTypeLinks = $("#newMeeting-chooseMeetingType").find("a");
+    meetingTypeLinks.click(evt => {
+        meetingTypeLinks.removeClass("active");
+        $(evt.target).addClass("active");
+        const settingBoxes = [$("#newMeeting-settingsBox-regular"), $("#newMeeting-settingsBox-phone"), $("#newMeeting-settingsBox-online"), $("#newMeeting-settingsBox-other")];
+        for (let i = 0; i < meetingTypeLinks.length; i++) {
+            if (meetingTypeLinks.eq(i).text() === $(evt.target).text()) settingBoxes[i].removeClass("d-none");else settingBoxes[i].addClass("d-none");
+        }
+    });
+
+    const attendeesLinks = $("#newMeeting-attendee-list").find("a");
+    attendeesLinks.click(function () {
+        $(this).toggleClass("active");
+    });
+    /*attendeesLinks.click((evt) => {
+        console.log("A");
+       $(evt.target).toggleClass("active");
+    });*/
+
+    //Date-Picker
+    $(function () {
+        $('.input-daterange input').each(function () {
+            $(this).datepicker({
+                calendarWeeks: true,
+                assumeNearbyYear: true
+
+            });
+            $(this).on('changeDate', () => {
+                $(this).datepicker('hide');
+                $("input:nth-of-type(2)", $(this).parent()).focus();
+            });
+        });
+
+        $('.input-daterange').datepicker({});
+        //$('.input-daterange input').datepicker().on('dateChanged', () => alert("test"));
+    });
+}
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ }),
+
+/***/ 250:
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function($) {/*
+ <form id="settings-workingHours">
+ <div class="form-group">
+ <label>Working hours</label>
+ <div class="input-group">
+ <input type="time" class="form-control"
+ placeholder="8:00">
+ until
+ <input type="time" class="form-control"
+ placeholder="12:30">
+ <div class="btn-group" role="group">
+ <button type="button" class="btn btn-outline-primary">Mon</button>
+ <button type="button" class="btn btn-outline-primary">Tue</button>
+ <button type="button" class="btn btn-outline-primary">Wed</button>
+ <button type="button" class="btn btn-outline-primary">Thr</button>
+ <button type="button" class="btn btn-outline-primary">Fri</button>
+ <button type="button" class="btn btn-outline-primary">Sat</button>
+ <button type="button" class="btn btn-outline-primary">Sun</button>
+ </div>
+ </div>
+ <small class="form-text text-muted">
+ How much time, do you think, your meeting will take?
+ </small>
+ </div>
+
+ */
+
+if (document.getElementById("settings-workingHours")) {
+    //this page is a settings-page
+    /*$("button").click(function () {
+        alert($(this).html());
+    });*/
+    $(".workingday").find("button").click(function () {
+        $(this).toggleClass("btn-success");
+        $(this).toggleClass("btn-outline-primary");
+    });
+}
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ }),
+
+/***/ 251:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min__ = __webpack_require__(252);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css__ = __webpack_require__(253);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css__);
+
+
+
+
+/* unused harmony default export */ var _unused_webpack_default_export = ((function () {
+    __WEBPACK_IMPORTED_MODULE_0_jquery__('.clockpicker').clockpicker({
+        autoclose: true
+    });
+})());
 
 /***/ })
 

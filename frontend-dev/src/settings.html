@@ -63,7 +63,7 @@
             <div class="sidebar-logo">
                 <div class="peers ai-c as-c fxw-nw">
                     <div class="peer peer-greed">
-                        <a class="sidebar-link td-n" href="index.html">
+                        <a class="sidebar-link td-n" href="/">
                             <div class="peers ai-c fxw-nw">
                                 <div class="peer">
                                     <div class="logo">
@@ -89,7 +89,7 @@
             <!-- ### $Sidebar Menu ### -->
             <ul class="sidebar-menu scrollable pos-r">
                 <li class="nav-item mT-30 active">
-                    <a class="sidebar-link" href="index.html">
+                    <a class="sidebar-link" href="/">
                 <span class="icon-holder">
                   <i class="c-blue-500 ti-home"></i>
                 </span>
@@ -334,7 +334,7 @@
                         </a>
                         <ul class="dropdown-menu fsz-sm">
                             <li>
-                                <a href="" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700">
+                                <a href="/settings" class="d-b td-n pY-5 bgcH-grey-100 c-grey-700">
                                     <i class="ti-settings mR-10"></i>
                                     <span>Settings</span>
                                 </a>
@@ -384,6 +384,9 @@
                             <div class="layer w-100 pX-20 pY-20">
                                 <form>
                                     Some general settings
+                                    <div class="form-group">
+                                        <a href="javascript:alert('you will be redirected to changing password')">Change your password</a>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -399,189 +402,38 @@
                                     <div class="form-group">
                                         <label>Working hours</label>
                                         <div class="input-group">
-                                            <input type="time" class="form-control"
-                                                   placeholder="8:00">
-                                            until
-                                            <input type="time" class="form-control"
-                                                   placeholder="12:30">
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-outline-primary">Mon</button>
-                                                <button type="button" class="btn btn-outline-primary">Tue</button>
-                                                <button type="button" class="btn btn-outline-primary">Wed</button>
-                                                <button type="button" class="btn btn-outline-primary">Thr</button>
-                                                <button type="button" class="btn btn-outline-primary">Fri</button>
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fa fa-clock-o"></i></span>
+                                            </div>
+                                            <div class="clockpicker">
+                                                <input type="text" class="form-control" value="8:00">
+                                            </div>
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fa fa-hourglass-end"></i></span>
+                                            </div>
+                                            <div class="clockpicker">
+                                                <input type="text" class="form-control" value="16:00">
+                                            </div>
+                                            <div class="btn-group workingday" role="group">
+                                                <button type="button" class="btn btn-success">Mon</button>
+                                                <button type="button" class="btn btn-success">Tue</button>
+                                                <button type="button" class="btn btn-success">Wed</button>
+                                                <button type="button" class="btn btn-success">Thr</button>
+                                                <button type="button" class="btn btn-success">Fri</button>
                                                 <button type="button" class="btn btn-outline-primary">Sat</button>
                                                 <button type="button" class="btn btn-outline-primary">Sun</button>
                                             </div>
                                         </div>
                                         <small class="form-text text-muted">
-                                            How much time, do you think, your meeting will take?
-                                        </small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Date of the meeting</label>
-                                        <div class="input-group">
-                                            <input data-provide="datepicker" data-date-format="yyyy-mm-dd"
-                                                   class="form-control"
-                                                   placeholder="Sending invitations not to late and to early...">
-
-                                            <!-- todo: not working... ad daterange picker -->
-                                            <input type="text" name="daterange" value="01/01/2018 - 01/15/2018"/>
-                                        </div>
-                                        <small class="form-text text-muted">
-                                            In which Date-Span do you wish to have this meeting?
+                                            When are your normal working hours? (= when do you wish to have
+                                            meetings?)<br>
+                                            A break of minimum 30 minutes will be calculated automatically.
                                         </small>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
-
-                    <div class="masonry-item col-md-6">
-                        <div class="bg-white bd">
-                            <div class="layer 2-100 pX-20 pT-20">
-                                <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
-                            </div>
-                            <div class="layer w-100 pX-20 pY-20">
-                                <form>
-                                    <div class="form-group">
-                                        <label>Subject for your meeting</label>
-                                        <input type="text" class="form-control"
-                                               placeholder="Enter subject">
-                                        <small class="form-text text-muted">
-                                            The right subject for the meeting is essentially.
-                                        </small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Describe your
-                                            meeting</label>
-                                        <textarea class="form-control" rows="3"
-                                                  placeholder="Some text"></textarea>
-                                        <small class="form-text text-muted">
-                                            Give the attendees first insights what you will do in this meeting.
-                                        </small>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="masonry-item col-md-6">
-                        <div class="bg-white bd">
-                            <div class="layer 2-100 pX-20 pT-20">
-                                <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
-                            </div>
-                            <div class="layer w-100 pX-20 pY-20">
-                                <form>
-                                    <div class="form-group">
-                                        <label>Subject for your meeting</label>
-                                        <input type="text" class="form-control"
-                                               placeholder="Enter subject">
-                                        <small class="form-text text-muted">
-                                            The right subject for the meeting is essentially.
-                                        </small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Describe your
-                                            meeting</label>
-                                        <textarea class="form-control" rows="3"
-                                                  placeholder="Some text"></textarea>
-                                        <small class="form-text text-muted">
-                                            Give the attendees first insights what you will do in this meeting.
-                                        </small>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="masonry-item col-4">
-                        <div class="bg-white bd">
-                            <div class="layer 2-100 pX-20 pT-20">
-                                <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
-                            </div>
-                            <div class="layer w-100 pX-20 pY-20">
-                                <form>
-                                    <div class="form-group">
-                                        <label>Subject for your meeting</label>
-                                        <input type="text" class="form-control"
-                                               placeholder="Enter subject">
-                                        <small class="form-text text-muted">
-                                            The right subject for the meeting is essentially.
-                                        </small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Describe your
-                                            meeting</label>
-                                        <textarea class="form-control" rows="3"
-                                                  placeholder="Some text"></textarea>
-                                        <small class="form-text text-muted">
-                                            Give the attendees first insights what you will do in this meeting.
-                                        </small>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="masonry-item col-8">
-                        <div class="bg-white bd">
-                            <div class="layer 2-100 pX-20 pT-20">
-                                <h6 class="lh-1 c-grey-900 ta-l">General Information</h6>
-                            </div>
-                            <div class="layer w-100 pX-20 pY-20">
-                                <form>
-                                    <div class="form-group">
-                                        <label>Subject for your meeting</label>
-                                        <input type="text" class="form-control"
-                                               placeholder="Enter subject">
-                                        <small class="form-text text-muted">
-                                            The right subject for the meeting is essentially.
-                                        </small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Describe your
-                                            meeting</label>
-                                        <textarea class="form-control" rows="3"
-                                                  placeholder="Some text"></textarea>
-                                        <small class="form-text text-muted">
-                                            Give the attendees first insights what you will do in this meeting.
-                                        </small>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--<div class="masonry-item col-12">
-                        <div class="bgc-white p-20 bd">
-                            <h6 class="c-grey-900">Basic Form</h6>
-                            <div class="mT-30">
-                                <form>
-                                    <div class="form-group">
-                                        <label for="exampleInputEmail1">Email address</label>
-                                        <input type="email" class="form-control" id="exampleInputEmail1"
-                                               aria-describedby="emailHelp" placeholder="Enter email">
-                                        <small id="emailHelp" class="form-text text-muted">We'll never share your email
-                                            with anyone else.
-                                        </small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="exampleInputPassword1">Password</label>
-                                        <input type="password" class="form-control" id="exampleInputPassword1"
-                                               placeholder="Password">
-                                    </div>
-                                    <div class="checkbox checkbox-circle checkbox-info peers ai-c mB-15">
-                                        <input type="checkbox" id="inputCall1" name="inputCheckboxesCall" class="peer">
-                                        <label for="inputCall1" class=" peers peer-greed js-sb ai-c">
-                                            <span class="peer peer-greed">Call John for Dinner</span>
-                                        </label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>-->
                 </div>
             </div>
         </main>

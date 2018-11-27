@@ -14,6 +14,26 @@ router.get('/', function (req, res, next) {
     }
 });
 
+router.get("/settings", function (req, res, next) {
+    if (!showLoginIfNecessary(req)) {
+        debug("I know you!");
+        debug("TEEEST");
+        res.render('settings');
+    } else {
+        debug("You are new! Redirecting to login...");
+        res.redirect("/login");
+    }
+});
+
+router.get('index.html', function (req, res) {
+    res.redirect("/")
+});
+
+router.get('settings.html', function (req, res) {
+    debug("SETTINGS");
+   res.redirect("/index.html");
+});
+
 router.get('/abc', function (req, res) {
     res.render("forms");
 });

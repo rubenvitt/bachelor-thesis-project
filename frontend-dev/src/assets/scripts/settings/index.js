@@ -25,6 +25,13 @@
 
  */
 
-if ($('#settings-workingHours') !== undefined) {
-    alert($('#settings-workingHours'));
+if (document.getElementById("settings-workingHours")) {
+    //this page is a settings-page
+    /*$("button").click(function () {
+        alert($(this).html());
+    });*/
+    $(".workingday").find("button").click(function () {
+        $(this).toggleClass("btn-success");
+        $(this).toggleClass("btn-outline-primary")
+    });
 }

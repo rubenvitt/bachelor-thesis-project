@@ -19,3 +19,5 @@ import './utils';
 import './dashboard';
 import './meeting-creation'
 import './settings';
+import './clockpicker';
+import './selectpicker';
