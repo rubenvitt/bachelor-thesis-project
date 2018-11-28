@@ -22,7 +22,7 @@ build:
   - npm install
   - npm run build || true #true, because build will "fail"
   tags:
-  - docker-fast
+  - docker-win
 
 deploy-docker:
   image: docker:latest
@@ -30,7 +30,7 @@ deploy-docker:
   script:
   - cd frontend-server
   - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.rubeen.me
-  - docker build -t docker.rubeen.me/studium/bsc/frontend .
-  - docker push docker.rubeen.me/studium/bsc/frontend
+  - docker build -t docker.rubeen.me/studium/bsc/frontend:win .
+  - docker push docker.rubeen.me/studium/bsc/frontend:win
   tags:
-  - docker-fast
+  - docker-win
