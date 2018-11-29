@@ -34,4 +34,10 @@ if (document.getElementById("settings-workingHours")) {
         $(this).toggleClass("btn-success");
         $(this).toggleClass("btn-outline-primary")
     });
+
+    $("#provider-google").hover(function () {
+        $(this).attr('src', 'assets/static/images/google-signin-pressed.png')
+    }, function () {
+        $(this).attr('src', 'assets/static/images/google-signin-normal.png');
+    });
 }

@@ -385,7 +385,8 @@
                                 <form>
                                     Some general settings
                                     <div class="form-group">
-                                        <a href="javascript:alert('you will be redirected to changing password')">Change your password</a>
+                                        <a href="javascript:alert('you will be redirected to changing password')">Change
+                                            your password</a>
                                     </div>
                                 </form>
                             </div>
@@ -394,7 +395,7 @@
 
                     <div class="masonry-item col-md-8">
                         <div class="bg-white bd">
-                            <div class="layer 2-100 pX-20 pT-20">
+                            <div class="layer w-100 pX-20 pT-20">
                                 <h6 class="lh-1 c-grey-900 ta-l">Availability</h6>
                             </div>
                             <div class="layer w-100 pX-20 pY-20">
@@ -409,7 +410,8 @@
                                                 <input type="text" class="form-control" value="8:00">
                                             </div>
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fa fa-hourglass-end"></i></span>
+                                                <span class="input-group-text"><i
+                                                        class="fa fa-hourglass-end"></i></span>
                                             </div>
                                             <div class="clockpicker">
                                                 <input type="text" class="form-control" value="16:00">
@@ -431,6 +433,51 @@
                                         </small>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row gap-20 masonry">
+                    <div class="masonry-item col-2">
+                        <div class="bg-white bd">
+                            <div class="layer 2-100 pX-20 pT-20">
+                                <h6 class="lh-1 c-grey-900 ta-l">Calendar integrations</h6>
+                            </div>
+                            <div class="layer w-100 pX-20 pY-20">
+                                <div class="w-100 provider-container">
+                                    <label>Office 365:</label>
+                                    <img class="w-100" src="assets/static/images/office.jpg">
+                                </div>
+                                <div class="w-100 provider-container">
+                                    <label>Google Calendar:</label>
+                                    <img class="w-100" id="provider-google"
+                                         src="assets/static/images/google-signin-normal.png">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="masonry-item col-10">
+                        <div class="bg-white bd">
+                            <div class="layer w-100 pX-20 pT-20">
+                                <h6 class="lh-1 c-grey-900 ta-l">Calendar settings (Office / Google)</h6>
+                            </div>
+                            <div class="layer w-45 pX-20 pY-20">
+                                <label forc="microsoft-access-token">Microsoft Access Token:</label>
+                                <div class="input-group">
+                                    <div class="pL-10 input-group-prepend">
+                                        <span class="input-group-text"><i class="fab fa-windows"></i></span>
+                                    </div>
+                                    <input class="w-auto form-control" type="text" readonly placeholder="not available"
+                                           id="microsoft-access-token"/>
+                                </div>
+                                <label for="google-access-token">Google Access Token:</label>
+                                <div class="input-group">
+                                    <div class="pL-10 input-group-prepend">
+                                        <span class="input-group-text"><i class="fab fa-google"></i></span>
+                                    </div>
+                                    <input class="form-control" type="text" readonly placeholder="not available"
+                                           id="google-access-token"/>
+                                </div>
                             </div>
                         </div>
                     </div>
