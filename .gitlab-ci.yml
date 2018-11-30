@@ -2,6 +2,10 @@ cache:
   paths:
     - ./frontend-dev/node_modules/
     - ./frontend-server/node_modules/
+    - $CI_PROJECT_DIR/cache
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/cache/.m2/repository"
 
 services:
   - docker:dind
@@ -65,7 +69,7 @@ frontend-build:
     - docker
 
 frontend-deploy-docker:
-  image: docker:latest
+  image: docker.fme.de/docker/docker-in-docker:master
   stage: deploy
   before_script:
     - echo "build will be plattform-dependent!"
