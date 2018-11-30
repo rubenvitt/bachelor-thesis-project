@@ -1,36 +1,78 @@
 cache:
   paths:
-  - ./frontend-dev/node_modules/
-  - ./frontend-server/node_modules/
+    - ./frontend-dev/node_modules/
+    - ./frontend-server/node_modules/
 
 services:
-- docker:dind
+  - docker:dind
 
 stages:
-- build
-- deploy
+  - test
+  - build
+  - deploy
 
-build:
+office-test:
+  image: maven:3.6.0-jdk-11
+  stage: test
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - ./office365-tests/target/surfire-reports
+    when: on_failure
+  script:
+    - cd office365-tests
+    - mvn test
+  tags:
+    - docker
+
+office-build:
+  image: maven:3.6.0-jdk-11
+  stage: build
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - ./office365-tests/target/*.war
+  script:
+    - cd office365-tests
+    - mvn package -DskipTests
+  tags:
+    - docker
+
+office-deploy-docker:
+  image: docker:latest
+  stage: deploy
+  script:
+    - cd office365-tests
+    - echo "this stage needs to be implemented"
+    #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
+    #- docker build -t docker.fme.de/r.vitt/bsc/office365:test .
+    #- docker push docker.fme.de/r.vitt/bsc/office365:test
+  tags:
+    - docker
+
+frontend-build:
   image: node:latest
   stage: build
   artifacts:
     expire_in: 1 week
     paths:
-    - ./frontend-server/public
+      - ./frontend-server/public
   script:
-  - cd frontend-dev
-  - npm install
-  - npm run build || true #true, because build will "fail"
+    - cd frontend-dev
+    - npm install
+    - npm run build || true #true, because build will "fail"
   tags:
-  - docker-win
+    - docker
 
-deploy-docker:
+frontend-deploy-docker:
   image: docker:latest
   stage: deploy
+  before_script:
+    - echo "build will be plattform-dependent!"
   script:
-  - cd frontend-server
-  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.rubeen.me
-  - docker build -t docker.rubeen.me/studium/bsc/frontend:win .
-  - docker push docker.rubeen.me/studium/bsc/frontend:win
+    - cd frontend-server
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
+    - docker build -t docker.fme.de/r.vitt/bsc/frontend .
+    - docker push docker.fme.de/r.vitt/bsc/frontend
   tags:
-  - docker-win
+    - docker
