@@ -47,11 +47,11 @@ office-deploy-docker:
   script:
     - cd office365-tests
     - echo "this stage needs to be implemented"
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
-    - docker build -t docker.fme.de/r.vitt/bsc/office365:test .
-    - docker push docker.fme.de/r.vitt/bsc/office365:test
+    #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
+    #- docker build -t docker.fme.de/r.vitt/bsc/office365:test .
+    #- docker push docker.fme.de/r.vitt/bsc/office365:test
   tags:
-    - docker-build-1
+    - docker
 
 frontend-build:
   image: node:latest
@@ -79,4 +79,4 @@ frontend-deploy-docker:
     - docker build -t docker.fme.de/r.vitt/bsc/frontend .
     - docker push docker.fme.de/r.vitt/bsc/frontend
   tags:
-    - docker-build-1
+    - docker
