@@ -52,7 +52,7 @@ office-deploy-docker:
     - docker build -t docker.fme.de/r.vitt/bsc/office365:test .
     - docker push docker.fme.de/r.vitt/bsc/office365:test
   tags:
-    - docker
+    - docker-build-1
 
 frontend-build:
   image: node:latest
@@ -80,4 +80,4 @@ frontend-deploy-docker:
     - docker build -t docker.fme.de/r.vitt/bsc/frontend .
     - docker push docker.fme.de/r.vitt/bsc/frontend
   tags:
-    - docker
+    - docker-build-1
