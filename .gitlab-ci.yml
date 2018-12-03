@@ -1,3 +1,5 @@
+image: docker:latest
+
 cache:
   paths:
     - ./frontend-dev/node_modules/
@@ -6,9 +8,6 @@ cache:
 
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/cache/.m2/repository"
-
-services:
-  - docker:dind
 
 stages:
   - test
