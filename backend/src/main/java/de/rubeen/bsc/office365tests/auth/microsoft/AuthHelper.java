@@ -1,4 +1,4 @@
-package de.rubeen.bsc.office365tests.security;
+package de.rubeen.bsc.office365tests.auth.microsoft;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;

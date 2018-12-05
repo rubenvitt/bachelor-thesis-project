@@ -20,10 +20,10 @@ office-test:
   artifacts:
     expire_in: 1 week
     paths:
-      - ./office365-tests/target/surfire-reports
+      - ./office365-de.rubeen.bsc.googletests/target/surfire-reports
     when: on_failure
   script:
-    - cd office365-tests
+    - cd office365-de.rubeen.bsc.googletests
     - mvn test
   tags:
     - docker
@@ -34,9 +34,9 @@ office-build:
   artifacts:
     expire_in: 1 week
     paths:
-      - ./office365-tests/target/*.war
+      - ./office365-de.rubeen.bsc.googletests/target/*.war
   script:
-    - cd office365-tests
+    - cd office365-de.rubeen.bsc.googletests
     - mvn package -DskipTests
   tags:
     - docker
@@ -45,7 +45,7 @@ office-deploy-docker:
   image: docker:latest
   stage: deploy
   script:
-    - cd office365-tests
+    - cd office365-de.rubeen.bsc.googletests
     - echo "this stage needs to be implemented"
     #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
     #- docker build -t docker.fme.de/r.vitt/bsc/office365:test .

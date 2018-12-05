@@ -1,4 +1,4 @@
-package me.rubeen.bsc.tests;
+package de.rubeen.bsc.googletests;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -6,7 +6,6 @@ import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -16,22 +15,21 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.websocket.server.PathParam;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Set;
 
-@Controller
+@RestController
 public class GoogleController {
     GoogleClientSecrets clientSecrets;
     GoogleAuthorizationCodeFlow flow;
@@ -60,24 +58,26 @@ public class GoogleController {
         this.eventSet = eventSet;
     }
 
-    @RequestMapping(value = "/login/google", method = RequestMethod.GET)
+    @RequestMapping(value = "/auth-google", method = RequestMethod.GET)
     public RedirectView googleConnectionStatus() throws GeneralSecurityException, IOException {
         return new RedirectView(authorize());
     }
 
-    @RequestMapping(value = "/login/google", method = RequestMethod.GET, params = "code")
-    public ResponseEntity<String> oauth2Callback(@RequestParam(value = "code") String code, HttpServletResponse response) {
+    @RequestMapping(value = "/auth-google", method = RequestMethod.GET, params = "code")
+    public String oauth2Callback(@RequestParam(value = "code") String code, HttpServletResponse response) {
         Events events;
         String message;
         try {
             TokenResponse tokenResponse = flow.newTokenRequest(code).setRedirectUri(redirectURL).execute();
             credential = flow.createAndStoreCredential(tokenResponse, "userID");
             message = credential.getAccessToken();
-            Cookie cookie = new Cookie("google-access-key", tokenResponse.getAccessToken());
-            response.addCookie(cookie);
-            System.out.println(cookie.getValue());
+            //Cookie cookie = new Cookie("google-access-key", tokenResponse.getAccessToken());
+            //response.addCookie(cookie);
+            response.addCookie(new Cookie("google-access-key", tokenResponse.getAccessToken()));
+            //System.out.println(cookie.getValue());
             calendar = new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName("Application-Name").build();
-            response.sendRedirect("http://localhost:3000/settings");
+            response.sendRedirect("http://localhost:3333/settings");
+
             /*events = calendar.events().list("primary").setTimeMin(minDate).setTimeMax(maxDate).execute();
             message = events.getItems().toString();
             System.out.println("My: " + events.getItems());*/
@@ -86,7 +86,9 @@ public class GoogleController {
                     + " Redirecting to google connection status page.";
         }
         System.out.println("message: " + message);
-        return new ResponseEntity<>(message, HttpStatus.OK);
+        response.setStatus(200);
+        return message;
+        //return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     private String authorize() throws GeneralSecurityException, IOException {

@@ -1,12 +1,11 @@
-package de.rubeen.bsc.office365tests;
+package de.rubeen.bsc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Office365TestsApplication {
-
+public class BackendApplication {
     public static void main(String[] args) {
-        SpringApplication.run(Office365TestsApplication.class, args);
+        SpringApplication.run(BackendApplication.class, args);
     }
 }

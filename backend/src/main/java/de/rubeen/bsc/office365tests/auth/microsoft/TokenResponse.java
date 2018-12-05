@@ -1,4 +1,4 @@
-package de.rubeen.bsc.office365tests.security;
+package de.rubeen.bsc.office365tests.auth.microsoft;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

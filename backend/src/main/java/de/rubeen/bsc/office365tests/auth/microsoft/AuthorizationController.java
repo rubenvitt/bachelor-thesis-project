@@ -1,4 +1,4 @@
-package de.rubeen.bsc.office365tests.security;
+package de.rubeen.bsc.office365tests.auth.microsoft;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,8 +42,9 @@ public class AuthorizationController {
                 System.out.println("Expires: " + tokenResponse.getExpirationTime());
                 Cookie cookie = new Cookie("microsoft-access-key", tokenResponse.getAccessToken());
                 response.addCookie(cookie);
-                response.setHeader("test", "abc");
-                response.sendRedirect("http://localhost:3000/settings");
+                response.addCookie(new Cookie("google-access-key", "this-will–be-my-token"));
+                //response.setHeader("test", "abc");
+                response.sendRedirect("http://localhost:3333/settings");
             } else {
                 session.setAttribute("error", "ID token failed validation.");
             }

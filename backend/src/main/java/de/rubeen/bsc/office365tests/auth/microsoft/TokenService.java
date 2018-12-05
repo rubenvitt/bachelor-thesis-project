@@ -1,4 +1,4 @@
-package de.rubeen.bsc.office365tests.security;
+package de.rubeen.bsc.office365tests.auth.microsoft;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
