@@ -44,6 +44,9 @@ if (document.getElementById("settings-workingHours")) {
     if (getCookie("microsoft-access-key") !== null) {
         $("#microsoft-access-token").val(getCookie("microsoft-access-key"));
     }
+    if (getCookie("google-access-key") !== null) {
+        $('#google-access-token').val(getCookie("google-access-key"));
+    }
 }
 
 function getCookie (name) {

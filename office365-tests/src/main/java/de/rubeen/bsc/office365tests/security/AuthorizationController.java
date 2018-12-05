@@ -43,7 +43,7 @@ public class AuthorizationController {
                 Cookie cookie = new Cookie("microsoft-access-key", tokenResponse.getAccessToken());
                 response.addCookie(cookie);
                 response.setHeader("test", "abc");
-                response.sendRedirect("http://localhost:3000/");
+                response.sendRedirect("http://localhost:3000/settings");
             } else {
                 session.setAttribute("error", "ID token failed validation.");
             }
