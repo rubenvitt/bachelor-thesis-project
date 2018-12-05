@@ -1,4 +1,4 @@
-package de.rubeen.bsc.googletests;
+package de.rubeen.bsc.controller;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -15,6 +15,8 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,8 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.websocket.server.PathParam;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -89,6 +92,19 @@ public class GoogleController {
         response.setStatus(200);
         return message;
         //return new ResponseEntity<>(message, HttpStatus.OK);
+    }
+
+    @RequestMapping("/logout-google")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession();
+        session.invalidate();
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("google-access-key")) {
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private String authorize() throws GeneralSecurityException, IOException {

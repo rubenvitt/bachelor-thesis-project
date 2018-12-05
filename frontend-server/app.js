@@ -23,7 +23,7 @@ app.use(session({
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/auth', authRouter);
+app.use('/controller', authRouter);
 
 app.use(express.static(path.join(__dirname, '/public')));
 app.set('views', __dirname + "/public");

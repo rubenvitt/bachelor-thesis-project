@@ -516,7 +516,7 @@ module.exports = __webpack_require__.p + "assets/5853440d8def5df658644a063ec5a01
 
     $('#login-form').submit(function (evt) {
         evt.preventDefault();
-        $.post('/auth', $(this).serialize()).done((req, evt, rawRequest) => {
+        $.post('/controller', $(this).serialize()).done((req, evt, rawRequest) => {
             if (rawRequest.status === 202) location.href = "/";
         }).fail(evt => {
             console.error(evt);
@@ -1573,7 +1573,7 @@ const Skycons = __WEBPACK_IMPORTED_MODULE_0_skycons___default()(window);
   // ------------------------------------------------------
 
   // Open external links in new window
-  __WEBPACK_IMPORTED_MODULE_0_jquery__('a').filter('[href^="http"], [href^="//"]').not(`[href*="${window.location.host}"]`).attr('rel', 'noopener noreferrer').attr('target', '_blank');
+  __WEBPACK_IMPORTED_MODULE_0_jquery__('a').filter('[href^="http"], [href^="//"]').not(`[href*="${window.location.host}"]`).not(`[href*="localhost:8080"]`).attr('rel', 'noopener noreferrer').attr('target', '_blank');
 
   // ------------------------------------------------------
   // @Resize Trigger

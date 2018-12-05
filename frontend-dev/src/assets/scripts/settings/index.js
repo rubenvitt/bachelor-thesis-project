@@ -41,6 +41,16 @@ if (document.getElementById("settings-workingHours")) {
         $(this).attr('src', 'assets/static/images/google-signin-normal.png');
     });
 
+    $("#account-settings-remove-microsoft-access-token-btn").click(function () {
+       $("#removal-name").text("Office 365");
+       $("#are-you-sure-modal").modal();
+    });
+
+    $("#account-settings-remove-google-access-token-btn").click(function () {
+        $("#removal-name").text("Google");
+        $("#are-you-sure-modal").modal();
+    });
+
     if (getCookie("microsoft-access-key") !== null) {
         $("#microsoft-access-token").val(getCookie("microsoft-access-key"));
     }

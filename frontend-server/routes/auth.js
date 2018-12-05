@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const sessions = require('../modules/sessionsArray');
 
 router.post('/', function (req, res, next) {
-    debug("auth/POST was accessed");
+    debug("controller/POST was accessed");
     debug(req.body);
     debug("user: " + req.body.email);
     debug("password: " + req.body.password);

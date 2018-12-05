@@ -1,5 +1,10 @@
-package de.rubeen.bsc.office365tests.auth.microsoft;
+package de.rubeen.bsc.controller;
 
+import de.rubeen.bsc.office365tests.auth.microsoft.AuthHelper;
+import de.rubeen.bsc.office365tests.auth.microsoft.IdToken;
+import de.rubeen.bsc.office365tests.auth.microsoft.TokenResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,9 +18,9 @@ import java.io.IOException;
 import java.util.UUID;
 
 @RestController
-public class AuthorizationController {
+public class Office365Controller {
 
-    @RequestMapping(value = "/auth", method = RequestMethod.POST)
+    @RequestMapping(value = "/auth-office", method = RequestMethod.POST, params = "code, id_token, state")
     public String authorize(
             @RequestParam("code") String code,
             @RequestParam("id_token") String idToken,
@@ -42,7 +47,6 @@ public class AuthorizationController {
                 System.out.println("Expires: " + tokenResponse.getExpirationTime());
                 Cookie cookie = new Cookie("microsoft-access-key", tokenResponse.getAccessToken());
                 response.addCookie(cookie);
-                response.addCookie(new Cookie("google-access-key", "this-will–be-my-token"));
                 //response.setHeader("test", "abc");
                 response.sendRedirect("http://localhost:3333/settings");
             } else {
@@ -57,20 +61,26 @@ public class AuthorizationController {
         return "<h1 style=\"align=center\">Hello " + session.getAttribute("userName") + "</h1>";
     }
 
-    @RequestMapping("/logout")
-    public String logout(HttpServletRequest request) {
+    @RequestMapping("/logout-office")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         session.invalidate();
-        return "redirect:/";
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("microsoft-access-key")) {
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping("/login")
+    @RequestMapping(value = "/auth-office", method = RequestMethod.GET)
     public String index(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UUID state = UUID.randomUUID();
         UUID nonce = UUID.randomUUID();
 
         // Save the state and nonce in the session so we can
-        // verify after the auth process redirects back
+        // verify after the controller process redirects back
         HttpSession session = request.getSession();
         session.setAttribute("expected_state", state);
         session.setAttribute("expected_nonce", nonce);

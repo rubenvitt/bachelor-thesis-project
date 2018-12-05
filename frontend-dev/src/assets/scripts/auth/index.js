@@ -5,7 +5,7 @@ if (document.getElementById('login-failure-alert') !== null) {
 
     $('#login-form').submit(function (evt) {
         evt.preventDefault();
-        $.post('/auth', $(this).serialize())
+        $.post('/controller', $(this).serialize())
             .done((req, evt, rawRequest) => {
                 if (rawRequest.status === 202)
                     location.href = "/";

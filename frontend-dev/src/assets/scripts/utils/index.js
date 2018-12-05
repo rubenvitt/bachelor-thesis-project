@@ -29,6 +29,7 @@ export default (function () {
   $('a')
     .filter('[href^="http"], [href^="//"]')
     .not(`[href*="${window.location.host}"]`)
+    .not(`[href*="localhost:8080"]`)
     .attr('rel', 'noopener noreferrer')
     .attr('target', '_blank');
 

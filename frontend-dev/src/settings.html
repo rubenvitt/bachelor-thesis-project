@@ -446,12 +446,13 @@
                             <div class="layer w-100 pX-20 pY-20">
                                 <div class="w-100 provider-container">
                                     <label>Office 365:</label>
-                                    <a href="http://localhost:8080/login"><img class="w-100" src="assets/static/images/office.jpg"></a>
+                                    <a href="http://localhost:8080/auth-office"><img class="w-100"
+                                                                                     src="assets/static/images/office.jpg"></a>
                                 </div>
                                 <div class="w-100 provider-container">
                                     <label>Google Calendar:</label>
                                     <a href="http://localhost:8080/auth-google"><img class="w-100" id="provider-google"
-                                            src="assets/static/images/google-signin-normal.png"></a>
+                                                                                     src="assets/static/images/google-signin-normal.png"></a>
                                 </div>
                             </div>
                         </div>
@@ -469,6 +470,13 @@
                                     </div>
                                     <input class="w-auto form-control" type="text" readonly placeholder="not available"
                                            id="microsoft-access-token"/>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-outline-danger"
+                                                type="button"
+                                                id="account-settings-remove-microsoft-access-token-btn">
+                                            <i class="fas fa-eraser"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <label for="google-access-token">Google Access Token:</label>
                                 <div class="input-group">
@@ -477,6 +485,13 @@
                                     </div>
                                     <input class="form-control" type="text" readonly placeholder="not available"
                                            id="google-access-token"/>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-outline-danger"
+                                                type="button"
+                                                id="account-settings-remove-google-access-token-btn">
+                                            <i class="fas fa-eraser"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -491,5 +506,27 @@
         </footer>
     </div>
 </div>
+
+<div class="modal fade" tabindex="-1" aria-labelledby="are-you-sure-modal-label" aria-hidden="false" role="dialog" id="are-you-sure-modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="are-you-sure-modal-label">Are you sure?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                You are about to remove your <b class="c-blue-600" id="removal-name"></b> Access-Key. To access your calendar again
+                with this application, you have to login again.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger">Yes, remove access key</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
