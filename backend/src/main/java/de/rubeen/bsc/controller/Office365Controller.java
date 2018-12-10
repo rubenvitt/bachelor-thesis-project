@@ -20,7 +20,7 @@ import java.util.UUID;
 @RestController
 public class Office365Controller {
 
-    @RequestMapping(value = "/auth-office", method = RequestMethod.POST, params = "code, id_token, state")
+    @RequestMapping(value = "/auth-office", method = RequestMethod.POST)
     public String authorize(
             @RequestParam("code") String code,
             @RequestParam("id_token") String idToken,
