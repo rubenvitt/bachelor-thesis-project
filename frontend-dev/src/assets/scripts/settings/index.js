@@ -51,11 +51,15 @@ if (document.getElementById("settings-workingHours")) {
         $("#are-you-sure-modal").modal();
     });
 
-    if (getCookie("microsoft-access-key") !== null) {
+    if (getCookie("microsoft-access-key") !== undefined) {
         $("#microsoft-access-token").val(getCookie("microsoft-access-key"));
+    } else {
+        $("#account-settings-remove-microsoft-access-token-btn").css("display", "none");
     }
-    if (getCookie("google-access-key") !== null) {
+    if (getCookie("google-access-key") !== undefined) {
         $('#google-access-token').val(getCookie("google-access-key"));
+    } else {
+        $("#account-settings-remove-google-access-token-btn").css("display", "none");
     }
 }
 
