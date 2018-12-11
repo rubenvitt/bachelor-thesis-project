@@ -462,7 +462,7 @@
                             <div class="layer w-100 pX-20 pT-20">
                                 <h6 class="lh-1 c-grey-900 ta-l">Calendar settings (Office / Google)</h6>
                             </div>
-                            <div class="layer w-45 pX-20 pY-20">
+                            <div class="layer w-45 pX-20 pT-20">
                                 <label forc="microsoft-access-token">Microsoft Access Token:</label>
                                 <div class="input-group">
                                     <div class="pL-10 input-group-prepend">
@@ -494,6 +494,20 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="masonry row gap-20 pX-20 pY-20">
+                                <div class="col-6 masonry-item">
+                                    <h6 class="lh-1 c-grey-800 ta-l">Office calendar</h6>
+                                    <div id="settings-list-group-office-cal-list" class="list-group">
+                                        <p class="h-100 w-100 ta-c">No calendar available.</p>
+                                    </div>
+                                </div>
+                                <div class="col-6 masonry-item">
+                                    <h6 class="lh-1 c-grey-800 ta-l">Google calendar</h6>
+                                    <div id="settings-list-group-google-cal-list" class="list-group">
+                                        <p class="h-100 w-100 ta-c">No calendar available.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -522,7 +536,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger">Yes, remove access key</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" id="are-you-sure-yes" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>

@@ -1,0 +1,12 @@
+.badge {
+
+  &.fa {
+    &:empty {
+      display: inline-block !important;
+    }
+  }
+}
+
+label > input[type=checkbox] {
+  visibility: hidden;
+}

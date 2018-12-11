@@ -21,3 +21,4 @@ import './meeting-creation'
 import './settings';
 import './clockpicker';
 import './selectpicker';
+import './checkbox-in-list-with-badge';

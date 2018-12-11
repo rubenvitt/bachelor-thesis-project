@@ -52,6 +52,7 @@
     "bootstrap-datepicker": "^1.7.1",
     "bootstrap-daterangepicker": "^3.0.3",
     "bootstrap-select": "^1.13.3",
+    "bootstrap3-dialog": "^1.35.4",
     "chart.js": "^2.7.1",
     "clockpicker": "0.0.7",
     "datatables": "^1.10.13",
