@@ -54,7 +54,11 @@ if (document.getElementById("settings-workingHours")) {
         $("#are-you-sure-modal").modal();
     });
     loadAccessKeyBoxes();
-    loadCalendars($('#microsoft-access-token').val(), $('#google-access-token').val())
+    loadCalendars($('#microsoft-access-token').val(), $('#google-access-token').val());
+
+    $('#google-provider-link').click(function () {
+        window.location = "http://localhost:8080/auth-google?user_id=" + getCookie("USER-ID");
+    });
 }
 
 function addModalListener(cookie) {
@@ -83,7 +87,7 @@ function loadCalendars(microsoft, google) {
         $.ajax({
             url: "http://localhost:8080/google/calendar",
             data: {
-                access_token: google
+                user_id: getCookie("USER-ID")
             }
         }).done(function (content) {
             content.items.forEach(item => {

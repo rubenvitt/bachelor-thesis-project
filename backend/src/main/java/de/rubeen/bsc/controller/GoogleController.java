@@ -5,18 +5,17 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
+import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import org.joda.time.DateTimeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +31,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -45,7 +45,6 @@ public class GoogleController {
     private static String APP_NAME = "My-Business-Day";
     GoogleClientSecrets clientSecrets;
     GoogleAuthorizationCodeFlow flow;
-    Credential credential;
     JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
     Logger LOG = LoggerFactory.getLogger(this.getClass());
     @Value("${google.client.client-id}")
@@ -66,23 +65,36 @@ public class GoogleController {
     }
 
     @RequestMapping(value = "/auth-google", method = RequestMethod.GET)
-    public RedirectView googleConnectionStatus() throws GeneralSecurityException, IOException {
-        return new RedirectView(authorize());
+    public RedirectView googleConnectionStatus(@RequestParam(value = "user_id") String user_id) throws GeneralSecurityException, IOException {
+        return new RedirectView(authorize(user_id));
     }
 
     @RequestMapping(value = "/auth-google", method = RequestMethod.GET, params = "code")
-    public String oauth2Callback(@RequestParam(value = "code") String code, HttpServletResponse response) {
+    public String oauth2Callback(@RequestParam(value = "code") String code, HttpServletRequest request,HttpServletResponse response) throws IOException {
         Events events;
         String message;
+        LOG.info("GOT Cookies: ");
+        Cookie cookie = null;
+        for (Cookie thisCookie : request.getCookies()) {
+            if (thisCookie.getName().equals("USER-ID"))
+                cookie = thisCookie;
+        }
+        if (cookie == null) {
+            response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
+            return null;
+        }
         try {
+            LOG.info("OLD: " + code);
             TokenResponse tokenResponse = flow.newTokenRequest(code).setRedirectUri(redirectURL).execute();
-            credential = flow.createAndStoreCredential(tokenResponse, "userID");
+            System.out.println("TOKEN-RESPONSE: " + tokenResponse);
+            System.out.println(tokenResponse.getUnknownKeys().get("user-id"));
+            Credential credential = flow.createAndStoreCredential(tokenResponse, cookie.getValue());
+            System.out.println(flow.loadCredential(cookie.getValue()));
             message = credential.getAccessToken();
             //Cookie cookie = new Cookie("google-access-key", tokenResponse.getAccessToken());
             //response.addCookie(cookie);
             response.addCookie(new Cookie("google-access-key", tokenResponse.getAccessToken()));
             //System.out.println(cookie.getValue());
-            Calendar calendar = getCalendar();
             response.sendRedirect("http://localhost:3333/settings");
 
             /*events = calendar.events().list("primary").setTimeMin(minDate).setTimeMax(maxDate).execute();
@@ -112,53 +124,67 @@ public class GoogleController {
     }
 
     @RequestMapping("/google/calendar")
-    public CalendarList getAllCalendar(@RequestParam("access_token") String access_token) throws IOException, GeneralSecurityException {
+    public CalendarList getAllCalendar(@RequestParam("user_id") String user_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
         LOG.info("Getting a list of calendars");
-        saveAuthToken(access_token);
-        authorize();
-        Calendar calendar = getCalendar();
-        CalendarList execute = calendar.calendarList().list().execute();
-        System.out.println(calendar);
+        createFlow();
+        Credential credential = flow.loadCredential(user_id);
+        System.out.println("FLOW-CREDENTIAL: " + credential);
+        if (credential == null) {
+            LOG.info("Credential == null; redirecting...");
+            response.setStatus(401);
+            response.setHeader("auth-url", authorize(user_id));
+            return null;
+        } else {
+            Calendar calendar = getCalendar(credential);
+            CalendarList execute = calendar.calendarList().list().execute();
+            System.out.println(calendar);
+            return execute;
+        }
         //TokenResponse response = flow.newTokenRequest(code).setRedirectUri("http://localhost:8080/auth-google").execute();
         //Calendar calendar = new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName("App-Name").build();
         //return calendar.calendarList();
-        return execute;
-    }
-
-    private void saveAuthToken(String access_token) {
-        if (credential == null) {
-            credential = new GoogleCredential().setAccessToken(access_token);
-        }
     }
 
     @RequestMapping("/google/events")
-    public Events events(@RequestParam("access_token") String access_token, @RequestParam("calendar_id") String calendarId) throws GeneralSecurityException, IOException {
+    public Events events(@RequestParam("user_id") String user_id, @RequestParam("calendar_id") String calendarId, HttpServletResponse response) throws GeneralSecurityException, IOException {
         LOG.info("Getting all events for calendar id: " + calendarId);
-        saveAuthToken(access_token);
-        authorize();
-        Calendar calendar = getCalendar();
+        createFlow();
+        Credential credential = flow.loadCredential(user_id);
+        if (credential == null)
+            response.sendRedirect("/auth-google");
+        Calendar calendar = getCalendar(credential);
         final DateTime minDate = new DateTime(org.joda.time.DateTime.now().withDayOfWeek(MONDAY).toDate());
         final DateTime maxDate = new DateTime(org.joda.time.DateTime.now().withDayOfWeek(SUNDAY).toDate());
         return calendar.events().list(calendarId).setTimeMin(minDate).setTimeMax(maxDate).execute();
     }
 
-    private Calendar getCalendar() {
+    private Calendar getCalendar(Credential credential) {
         return new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName(APP_NAME).build();
     }
 
-    private String authorize() throws GeneralSecurityException, IOException {
+    private String authorize(String user_id) throws GeneralSecurityException, IOException {
         LOG.info("Try to authenticate user...");
         AuthorizationCodeRequestUrl authorizationCodeRequestUrl;
+        createFlow();
+        authorizationCodeRequestUrl = flow
+                .newAuthorizationUrl()
+                .setRedirectUri(redirectURL);
+        System.out.println("URL: " + authorizationCodeRequestUrl);
+        return authorizationCodeRequestUrl.build();
+    }
+
+    private void createFlow() throws IOException, GeneralSecurityException {
         if (flow == null) {
+            System.out.println("Creating new flow");
             GoogleClientSecrets.Details web = new GoogleClientSecrets.Details()
                     .setClientId(clientId)
                     .setClientSecret(clientSecret);
             clientSecrets = new GoogleClientSecrets().setWeb(web);
             httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, List.of(CalendarScopes.CALENDAR)).build();
+            flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, List.of(CalendarScopes.CALENDAR))
+                    .setDataStoreFactory(new FileDataStoreFactory(new File("google-auth-clients")))
+                    .setAccessType("offline")
+                    .build();
         }
-        authorizationCodeRequestUrl = flow.newAuthorizationUrl().setRedirectUri(redirectURL);
-        System.out.println("URL: " + authorizationCodeRequestUrl);
-        return authorizationCodeRequestUrl.build();
     }
 }

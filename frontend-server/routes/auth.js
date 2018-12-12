@@ -13,15 +13,15 @@ router.post('/', function (req, res, next) {
     if (passwordCorrect(req.body.email, req.body.password)) {
         const entry = {key: req.session.id, val: crypto.randomBytes(64).toString('hex')};
         sessions.sessionArray.keys.push(entry);
+        res.cookie(sessions.cookie.cookieNameUserID, req.body.email);
         res.cookie(sessions.cookie.cookieNamePrivateKey, entry.val, {httpOnly: true});
         res.status(202).send("AUTH OKAY");
-    }
-    else
+    } else
         res.status(403).send("WRONG CREDENTIALS");
 });
 
 function passwordCorrect(email, pass) {
-    return pass !== '123';
+    return pass !== '123' || email !== "";
 }
 
 module.exports = router;
