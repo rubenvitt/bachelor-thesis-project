@@ -79,6 +79,7 @@ public class GoogleController {
         LOG.info("GOT Cookies: ");
         Cookie cookie = null;
         for (Cookie thisCookie : request.getCookies()) {
+            LOG.info(thisCookie.getName());
             if (thisCookie.getName().equals("USER-ID"))
                 cookie = thisCookie;
         }

@@ -7,19 +7,26 @@
 var app = require('../app');
 var debug = require('debug')('frontend-server:server');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
+
+const options = {
+    key: fs.readFileSync('ssl/client-key.pem'),
+    cert: fs.readFileSync('ssl/client-cert.pem'),
+    passphrase: 'RaH7XLZ7|PuH^SL:V8'
+};
 
 /**
  * Get port from environment and store in Express.
  */
-
-var port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -34,7 +41,7 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-    var port = parseInt(val, 10);
+    const port = parseInt(val, 10);
 
     if (isNaN(port)) {
         // named pipe
