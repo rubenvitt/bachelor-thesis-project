@@ -34,7 +34,7 @@ backend-build:
   artifacts:
     expire_in: 1 week
     paths:
-      - ./backend/target/*.war
+      - ./backend/target/*.jar
   script:
     - cd backend
     - mvn package -DskipTests
