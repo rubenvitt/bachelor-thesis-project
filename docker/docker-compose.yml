@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  frontend:
+    image: docker.fme.de/r.vitt/bsc/frontend
+    ports:
+      - 3333:3000
+
+  backend:
+    image: docker.fme.de/r.vitt/bsc/backend
+    ports:
+      - 8443:8443

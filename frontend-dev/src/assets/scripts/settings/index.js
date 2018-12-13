@@ -1,4 +1,5 @@
 import * as checkboxController from '../checkbox-in-list-with-badge'
+import * as URLS from '../constants/urls'
 /*
  <form id="settings-workingHours">
  <div class="form-group">
@@ -56,8 +57,12 @@ if (document.getElementById("settings-workingHours")) {
     loadAccessKeyBoxes();
     loadCalendars($('#microsoft-access-token').val(), $('#google-access-token').val());
 
+    $('#office-provider-link').click(function () {
+        window.location = `${URLS.apiUrl}/auth-office?user_id=${getCookie("USER-ID")}`;
+    });
+
     $('#google-provider-link').click(function () {
-        window.location = "http://localhost:8080/auth-google?user_id=" + getCookie("USER-ID");
+        window.location = `${URLS.apiUrl}/auth-google?user_id=${getCookie("USER-ID")}`;
     });
 }
 
@@ -85,7 +90,7 @@ function loadCalendars(microsoft, google) {
     if (google) {
         let string = "";
         $.ajax({
-            url: "http://localhost:8080/google/calendar",
+            url: `${URLS.apiUrl}/google/calendar`,
             data: {
                 user_id: getCookie("USER-ID")
             }

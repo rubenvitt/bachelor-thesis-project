@@ -3,6 +3,7 @@ package de.rubeen.bsc.controller;
 import de.rubeen.bsc.office365tests.auth.microsoft.AuthHelper;
 import de.rubeen.bsc.office365tests.auth.microsoft.IdToken;
 import de.rubeen.bsc.office365tests.auth.microsoft.TokenResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,10 +16,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.UUID;
+
+import static java.text.MessageFormat.format;
 
 @RestController
 public class Office365Controller {
+    @Value("${webapp.url}")
+    String webappUrl;
 
     @RequestMapping(value = "/auth-office", method = RequestMethod.POST)
     public String authorize(
@@ -48,7 +54,7 @@ public class Office365Controller {
                 Cookie cookie = new Cookie("microsoft-access-key", tokenResponse.getAccessToken());
                 response.addCookie(cookie);
                 //response.setHeader("test", "abc");
-                response.sendRedirect("http://localhost:3333/settings");
+                response.sendRedirect(format("{0}/settings", webappUrl));
             } else {
                 session.setAttribute("error", "ID token failed validation.");
             }

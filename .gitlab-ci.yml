@@ -47,8 +47,8 @@ backend-deploy-docker:
   script:
     - cd backend
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
-    - mvn install dockerfile:build
-    - mvn dockerfile:push
+    - ./mvnw install dockerfile:build
+    - ./mvnw dockerfile:push
   tags:
     - docker
 

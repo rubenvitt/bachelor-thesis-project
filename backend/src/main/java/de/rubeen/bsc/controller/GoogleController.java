@@ -37,6 +37,7 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Set;
 
+import static java.text.MessageFormat.format;
 import static org.joda.time.DateTimeConstants.MONDAY;
 import static org.joda.time.DateTimeConstants.SUNDAY;
 
@@ -53,6 +54,8 @@ public class GoogleController {
     private String clientSecret;
     @Value("${google.client.redirectUri}")
     private String redirectURL;
+    @Value("${webapp.url}")
+    private String webAppUrl;
     private Set<Event> eventSet;
     private NetHttpTransport httpTransport;
 
@@ -70,7 +73,7 @@ public class GoogleController {
     }
 
     @RequestMapping(value = "/auth-google", method = RequestMethod.GET, params = "code")
-    public String oauth2Callback(@RequestParam(value = "code") String code, HttpServletRequest request,HttpServletResponse response) throws IOException {
+    public String oauth2Callback(@RequestParam(value = "code") String code, HttpServletRequest request, HttpServletResponse response) throws IOException {
         Events events;
         String message;
         LOG.info("GOT Cookies: ");
@@ -95,7 +98,7 @@ public class GoogleController {
             //response.addCookie(cookie);
             response.addCookie(new Cookie("google-access-key", tokenResponse.getAccessToken()));
             //System.out.println(cookie.getValue());
-            response.sendRedirect("http://localhost:3333/settings");
+            response.sendRedirect(format("{0}/settings", webAppUrl));
 
             /*events = calendar.events().list("primary").setTimeMin(minDate).setTimeMax(maxDate).execute();
             message = events.getItems().toString();
@@ -140,9 +143,6 @@ public class GoogleController {
             System.out.println(calendar);
             return execute;
         }
-        //TokenResponse response = flow.newTokenRequest(code).setRedirectUri("http://localhost:8080/auth-google").execute();
-        //Calendar calendar = new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName("App-Name").build();
-        //return calendar.calendarList();
     }
 
     @RequestMapping("/google/events")
