@@ -1,0 +1,12 @@
+dev:
+  image: ubuntu:latest
+  ports:
+  - 8080:8080
+  - 3000:3000
+  - 3333:3333
+  stdin_open: true
+  tty: true
+  volumes:
+  - '../:/app'
+  - /app/frontend-dev/node_modules/
+  - /app/frontend-server/node_modules/

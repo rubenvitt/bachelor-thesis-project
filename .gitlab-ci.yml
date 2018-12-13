@@ -46,10 +46,9 @@ backend-deploy-docker:
   stage: deploy
   script:
     - cd backend
-    - echo "this stage needs to be implemented"
-    #- docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
-    #- docker build -t docker.fme.de/r.vitt/bsc/office365:test .
-    #- docker push docker.fme.de/r.vitt/bsc/office365:test
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
+    - mvn install dockerfile:build
+    - mvn dockerfile:push
   tags:
     - docker
 
@@ -74,7 +73,6 @@ frontend-deploy-docker:
     - echo "build will be plattform-dependent!"
   script:
     - cd frontend-server
-    - echo "needs to be done (login fails)"
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
     - docker build -t docker.fme.de/r.vitt/bsc/frontend .
     - docker push docker.fme.de/r.vitt/bsc/frontend
