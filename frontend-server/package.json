@@ -12,6 +12,8 @@
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "express-session": "^1.15.6",
+    "jquery": "^3.3.1",
+    "jsdom": "^13.0.0",
     "morgan": "~1.9.0",
     "mustache": "~3.0.0"
   }

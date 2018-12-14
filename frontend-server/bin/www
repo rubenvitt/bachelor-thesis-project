@@ -6,9 +6,11 @@
 
 var app = require('../app');
 var debug = require('debug')('frontend-server:server');
-var http = require('http');
 var https = require('https');
 var fs = require('fs');
+
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+//https.globalAgent.options.rejectUnauthorized = false;
 
 const options = {
     key: fs.readFileSync('ssl/client-key.pem'),

@@ -12,7 +12,7 @@ if (document.getElementById('login-failure-alert') !== null) {
             })
             .fail(evt => {
                 console.error(evt);
-                if (evt.status === 403) {
+                if (evt.status === 401) {
                     $('#login-failure-alert').removeClass('d-none');
                 } else {
                     location.pathname = "500.html";

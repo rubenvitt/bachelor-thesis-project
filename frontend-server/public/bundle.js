@@ -605,7 +605,7 @@ module.exports = __webpack_require__.p + "assets/53e1e4673e3d7eba7e5bd5bc57c76bb
             if (rawRequest.status === 202) location.href = "/";
         }).fail(evt => {
             console.error(evt);
-            if (evt.status === 403) {
+            if (evt.status === 401) {
                 $('#login-failure-alert').removeClass('d-none');
             } else {
                 location.pathname = "500.html";
