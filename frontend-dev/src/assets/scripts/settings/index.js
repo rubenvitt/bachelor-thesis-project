@@ -87,7 +87,9 @@ function loadCalendars(microsoft, google) {
         const list = $('#settings-list-group-office-cal-list');
         //list.html(string);
         const inputList = list.children().children("input");
-        checkboxController.initCheckboxList(inputList);
+        checkboxController.initCheckboxList(inputList, function (checked) {
+            console.log(checked);
+        });
     }
     if (google) {
         let string = "";
@@ -96,15 +98,40 @@ function loadCalendars(microsoft, google) {
             data: {
                 user_id: cookie.getUserID()
             }
-        }).done(function (content) {
-            content.items.forEach(item => {
-                string += getListItemFor(item.id, item.summary);
+        }).done(
+            /**
+             *
+             * @param content array of calendars
+             * @param content[].calendarID id of calendar
+             * @param content[].calendarName name of calendar
+             * @param content[].activated activated-state of calendar
+             */
+            function (content) {
+                content.forEach(item => {
+                    string += getListItemFor(item.calendarID, item.calendarName, item.activated);
+                });
+                const googleList = $('#settings-list-group-google-cal-list');
+                googleList.html(string);
+                const inputList = googleList.children().children('input');
+                checkboxController.initCheckboxList(inputList, function (checked, id) {
+                    console.log("AJAX: " + checked + " --- " + id);
+                    $.ajax({
+                        url: `${URLS.apiUrl}/calendar/activate?${jQuery.param({
+                            "calendar_id": id,
+                            "user_id": cookie.getUserID(),
+                            "activated": checked
+                        })}`,
+                        method: 'post'
+                       // data: {
+                       //     calendar_id: id,
+                       //     user_id: cookie.getUserID(),
+                       //     activated: checked
+                       // }
+                    }).done(function () {
+
+                    })
+                });
             });
-            const googleList = $('#settings-list-group-google-cal-list');
-            googleList.html(string);
-            const inputList = googleList.children().children('input');
-            checkboxController.initCheckboxList(inputList);
-        });
     }
 }
 
@@ -142,10 +169,10 @@ function loadAccessKeyBoxes() {
     }*/
 }
 
-function getListItemFor(id, name) {
+function getListItemFor(id, name, activated) {
     return `
 <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-    <input data-content="${id}" type="checkbox" class="form-check-input">
+    <input data-content="${id}" type="checkbox" ${activated ? "checked" : ""} class="form-check-input">
     ${name}
     <i class="fa fa-check badge badge-primary badge-pill"></i>
 </label>`;

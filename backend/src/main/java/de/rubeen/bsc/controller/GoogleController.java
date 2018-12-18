@@ -16,6 +16,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.service.CalendarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 import static org.joda.time.DateTimeConstants.MONDAY;
@@ -137,7 +139,7 @@ public class GoogleController {
     }
 
     @RequestMapping("/google/calendar")
-    public CalendarList getAllCalendar(@RequestParam("user_id") String user_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
+    public List<CalendarEntity> getAllCalendar(@RequestParam("user_id") String user_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
         LOG.info("Getting a list of calendars");
         createFlow();
         Credential credential = flow.loadCredential(user_id);
@@ -147,7 +149,9 @@ public class GoogleController {
             Calendar calendar = getCalendar(credential);
             CalendarList calendarList = calendar.calendarList().list().execute();
             calendarList.getItems().parallelStream().forEach(calendarListEntry -> calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id));
-            return calendarList;
+            return calendarList.getItems().parallelStream()
+                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry.getSummary(), calendarListEntry.getId(), calendarService.isCalendarActivated(calendarListEntry.getId())))
+                    .collect(Collectors.toList());
         } catch (CredentialException e) {
             LOG.error("Credential exception: ", e);
             response.setStatus(401);

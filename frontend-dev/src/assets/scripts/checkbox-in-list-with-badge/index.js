@@ -9,9 +9,10 @@ function setAllCheckboxesChanged() {
     });
 }
 
-function setChangeListener(checkbox) {
+function setChangeListener(checkbox, changedListener) {
     $(checkbox).change(function () {
         setCheckboxVisibility(this);
+        changedListener(this.checked, $(this).attr('data-content'));
     });
 }
 
@@ -32,9 +33,9 @@ function setCheckboxVisibility(checkbox) {
     }
 }
 
-export function initCheckboxList(checkboxes) {
+export function initCheckboxList(checkboxes, changedListener) {
     checkboxes.each(function () {
         setCheckboxVisibility(this);
-        setChangeListener(this);
+        setChangeListener(this, changedListener);
     });
 }

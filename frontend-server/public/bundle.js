@@ -310,9 +310,10 @@ function setAllCheckboxesChanged() {
     });
 }
 
-function setChangeListener(checkbox) {
+function setChangeListener(checkbox, changedListener) {
     $(checkbox).change(function () {
         setCheckboxVisibility(this);
+        changedListener(this.checked, $(this).attr('data-content'));
     });
 }
 
@@ -333,10 +334,10 @@ function setCheckboxVisibility(checkbox) {
     }
 }
 
-function initCheckboxList(checkboxes) {
+function initCheckboxList(checkboxes, changedListener) {
     checkboxes.each(function () {
         setCheckboxVisibility(this);
-        setChangeListener(this);
+        setChangeListener(this, changedListener);
     });
 }
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
@@ -1755,7 +1756,7 @@ if ($('dashboard-todayMeetings-dayDate') !== undefined) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__ = __webpack_require__(149);
+/* WEBPACK VAR INJECTION */(function($, jQuery) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__ = __webpack_require__(149);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(262);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(263);
 
@@ -1847,7 +1848,9 @@ function loadCalendars(microsoft, google) {
         const list = $('#settings-list-group-office-cal-list');
         //list.html(string);
         const inputList = list.children().children("input");
-        __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__["a" /* initCheckboxList */](inputList);
+        __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__["a" /* initCheckboxList */](inputList, function (checked) {
+            console.log(checked);
+        });
     }
     if (google) {
         let string = "";
@@ -1856,14 +1859,37 @@ function loadCalendars(microsoft, google) {
             data: {
                 user_id: __WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */]()
             }
-        }).done(function (content) {
-            content.items.forEach(item => {
-                string += getListItemFor(item.id, item.summary);
+        }).done(
+        /**
+         *
+         * @param content array of calendars
+         * @param content[].calendarID id of calendar
+         * @param content[].calendarName name of calendar
+         * @param content[].activated activated-state of calendar
+         */
+        function (content) {
+            content.forEach(item => {
+                string += getListItemFor(item.calendarID, item.calendarName, item.activated);
             });
             const googleList = $('#settings-list-group-google-cal-list');
             googleList.html(string);
             const inputList = googleList.children().children('input');
-            __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__["a" /* initCheckboxList */](inputList);
+            __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__["a" /* initCheckboxList */](inputList, function (checked, id) {
+                console.log("AJAX: " + checked + " --- " + id);
+                $.ajax({
+                    url: `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/calendar/activate?${jQuery.param({
+                        "calendar_id": id,
+                        "user_id": __WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */](),
+                        "activated": checked
+                    })}`,
+                    method: 'post'
+                    // data: {
+                    //     calendar_id: id,
+                    //     user_id: cookie.getUserID(),
+                    //     activated: checked
+                    // }
+                }).done(function () {});
+            });
         });
     }
 }
@@ -1902,15 +1928,15 @@ function loadAccessKeyBoxes() {
     }*/
 }
 
-function getListItemFor(id, name) {
+function getListItemFor(id, name, activated) {
     return `
 <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-    <input data-content="${id}" type="checkbox" class="form-check-input">
+    <input data-content="${id}" type="checkbox" ${activated ? "checked" : ""} class="form-check-input">
     ${name}
     <i class="fa fa-check badge badge-primary badge-pill"></i>
 </label>`;
 }
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1), __webpack_require__(1)))
 
 /***/ }),
 

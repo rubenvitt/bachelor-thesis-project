@@ -30,7 +30,7 @@ public class CalendarService extends AbstractDatabaseService {
         LOG.info("Found: " + integer);
         if (integer < 1) {
             dslContext.insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED)
-                    .values(calendarID, loginService.getUserID(user), true).executeAsync();
+                    .values(calendarID, loginService.getUserID(user), true).execute();
         }
     }
 

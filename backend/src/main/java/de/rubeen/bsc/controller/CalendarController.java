@@ -19,7 +19,7 @@ public class CalendarController {
         this.calendarService = calendarService;
     }
 
-    @RequestMapping(value = "/activate", method = RequestMethod.PUT)
+    @RequestMapping(value = "/activate", method = RequestMethod.POST)
     public ResponseEntity activateCalendar(@RequestParam("calendar_id") String calendarID,
                                            @RequestParam("user_id") String userID,
                                            @RequestParam("activated") Boolean activated) {
