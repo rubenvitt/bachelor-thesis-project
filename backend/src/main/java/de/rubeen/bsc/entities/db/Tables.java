@@ -5,6 +5,7 @@ package de.rubeen.bsc.entities.db;
 
 
 import de.rubeen.bsc.entities.db.tables.Appuser;
+import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.Credential;
 
 import javax.annotation.Generated;
@@ -27,6 +28,11 @@ public class Tables {
      * The table <code>public.appuser</code>.
      */
     public static final Appuser APPUSER = de.rubeen.bsc.entities.db.tables.Appuser.APPUSER;
+
+    /**
+     * The table <code>public.calendar</code>.
+     */
+    public static final Calendar CALENDAR = de.rubeen.bsc.entities.db.tables.Calendar.CALENDAR;
 
     /**
      * The table <code>public.credential</code>.

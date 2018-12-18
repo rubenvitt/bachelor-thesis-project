@@ -5,13 +5,16 @@ package de.rubeen.bsc.entities.db;
 
 
 import de.rubeen.bsc.entities.db.tables.Appuser;
+import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.Credential;
 import de.rubeen.bsc.entities.db.tables.records.AppuserRecord;
+import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import de.rubeen.bsc.entities.db.tables.records.CredentialRecord;
 
 import javax.annotation.Generated;
 
 import org.jooq.ForeignKey;
+import org.jooq.Identity;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
 
@@ -34,30 +37,43 @@ public class Keys {
     // IDENTITY definitions
     // -------------------------------------------------------------------------
 
+    public static final Identity<AppuserRecord, Integer> IDENTITY_APPUSER = Identities0.IDENTITY_APPUSER;
+    public static final Identity<CalendarRecord, Integer> IDENTITY_CALENDAR = Identities0.IDENTITY_CALENDAR;
+    public static final Identity<CredentialRecord, Integer> IDENTITY_CREDENTIAL = Identities0.IDENTITY_CREDENTIAL;
 
     // -------------------------------------------------------------------------
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<AppuserRecord> APPUSER_PKEY = UniqueKeys0.APPUSER_PKEY;
+    public static final UniqueKey<CalendarRecord> CALENDAR_PKEY = UniqueKeys0.CALENDAR_PKEY;
     public static final UniqueKey<CredentialRecord> CREDENTIAL_PKEY = UniqueKeys0.CREDENTIAL_PKEY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<CalendarRecord, AppuserRecord> CALENDAR__CALENDAR_USER_ID_FKEY = ForeignKeys0.CALENDAR__CALENDAR_USER_ID_FKEY;
     public static final ForeignKey<CredentialRecord, AppuserRecord> CREDENTIAL__CREDENTIAL_USERS_ID_FKEY = ForeignKeys0.CREDENTIAL__CREDENTIAL_USERS_ID_FKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
     // -------------------------------------------------------------------------
 
+    private static class Identities0 {
+        public static Identity<AppuserRecord, Integer> IDENTITY_APPUSER = Internal.createIdentity(Appuser.APPUSER, Appuser.APPUSER.ID);
+        public static Identity<CalendarRecord, Integer> IDENTITY_CALENDAR = Internal.createIdentity(Calendar.CALENDAR, Calendar.CALENDAR.ID);
+        public static Identity<CredentialRecord, Integer> IDENTITY_CREDENTIAL = Internal.createIdentity(Credential.CREDENTIAL, Credential.CREDENTIAL.ID);
+    }
+
     private static class UniqueKeys0 {
         public static final UniqueKey<AppuserRecord> APPUSER_PKEY = Internal.createUniqueKey(Appuser.APPUSER, "appuser_pkey", Appuser.APPUSER.ID);
+        public static final UniqueKey<CalendarRecord> CALENDAR_PKEY = Internal.createUniqueKey(Calendar.CALENDAR, "calendar_pkey", Calendar.CALENDAR.ID);
         public static final UniqueKey<CredentialRecord> CREDENTIAL_PKEY = Internal.createUniqueKey(Credential.CREDENTIAL, "credential_pkey", Credential.CREDENTIAL.ID);
     }
 
     private static class ForeignKeys0 {
+        public static final ForeignKey<CalendarRecord, AppuserRecord> CALENDAR__CALENDAR_USER_ID_FKEY = Internal.createForeignKey(de.rubeen.bsc.entities.db.Keys.APPUSER_PKEY, Calendar.CALENDAR, "calendar__calendar_user_id_fkey", Calendar.CALENDAR.USER_ID);
         public static final ForeignKey<CredentialRecord, AppuserRecord> CREDENTIAL__CREDENTIAL_USERS_ID_FKEY = Internal.createForeignKey(de.rubeen.bsc.entities.db.Keys.APPUSER_PKEY, Credential.CREDENTIAL, "credential__credential_users_id_fkey", Credential.CREDENTIAL.USERS_ID);
     }
 }

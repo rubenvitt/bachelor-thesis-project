@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 
+import static de.rubeen.bsc.entities.db.Tables.APPUSER;
+
 @Service
 public class LoginService extends AbstractDatabaseService {
     Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -25,8 +27,8 @@ public class LoginService extends AbstractDatabaseService {
     public Boolean login(final String user, final String password) {
         Result<Record> result = dslContext
                 .select()
-                .from(Tables.APPUSER)
-                .where(Appuser.APPUSER.MAIL.eq(user)
+                .from(APPUSER)
+                .where(Appuser.APPUSER.MAIL.eq(normalizeMail(user))
                         .and(Appuser.APPUSER.PASSWORD.eq(password)))
                 .limit(1)
                 .fetch();
@@ -36,12 +38,21 @@ public class LoginService extends AbstractDatabaseService {
     public Boolean login(LoginUser loginUser) {
         Result<Record> result = dslContext
                 .select()
-                .from(Tables.APPUSER)
-                .where(Appuser.APPUSER.MAIL.eq(loginUser.getEmail())
+                .from(APPUSER)
+                .where(Appuser.APPUSER.MAIL.eq(normalizeMail(loginUser.getEmail()))
                         .and(Appuser.APPUSER.PASSWORD.eq(loginUser.getPassword())))
                 .limit(1)
                 .fetch();
         return result.size() == 1;
     }
 
+    Integer getUserID(String email) {
+        LOG.info("Looking for user with mail: " + email);
+        return dslContext.select(APPUSER.ID).from(APPUSER).where(APPUSER.MAIL.eq(normalizeMail(email))).fetchOne(0, int.class);
+    }
+
+
+    private static String normalizeMail(final String mail) {
+        return mail.replace("%40", "@");
+    }
 }

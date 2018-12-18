@@ -1,5 +1,6 @@
 import * as checkboxController from '../checkbox-in-list-with-badge'
 import * as URLS from '../constants/urls'
+import * as cookie from '../cookie'
 /*
  <form id="settings-workingHours">
  <div class="form-group">
@@ -55,24 +56,25 @@ if (document.getElementById("settings-workingHours")) {
         $("#are-you-sure-modal").modal();
     });
     loadAccessKeyBoxes();
-    loadCalendars($('#microsoft-access-token').val(), $('#google-access-token').val());
+    loadCalendars($('#microsoft-access-token').val(), true);
 
     $('#office-provider-link').click(function () {
-        window.location = `${URLS.apiUrl}/auth-office?user_id=${getCookie("USER-ID")}`;
+        window.location = `${URLS.apiUrl}/auth-office?user_id=${cookie.getUserID()}`;
     });
 
     $('#google-provider-link').click(function () {
-        window.location = `${URLS.apiUrl}/auth-google?user_id=${getCookie("USER-ID")}`;
+        window.location = `${URLS.apiUrl}/auth-google?user_id=${cookie.getUserID()}`;
     });
 }
 
+//TODO cleanup
 function addModalListener(cookie) {
-    $("#are-you-sure-modal .btn-danger").click(function () {
+    /*$("#are-you-sure-modal .btn-danger").click(function () {
         console.log("removing cookie: " + cookie);
         removeCookie(cookie);
         $("#are-you-sure-modal").modal('hide');
         $(this).prop("onclick", null).off("click");
-    });
+    });*/
 }
 
 function loadCalendars(microsoft, google) {
@@ -92,7 +94,7 @@ function loadCalendars(microsoft, google) {
         $.ajax({
             url: `${URLS.apiUrl}/google/calendar`,
             data: {
-                user_id: getCookie("USER-ID")
+                user_id: cookie.getUserID()
             }
         }).done(function (content) {
             content.items.forEach(item => {
@@ -126,8 +128,9 @@ function setCheckboxVisibility(checkbox) {
     }
 }
 
+//TODO cleanup
 function loadAccessKeyBoxes() {
-    if (getCookie("microsoft-access-key") !== undefined) {
+    /*if (getCookie("microsoft-access-key") !== undefined) {
         $("#microsoft-access-token").val(getCookie("microsoft-access-key"));
     } else {
         $("#account-settings-remove-microsoft-access-token-btn").css("display", "none");
@@ -136,19 +139,7 @@ function loadAccessKeyBoxes() {
         $('#google-access-token').val(getCookie("google-access-key"));
     } else {
         $("#account-settings-remove-google-access-token-btn").css("display", "none");
-    }
-}
-
-function getCookie(name) {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    if (match) return match[2];
-}
-
-function removeCookie(cname) {
-    const d = new Date("2000");
-    const expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=;" + expires + ";path=/";
-    location.reload();
+    }*/
 }
 
 function getListItemFor(id, name) {

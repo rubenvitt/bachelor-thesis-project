@@ -5,6 +5,7 @@ package de.rubeen.bsc.entities.db;
 
 
 import de.rubeen.bsc.entities.db.tables.Appuser;
+import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.Credential;
 
 import javax.annotation.Generated;
@@ -32,6 +33,7 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index APPUSER_PKEY = Indexes0.APPUSER_PKEY;
+    public static final Index CALENDAR_PKEY = Indexes0.CALENDAR_PKEY;
     public static final Index CREDENTIAL_PKEY = Indexes0.CREDENTIAL_PKEY;
 
     // -------------------------------------------------------------------------
@@ -40,6 +42,7 @@ public class Indexes {
 
     private static class Indexes0 {
         public static Index APPUSER_PKEY = Internal.createIndex("appuser_pkey", Appuser.APPUSER, new OrderField[] { Appuser.APPUSER.ID }, true);
+        public static Index CALENDAR_PKEY = Internal.createIndex("calendar_pkey", Calendar.CALENDAR, new OrderField[] { Calendar.CALENDAR.ID }, true);
         public static Index CREDENTIAL_PKEY = Internal.createIndex("credential_pkey", Credential.CREDENTIAL, new OrderField[] { Credential.CREDENTIAL.ID }, true);
     }
 }

@@ -380,8 +380,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__meeting_creation__ = __webpack_require__(260);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__meeting_creation___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_18__meeting_creation__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__settings__ = __webpack_require__(261);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__clockpicker__ = __webpack_require__(263);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__selectpicker__ = __webpack_require__(266);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__clockpicker__ = __webpack_require__(264);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__selectpicker__ = __webpack_require__(267);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__checkbox_in_list_with_badge__ = __webpack_require__(149);
 
 
@@ -1757,6 +1757,8 @@ if ($('dashboard-todayMeetings-dayDate') !== undefined) {
 "use strict";
 /* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__ = __webpack_require__(149);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(262);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(263);
+
 
 
 /*
@@ -1814,24 +1816,25 @@ if (document.getElementById("settings-workingHours")) {
         $("#are-you-sure-modal").modal();
     });
     loadAccessKeyBoxes();
-    loadCalendars($('#microsoft-access-token').val(), $('#google-access-token').val());
+    loadCalendars($('#microsoft-access-token').val(), true);
 
     $('#office-provider-link').click(function () {
-        window.location = `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/auth-office?user_id=${getCookie("USER-ID")}`;
+        window.location = `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/auth-office?user_id=${__WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */]()}`;
     });
 
     $('#google-provider-link').click(function () {
-        window.location = `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/auth-google?user_id=${getCookie("USER-ID")}`;
+        window.location = `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/auth-google?user_id=${__WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */]()}`;
     });
 }
 
+//TODO cleanup
 function addModalListener(cookie) {
-    $("#are-you-sure-modal .btn-danger").click(function () {
+    /*$("#are-you-sure-modal .btn-danger").click(function () {
         console.log("removing cookie: " + cookie);
         removeCookie(cookie);
         $("#are-you-sure-modal").modal('hide');
         $(this).prop("onclick", null).off("click");
-    });
+    });*/
 }
 
 function loadCalendars(microsoft, google) {
@@ -1851,7 +1854,7 @@ function loadCalendars(microsoft, google) {
         $.ajax({
             url: `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/google/calendar`,
             data: {
-                user_id: getCookie("USER-ID")
+                user_id: __WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */]()
             }
         }).done(function (content) {
             content.items.forEach(item => {
@@ -1885,8 +1888,9 @@ function setCheckboxVisibility(checkbox) {
     }
 }
 
+//TODO cleanup
 function loadAccessKeyBoxes() {
-    if (getCookie("microsoft-access-key") !== undefined) {
+    /*if (getCookie("microsoft-access-key") !== undefined) {
         $("#microsoft-access-token").val(getCookie("microsoft-access-key"));
     } else {
         $("#account-settings-remove-microsoft-access-token-btn").css("display", "none");
@@ -1895,19 +1899,7 @@ function loadAccessKeyBoxes() {
         $('#google-access-token').val(getCookie("google-access-key"));
     } else {
         $("#account-settings-remove-google-access-token-btn").css("display", "none");
-    }
-}
-
-function getCookie(name) {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    if (match) return match[2];
-}
-
-function removeCookie(cname) {
-    const d = new Date("2000");
-    const expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=;" + expires + ";path=/";
-    location.reload();
+    }*/
 }
 
 function getListItemFor(id, name) {
@@ -1939,11 +1931,41 @@ const apiUrl = "https://rubeen.fritz.box:8443";
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getUserID; });
+/* unused harmony export removeUserID */
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    if (match) return match[2];
+}
+
+function removeCookie(cname) {
+    const d = new Date("2000");
+    const expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=;" + expires + ";path=/";
+    location.reload();
+}
+
+function getUserID() {
+    return getCookie('USER-ID');
+}
+
+function removeUserID() {
+    return removeCookie('USER-ID');
+}
+
+
+
+/***/ }),
+
+/***/ 264:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min__ = __webpack_require__(264);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min__ = __webpack_require__(265);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css__ = __webpack_require__(265);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css__ = __webpack_require__(266);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css__);
 
 
@@ -1957,15 +1979,15 @@ const apiUrl = "https://rubeen.fritz.box:8443";
 
 /***/ }),
 
-/***/ 266:
+/***/ 267:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_bootstrap_select_dist_js_bootstrap_select_min__ = __webpack_require__(267);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_bootstrap_select_dist_js_bootstrap_select_min__ = __webpack_require__(268);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_bootstrap_select_dist_js_bootstrap_select_min___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_bootstrap_select_dist_js_bootstrap_select_min__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_bootstrap_select_dist_css_bootstrap_select_min_css__ = __webpack_require__(268);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_bootstrap_select_dist_css_bootstrap_select_min_css__ = __webpack_require__(269);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_bootstrap_select_dist_css_bootstrap_select_min_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_bootstrap_select_dist_css_bootstrap_select_min_css__);
 
 

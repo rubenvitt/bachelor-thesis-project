@@ -5,6 +5,7 @@ package de.rubeen.bsc.entities.db;
 
 
 import de.rubeen.bsc.entities.db.tables.Appuser;
+import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.Credential;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.List;
 import javax.annotation.Generated;
 
 import org.jooq.Catalog;
+import org.jooq.Sequence;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
 
@@ -31,7 +33,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1667881641;
+    private static final long serialVersionUID = 2002000553;
 
     /**
      * The reference instance of <code>public</code>
@@ -42,6 +44,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.appuser</code>.
      */
     public final Appuser APPUSER = de.rubeen.bsc.entities.db.tables.Appuser.APPUSER;
+
+    /**
+     * The table <code>public.calendar</code>.
+     */
+    public final Calendar CALENDAR = de.rubeen.bsc.entities.db.tables.Calendar.CALENDAR;
 
     /**
      * The table <code>public.credential</code>.
@@ -65,6 +72,20 @@ public class Public extends SchemaImpl {
     }
 
     @Override
+    public final List<Sequence<?>> getSequences() {
+        List result = new ArrayList();
+        result.addAll(getSequences0());
+        return result;
+    }
+
+    private final List<Sequence<?>> getSequences0() {
+        return Arrays.<Sequence<?>>asList(
+            Sequences.APPUSER_ID_SEQ,
+            Sequences.CALENDAR_ID_SEQ,
+            Sequences.CREDENTIAL_ID_SEQ);
+    }
+
+    @Override
     public final List<Table<?>> getTables() {
         List result = new ArrayList();
         result.addAll(getTables0());
@@ -74,6 +95,7 @@ public class Public extends SchemaImpl {
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
             Appuser.APPUSER,
+            Calendar.CALENDAR,
             Credential.CREDENTIAL);
     }
 }

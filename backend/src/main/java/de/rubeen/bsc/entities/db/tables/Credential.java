@@ -16,6 +16,7 @@ import javax.annotation.Generated;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -40,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Credential extends TableImpl<CredentialRecord> {
 
-    private static final long serialVersionUID = -1033597702;
+    private static final long serialVersionUID = -2088980528;
 
     /**
      * The reference instance of <code>public.credential</code>
@@ -58,7 +59,7 @@ public class Credential extends TableImpl<CredentialRecord> {
     /**
      * The column <code>public.credential.id</code>.
      */
-    public final TableField<CredentialRecord, Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<CredentialRecord, Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('credential_id_seq'::regclass)", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>public.credential.credential</code>.
@@ -117,6 +118,14 @@ public class Credential extends TableImpl<CredentialRecord> {
     @Override
     public List<Index> getIndexes() {
         return Arrays.<Index>asList(Indexes.CREDENTIAL_PKEY);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Identity<CredentialRecord, Integer> getIdentity() {
+        return Keys.IDENTITY_CREDENTIAL;
     }
 
     /**

@@ -16,8 +16,10 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import de.rubeen.bsc.service.CalendarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.security.auth.login.CredentialException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,10 +47,11 @@ import static org.joda.time.DateTimeConstants.SUNDAY;
 @RestController
 public class GoogleController {
     private static String APP_NAME = "My-Business-Day";
-    GoogleClientSecrets clientSecrets;
-    GoogleAuthorizationCodeFlow flow;
-    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private final CalendarService calendarService;
+    private GoogleClientSecrets clientSecrets;
+    private GoogleAuthorizationCodeFlow flow;
+    private JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
     @Value("${google.client.client-id}")
     private String clientId;
     @Value("${google.client.client-secret}")
@@ -58,6 +62,11 @@ public class GoogleController {
     private String webAppUrl;
     private Set<Event> eventSet;
     private NetHttpTransport httpTransport;
+
+    @Autowired
+    public GoogleController(CalendarService calendarService) {
+        this.calendarService = calendarService;
+    }
 
     public Set<Event> getEventSet() {
         return eventSet;
@@ -133,16 +142,36 @@ public class GoogleController {
         createFlow();
         Credential credential = flow.loadCredential(user_id);
         System.out.println("FLOW-CREDENTIAL: " + credential);
-        if (credential == null) {
-            LOG.info("Credential == null; redirecting...");
+        try {
+            validateCredential(credential);
+            Calendar calendar = getCalendar(credential);
+            CalendarList calendarList = calendar.calendarList().list().execute();
+            calendarList.getItems().parallelStream().forEach(calendarListEntry -> calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id));
+            return calendarList;
+        } catch (CredentialException e) {
+            LOG.error("Credential exception: ", e);
             response.setStatus(401);
             response.setHeader("auth-url", authorize(user_id));
             return null;
-        } else {
+        }
+    }
+
+    @RequestMapping("/google/calendar/active")
+    public CalendarList getActiveCalendar(@RequestParam("user_id") String user_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
+        LOG.info("Getting a list of all activated calendars");
+        createFlow();
+        Credential credential = flow.loadCredential(user_id);
+        try {
+            validateCredential(credential);
             Calendar calendar = getCalendar(credential);
-            CalendarList execute = calendar.calendarList().list().execute();
-            System.out.println(calendar);
-            return execute;
+            CalendarList calendarList = calendar.calendarList().list().execute();
+            calendarList.getItems().removeIf(calendarListEntry -> !calendarService.isCalendarActivated(calendarListEntry.getId()));
+            return calendarList;
+        } catch (CredentialException e) {
+            LOG.error("Credential exception: ", e);
+            response.setStatus(401);
+            response.setHeader("auth-url", authorize(user_id));
+            return null;
         }
     }
 
@@ -184,8 +213,15 @@ public class GoogleController {
             httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, List.of(CalendarScopes.CALENDAR))
                     .setDataStoreFactory(new FileDataStoreFactory(new File("google-auth-clients")))
+                    .setApprovalPrompt("force")
                     .setAccessType("offline")
                     .build();
         }
+    }
+
+    private void validateCredential(Credential credential) throws IOException, CredentialException {
+        if (credential == null)
+            throw new CredentialException("Credential is null");
+        credential.refreshToken();
     }
 }

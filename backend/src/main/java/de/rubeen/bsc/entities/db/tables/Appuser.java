@@ -16,6 +16,7 @@ import javax.annotation.Generated;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -40,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Appuser extends TableImpl<AppuserRecord> {
 
-    private static final long serialVersionUID = 149453880;
+    private static final long serialVersionUID = 1179585359;
 
     /**
      * The reference instance of <code>public.appuser</code>
@@ -58,7 +59,7 @@ public class Appuser extends TableImpl<AppuserRecord> {
     /**
      * The column <code>public.appuser.id</code>.
      */
-    public final TableField<AppuserRecord, Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<AppuserRecord, Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('appuser_id_seq'::regclass)", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
      * The column <code>public.appuser.password</code>.
@@ -122,6 +123,14 @@ public class Appuser extends TableImpl<AppuserRecord> {
     @Override
     public List<Index> getIndexes() {
         return Arrays.<Index>asList(Indexes.APPUSER_PKEY);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Identity<AppuserRecord, Integer> getIdentity() {
+        return Keys.IDENTITY_APPUSER;
     }
 
     /**
