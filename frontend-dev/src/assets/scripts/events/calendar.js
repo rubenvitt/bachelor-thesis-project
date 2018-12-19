@@ -51,11 +51,18 @@ class CalendarEvent {
     }
 }
 
+//TODO change start & end date
 if ($('#full-calendar').length > 0) {
     console.log("Creating full-cal data");
+    let startDate = new Date();
+    let endDate = new Date();
     $.ajax({
         url: urls.apiUrl + "/calendar/events",
-        data: {user_id: cookie.getUserID()}
+        data: {user_id: cookie.getUserID()},
+        headers: {
+            "time-start": startDate,
+            "time-end": endDate
+        }
     }).done(function (content) {
         fillCalendar(content);
     });

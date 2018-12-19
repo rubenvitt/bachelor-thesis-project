@@ -36,6 +36,12 @@ public class EventService extends AbstractDatabaseService {
     }
 
     public List<EventEntity> getAllEventsForUser(String userMail) {
+        return this.getAllEventsForUser(userMail, getBeginOfToday().getMillis(), getEndOfToday().getMillis());
+    }
+
+    public List<EventEntity> getAllEventsForUser(String userMail, Long startMillis, Long endMillis) {
+        final DateTime startTime = new DateTime(startMillis),
+                endTime = new DateTime(endMillis);
         final Integer userID = loginService.getUserID(userMail);
         final List<String> googleCalendars = dslContext
                 .select(CALENDAR.CALENDARID)
@@ -52,8 +58,8 @@ public class EventService extends AbstractDatabaseService {
                     try {
                         return googleProviderService.getEvents(userMail,
                                 calendar,
-                                getBeginOfToday(),
-                                getEndOfToday());
+                                startTime,
+                                endTime);
                     } catch (IOException | GeneralSecurityException e) {
                         LOG.error("Can't get events for user: {} - calendar: {}", userMail, calendar, e);
                         return null;

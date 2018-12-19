@@ -3,16 +3,10 @@ package de.rubeen.bsc.controller;
 import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.EventService;
-import org.joda.time.DateTime;
-import org.joda.time.Hours;
-import org.joda.time.Minutes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,5 +34,12 @@ public class CalendarController {
     @RequestMapping(value = "/events", method = RequestMethod.GET)
     public List<EventEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID) {
         return eventService.getAllEventsForUser(userID);
+    }
+
+    @RequestMapping(value = "/events", method = RequestMethod.GET, headers = { "time-start", "time-end" })
+    public List<EventEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID,
+                                                           @RequestHeader("time-start") Long startMillis,
+                                                           @RequestHeader("time-end") Long endMillis) {
+        return eventService.getAllEventsForUser(userID, startMillis, endMillis);
     }
 }
