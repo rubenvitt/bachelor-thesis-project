@@ -15,8 +15,6 @@ import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
 @Service
 public class CalendarService extends AbstractDatabaseService {
 
-    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-
     private final LoginService loginService;
 
     public CalendarService(@Value("${database.url}") final String url,

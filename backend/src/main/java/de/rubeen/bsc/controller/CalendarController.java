@@ -2,6 +2,7 @@ package de.rubeen.bsc.controller;
 
 import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.service.CalendarService;
+import de.rubeen.bsc.service.EventService;
 import org.joda.time.DateTime;
 import org.joda.time.Hours;
 import org.joda.time.Minutes;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -21,9 +21,11 @@ import java.util.List;
 public class CalendarController {
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
     private final CalendarService calendarService;
+    private final EventService eventService;
 
-    public CalendarController(CalendarService calendarService) {
+    public CalendarController(CalendarService calendarService, EventService eventService) {
         this.calendarService = calendarService;
+        this.eventService = eventService;
     }
 
     @RequestMapping(value = "/activate", method = RequestMethod.POST)
@@ -37,9 +39,6 @@ public class CalendarController {
 
     @RequestMapping(value = "/events", method = RequestMethod.GET)
     public List<EventEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID) {
-        return List.of(
-                new EventEntity("Past Test-Event", DateTime.now().minus(Hours.hours(2)), DateTime.now().minus(Hours.hours(1))),
-                new EventEntity("Actual Test-Event", DateTime.now(), DateTime.now().plus(Minutes.minutes(30))),
-                new EventEntity("Upcoming Test-Event", DateTime.now().plus(Hours.hours(1)), DateTime.now().plus(Hours.hours(2))));
+        return eventService.getAllEventsForUser(userID);
     }
 }

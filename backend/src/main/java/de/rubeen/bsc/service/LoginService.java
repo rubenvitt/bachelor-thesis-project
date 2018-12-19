@@ -16,8 +16,6 @@ import static de.rubeen.bsc.entities.db.Tables.APPUSER;
 
 @Service
 public class LoginService extends AbstractDatabaseService {
-    Logger LOG = LoggerFactory.getLogger(this.getClass());
-
     public LoginService(@Value("${database.url}") final String url,
                         @Value("${database.user}") final String user,
                         @Value("${database.pass}") final String password) throws SQLException {

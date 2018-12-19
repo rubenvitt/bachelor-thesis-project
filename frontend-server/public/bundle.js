@@ -2225,9 +2225,9 @@ if (listGroup.length === 1) {
 }
 
 function generateListItem(subject, from, until, state) {
-    return `<a href="javascript:void(0)" class="list-group-item list-group-item-action ${state}">
+    return `<button class="btn btn-outline-primary list-group-item list-group-item-action ${state}" type="button">
 ${from} - ${until}<br>${subject}
-</a>`;
+</button>`;
 }
 
 const EventState = Object.freeze({ "upcoming": "", "active": "active", "past": "disabled" });
