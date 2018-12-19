@@ -3,11 +3,10 @@
 /**
  * Module dependencies.
  */
-
-var app = require('../app');
-var debug = require('debug')('frontend-server:server');
-var https = require('https');
-var fs = require('fs');
+const app = require('../app');
+const debug = require('debug')('frontend-server:server');
+const https = require('https');
+const fs = require('fs');
 
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 //https.globalAgent.options.rejectUnauthorized = false;

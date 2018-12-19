@@ -176,7 +176,7 @@
                 <configuration>
                     <jdbc>
                         <driver>org.postgresql.Driver</driver>
-                        <url>jdbc:postgresql://localhost:5432/testdatabase</url>
+                        <url>jdbc:postgresql://docker.local:5432/testdatabase</url>
                         <user>testuser</user>
                         <password>testpass</password>
                     </jdbc>

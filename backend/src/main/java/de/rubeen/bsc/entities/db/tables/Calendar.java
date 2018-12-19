@@ -7,6 +7,7 @@ package de.rubeen.bsc.entities.db.tables;
 import de.rubeen.bsc.entities.db.Indexes;
 import de.rubeen.bsc.entities.db.Keys;
 import de.rubeen.bsc.entities.db.Public;
+import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 
 import java.util.Arrays;
@@ -41,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Calendar extends TableImpl<CalendarRecord> {
 
-    private static final long serialVersionUID = 1277707925;
+    private static final long serialVersionUID = -1572444138;
 
     /**
      * The reference instance of <code>public.calendar</code>
@@ -70,6 +71,11 @@ public class Calendar extends TableImpl<CalendarRecord> {
      * The column <code>public.calendar.activated</code>.
      */
     public final TableField<CalendarRecord, Boolean> ACTIVATED = createField("activated", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false), this, "");
+
+    /**
+     * The column <code>public.calendar.provider</code>.
+     */
+    public final TableField<CalendarRecord, Calprovider> PROVIDER = createField("provider", org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(de.rubeen.bsc.entities.db.enums.Calprovider.class), this, "");
 
     /**
      * The column <code>public.calendar.user_id</code>.

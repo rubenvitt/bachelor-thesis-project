@@ -1,4 +1,4 @@
-const apiUrl = "rubeen.fritz.box";
+const apiUrl = "localhost";
 
 exports.urls = {
     apiUrl

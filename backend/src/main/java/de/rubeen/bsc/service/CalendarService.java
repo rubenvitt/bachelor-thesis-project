@@ -1,5 +1,6 @@
 package de.rubeen.bsc.service;
 
+import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import org.slf4j.Logger;
@@ -25,12 +26,12 @@ public class CalendarService extends AbstractDatabaseService {
         this.loginService = loginService;
     }
 
-    public void addCalendarToDatabase(String calendarID, String user) {
+    public void addCalendarToDatabase(String calendarID, String user, Calprovider provider) {
         Integer integer = dslContext.selectCount().from(CALENDAR).where(Calendar.CALENDAR.CALENDARID.eq(calendarID)).fetchOne(0, int.class);
         LOG.info("Found: " + integer);
         if (integer < 1) {
-            dslContext.insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED)
-                    .values(calendarID, loginService.getUserID(user), true).execute();
+            dslContext.insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED, CALENDAR.PROVIDER)
+                    .values(calendarID, loginService.getUserID(user), true, provider).execute();
         }
     }
 

@@ -17,10 +17,13 @@ create table credential
   users_id   int             not null references appUser (id)
 );
 
+create type calProvider as enum ('google', 'office');
+
 create table calendar
 (
   id         serial primary key,
   calendarID varchar(1000)   not null,
   activated  boolean         not null,
+  provider    calProvider   not null,
   user_id    int             not null references appUser (id)
 );

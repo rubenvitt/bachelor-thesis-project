@@ -1,26 +1,8 @@
-const checkboxes = $('label').find('input[type=checkbox]');
-setAllCheckboxVisibility();
-setAllCheckboxesChanged();
-
-function setAllCheckboxesChanged() {
-    checkboxes.change(function () {
-        console.log("CHANGED");
-        setCheckboxVisibility(this);
-    });
-}
-
 function setChangeListener(checkbox, changedListener) {
     $(checkbox).change(function () {
         setCheckboxVisibility(this);
         changedListener(this.checked, $(this).attr('data-content'));
     });
-}
-
-function setAllCheckboxVisibility() {
-    console.log("Setting all checkbox-visibilities");
-    checkboxes.each(function () {
-        setCheckboxVisibility(this);
-    })
 }
 
 function setCheckboxVisibility(checkbox) {

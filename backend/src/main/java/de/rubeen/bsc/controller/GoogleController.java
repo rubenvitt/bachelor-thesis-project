@@ -16,6 +16,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.service.CalendarService;
 import org.slf4j.Logger;
@@ -45,6 +46,8 @@ import java.util.stream.Collectors;
 import static java.text.MessageFormat.format;
 import static org.joda.time.DateTimeConstants.MONDAY;
 import static org.joda.time.DateTimeConstants.SUNDAY;
+
+// TODO: 19.12.2018 cleanup & implement google service
 
 @RestController
 public class GoogleController {
@@ -148,9 +151,9 @@ public class GoogleController {
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             CalendarList calendarList = calendar.calendarList().list().execute();
-            calendarList.getItems().parallelStream().forEach(calendarListEntry -> calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id));
+            calendarList.getItems().parallelStream().forEach(calendarListEntry -> calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id, Calprovider.google));
             return calendarList.getItems().parallelStream()
-                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry.getSummary(), calendarListEntry.getId(), calendarService.isCalendarActivated(calendarListEntry.getId())))
+                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId())))
                     .collect(Collectors.toList());
         } catch (CredentialException e) {
             LOG.error("Credential exception: ", e);
