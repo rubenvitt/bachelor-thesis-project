@@ -107,16 +107,4 @@ public class GoogleController {
             return null;
         }
     }
-
-    @RequestMapping("/google/events")
-    public Events events(@RequestParam("user_id") String user_id, @RequestParam("calendar_id") String calendarId, HttpServletResponse response) throws GeneralSecurityException, IOException {
-        LOG.info("Getting all events for calendar id: " + calendarId);
-        try {
-            return googleProviderService.getEvents(user_id, calendarId);
-        } catch (CredentialException e) {
-            response.setStatus(401);
-            response.setHeader("auth-url", googleProviderService.authorize());
-            return null;
-        }
-    }
 }

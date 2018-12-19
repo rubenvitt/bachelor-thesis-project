@@ -1,12 +1,9 @@
 package de.rubeen.bsc.service;
 
-import de.rubeen.bsc.entities.db.Tables;
 import de.rubeen.bsc.entities.db.tables.Appuser;
 import de.rubeen.bsc.entities.web.LoginUser;
 import org.jooq.Record;
 import org.jooq.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

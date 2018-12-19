@@ -4,7 +4,6 @@ import * as cookie from '../cookie'
 
 const listGroup = $('#dashboard-todayMeetings-listGroup');
 if (listGroup.length === 1) {
-    console.log(listGroup);
     $.ajax({
         url: url.apiUrl + "/calendar/events",
         data: {

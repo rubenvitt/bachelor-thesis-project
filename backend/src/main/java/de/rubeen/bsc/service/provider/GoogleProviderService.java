@@ -130,15 +130,17 @@ public class GoogleProviderService {
         }
     }
 
-    public Events getEvents(final String user_id, final String calendarId) throws IOException, GeneralSecurityException {
+    public Events getEvents(final String user_id, final String calendarId, final org.joda.time.DateTime startDateTime, final org.joda.time.DateTime endDateTime) throws IOException, GeneralSecurityException {
+        return this.getEvents(user_id, calendarId, new DateTime(startDateTime.toDate()), new DateTime(endDateTime.toDate()));
+    }
+
+    public Events getEvents(final String user_id, final String calendarId, final DateTime startDateTime, final DateTime endDateTime) throws IOException, GeneralSecurityException {
         createFlow();
         Credential credential = flow.loadCredential(user_id);
         try {
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
-            final DateTime minDate = new DateTime(org.joda.time.DateTime.now().withDayOfWeek(MONDAY).toDate());
-            final DateTime maxDate = new DateTime(org.joda.time.DateTime.now().withDayOfWeek(SUNDAY).toDate());
-            return calendar.events().list(calendarId).setTimeMin(minDate).setTimeMax(maxDate).execute();
+            return calendar.events().list(calendarId).setTimeMin(startDateTime).setTimeMax(endDateTime).execute();
         } catch (CredentialException e) {
             LOG.error("Credential exception: ", e);
             throw e;
