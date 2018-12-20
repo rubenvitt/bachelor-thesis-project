@@ -8,6 +8,7 @@
   "dependencies": {
     "consolidate": "~0.15.1",
     "cookie-parser": "^1.4.3",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "express": "~4.16.0",
@@ -16,5 +17,8 @@
     "jsdom": "^13.0.0",
     "morgan": "~1.9.0",
     "mustache": "~3.0.0"
+  },
+  "devDependencies": {
+    "http-proxy-middleware": "^0.19.1"
   }
 }

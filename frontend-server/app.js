@@ -4,6 +4,8 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var logger = require('morgan');
 var engines = require('consolidate');
+var proxy = require('http-proxy-middleware');
+const urls = require('./modules/constants/urls');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -23,6 +25,16 @@ app.use(session({
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/api', proxy(
+    {
+        target: 'https://localhost:8443',
+        secure: false,
+        changeOrigin: true,
+        logLevel: 'debug',
+        pathRewrite: {
+            '^/api': '/'
+        }
+    }));
 app.use('/controller', authRouter);
 
 app.use(express.static(path.join(__dirname, '/public')));

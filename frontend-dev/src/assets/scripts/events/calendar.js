@@ -58,11 +58,7 @@ if ($('#full-calendar').length > 0) {
     let endDate = new Date();
     $.ajax({
         url: urls.apiUrl + "/calendar/events",
-        data: {user_id: cookie.getUserID()},
-        headers: {
-            "time-start": startDate,
-            "time-end": endDate
-        }
+        data: {user_id: cookie.getUserID(), time_start: startDate, time_end: endDate},
     }).done(function (content) {
         fillCalendar(content);
     });

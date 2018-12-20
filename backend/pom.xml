@@ -75,13 +75,13 @@
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
-            <version>1.25.0</version>
+            <version>1.27.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-calendar</artifactId>
-            <version>v3-rev361-1.25.0</version>
+            <version>v3-rev364-1.25.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -176,7 +176,7 @@
                 <configuration>
                     <jdbc>
                         <driver>org.postgresql.Driver</driver>
-                        <url>jdbc:postgresql://localhost:5432/testdatabase</url>
+                        <url>jdbc:postgresql://docker.local:5432/testdatabase</url>
                         <user>testuser</user>
                         <password>testpass</password>
                     </jdbc>

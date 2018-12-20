@@ -1,6 +1,7 @@
 package de.rubeen.bsc.controller;
 
 import de.rubeen.bsc.entities.web.EventEntity;
+import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.EventService;
 import org.slf4j.Logger;
@@ -36,10 +37,15 @@ public class CalendarController {
         return eventService.getAllEventsForUser(userID);
     }
 
-    @RequestMapping(value = "/events", method = RequestMethod.GET, headers = { "time-start", "time-end" })
+    /*@RequestMapping(value = "/events", method = RequestMethod.GET)
     public List<EventEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID,
-                                                           @RequestHeader("time-start") Long startMillis,
-                                                           @RequestHeader("time-end") Long endMillis) {
+                                                           @RequestParam("time-start") Long startMillis,
+                                                           @RequestParam("time-end") Long endMillis) {
         return eventService.getAllEventsForUser(userID, startMillis, endMillis);
+    }*/
+
+    @RequestMapping(value = "/events/create", method = RequestMethod.POST, consumes = "application/json")
+    public void createNewEvent(@RequestBody NewEventEntity newEventEntity) {
+        LOG.info("got event entity: " + newEventEntity);
     }
 }

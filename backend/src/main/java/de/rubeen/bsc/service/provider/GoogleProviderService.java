@@ -7,15 +7,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.Json;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
-import com.google.api.services.calendar.model.CalendarList;
-import com.google.api.services.calendar.model.Events;
+import com.google.api.services.calendar.model.*;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.service.CalendarService;
@@ -25,15 +23,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.security.auth.login.CredentialException;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
-
-import static org.joda.time.DateTimeConstants.MONDAY;
-import static org.joda.time.DateTimeConstants.SUNDAY;
 
 @Service
 public class GoogleProviderService {
@@ -56,10 +57,14 @@ public class GoogleProviderService {
         this.calendarService = calendarService;
     }
 
+    @PostConstruct
+    public void init() throws IOException, GeneralSecurityException {
+        createFlow();
+    }
+
     public String authorize() throws GeneralSecurityException, IOException {
         LOG.info("Try to authenticate user...");
         AuthorizationCodeRequestUrl authorizationCodeRequestUrl;
-        createFlow();
         authorizationCodeRequestUrl = flow
                 .newAuthorizationUrl()
                 .setRedirectUri(redirectURL);
@@ -95,7 +100,6 @@ public class GoogleProviderService {
     }
 
     public List<CalendarEntity> getAllCalendars(String user_id) throws IOException, GeneralSecurityException {
-        createFlow();
         Credential credential = flow.loadCredential(user_id);
         try {
             validateCredential(credential);
@@ -116,7 +120,6 @@ public class GoogleProviderService {
     }
 
     public CalendarList getAllActiveCalendars(String user_id) throws IOException, GeneralSecurityException {
-        createFlow();
         Credential credential = flow.loadCredential(user_id);
         try {
             validateCredential(credential);
@@ -135,7 +138,6 @@ public class GoogleProviderService {
     }
 
     public Events getEvents(final String user_id, final String calendarId, final DateTime startDateTime, final DateTime endDateTime) throws IOException, GeneralSecurityException {
-        createFlow();
         Credential credential = flow.loadCredential(user_id);
         try {
             validateCredential(credential);
@@ -145,5 +147,43 @@ public class GoogleProviderService {
             LOG.error("Credential exception: ", e);
             throw e;
         }
+    }
+
+    public FreeBusyResponse getFreeBusyTimes(String user_id) throws IOException, CredentialException {
+        Credential credential = flow.loadCredential(user_id);
+        try {
+            validateCredential(credential);
+            //FreeBusyRequest request =
+            String dIn = "2018-12-20 08:00:00";
+            String dIne = "2018-12-20 20:00:00";
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            Date d = df.parse(dIn);
+            DateTime startTime = new DateTime(d, TimeZone.getDefault());
+
+            Date de = df.parse(dIne);
+            DateTime endTime = new DateTime(de, TimeZone.getDefault());
+
+            FreeBusyRequest req = new FreeBusyRequest();
+            req.setTimeMin(startTime);
+            req.setTimeMax(endTime);
+            req.setItems(List.of(new FreeBusyRequestItem().setId("rubeenv3@gmail.com")));
+            Calendar.Freebusy.Query fbq = getCalendar(credential).freebusy().query(req);
+
+            FreeBusyResponse fbresponse = fbq.execute();
+            System.out.println("-------------------------------");
+            System.out.println(fbresponse.toString());
+            System.out.println(fbresponse.getCalendars());
+            fbresponse.getCalendars().forEach((s, freeBusyCalendar) -> System.out.println(freeBusyCalendar));
+            fbresponse.getCalendars().forEach((s, freeBusyCalendar) -> freeBusyCalendar.getBusy().forEach(System.out::println));
+            System.out.println("-------------------------------");
+            return fbresponse;
+        } catch (CredentialException e) {
+            LOG.error("Credential exception: ", e);
+            throw e;
+        } catch (ParseException e) {
+            LOG.error("Error while parsing: ", e);
+        }
+        return null;
     }
 }

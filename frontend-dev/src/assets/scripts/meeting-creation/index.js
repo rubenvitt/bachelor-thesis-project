@@ -1,7 +1,26 @@
+import * as form from './form-sending-handler';
+
 if (document.getElementById("newMeeting-chooseMeetingType")) {
-    $('#new-meeting-dd-intelligentTimeDuration').find('a').click((evt) => {
+    $('#meeting-creation-intelligent-duration-time').find('a').click((evt) => {
         const targetLink = $(evt.target);
-        $('#new-meeting-dd-intelligentTimeDuration-btn').text(targetLink.text())
+        $('#meeting-creation-intelligent-duration-btn').text(targetLink.text())
+    });
+
+    $('#meeting-creation-submitButton').click(function () {
+        form.sendForm();
+    });
+
+    $('#meeting-creation-time-manual-btn').click(function () {
+        $('#meeting-creation-automatic-box').addClass("d-none");
+        $('#meeting-creation-manual-box').removeClass("d-none");
+        $('#meeting-creation-time-intelligent-btn').removeClass("active");
+        $(this).addClass("active");
+    });
+    $('#meeting-creation-time-intelligent-btn').click(function () {
+        $('#meeting-creation-manual-box').addClass("d-none");
+        $('#meeting-creation-automatic-box').removeClass("d-none");
+        $('#meeting-creation-time-manual-btn').removeClass("active");
+        $(this).addClass("active");
     });
 
     const meetingTypeLinks = $("#newMeeting-chooseMeetingType").find("a");

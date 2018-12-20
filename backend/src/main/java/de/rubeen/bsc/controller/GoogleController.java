@@ -1,7 +1,7 @@
 package de.rubeen.bsc.controller;
 
 import com.google.api.services.calendar.model.CalendarList;
-import com.google.api.services.calendar.model.Events;
+import com.google.api.services.calendar.model.FreeBusyResponse;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
 import org.slf4j.Logger;
@@ -106,5 +106,16 @@ public class GoogleController {
             response.setHeader("auth-url", googleProviderService.authorize());
             return null;
         }
+    }
+
+    @RequestMapping("/google/free-busy")
+    public FreeBusyResponse getFreeBusyTimes(@RequestParam("user_id") String user_id) {
+        try {
+            return googleProviderService.getFreeBusyTimes(user_id);
+        } catch (CredentialException | IOException e) {
+            e.printStackTrace();
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return null;
     }
 }
