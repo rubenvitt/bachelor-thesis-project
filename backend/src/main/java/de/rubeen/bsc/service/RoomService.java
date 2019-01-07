@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.tables.Room.ROOM;
 import static de.rubeen.bsc.entities.db.tables.RoomEquipment.ROOM_EQUIPMENT;
@@ -22,10 +24,23 @@ import static de.rubeen.bsc.entities.db.tables.RoomRoomEquipment.ROOM_ROOM_EQUIP
 
 @Service
 public class RoomService extends AbstractDatabaseService {
+    private final ModelMapper modelMapper = new ModelMapper();
+
     public RoomService(@Value("${database.url}") final String url,
                        @Value("${database.user}") final String user,
                        @Value("${database.pass}") final String password) throws SQLException {
         super(url, user, password);
+        modelMapper.getConfiguration().addValueReader(new RecordValueReader());
+        modelMapper.getConfiguration().setSourceNameTokenizer(NameTokenizers.UNDERSCORE);
+
+    }
+
+    public Collection<RoomEntity.EquipmentEntity> getAllEquipments() {
+        return dslContext.select()
+                .from(ROOM_EQUIPMENT)
+                .fetch().parallelStream()
+                .map(record -> modelMapper.map(record, RoomEntity.EquipmentEntity.class))
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     public Collection<RoomEntity> getAllRooms() {
@@ -35,15 +50,11 @@ public class RoomService extends AbstractDatabaseService {
             e.printStackTrace();
         }
         return List.of(new RoomEntity(0, "test", 3, List.of(new RoomEntity.EquipmentEntity(1, "Equipment"))));
-        //return null;
     }
 
     private Set<RoomEntity> getRoomEntities() throws SQLException {
         Multimap<RoomEntity, RoomEntity.EquipmentEntity> roomEntityEquipmentEntityMultimap =
                 MultimapBuilder.treeKeys().arrayListValues().build();
-        final ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().addValueReader(new RecordValueReader());
-        modelMapper.getConfiguration().setSourceNameTokenizer(NameTokenizers.UNDERSCORE);
 
         final Result<Record> records = dslContext.select()
                 .from(ROOM)

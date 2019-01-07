@@ -19,7 +19,12 @@ public class RoomController {
     }
 
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public Collection<RoomEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID) {
+    public Collection<RoomEntity> allRooms(@RequestParam("user_id") String userID) {
         return roomService.getAllRooms();
+    }
+
+    @RequestMapping(value = "/equipments", method = RequestMethod.GET)
+    public Collection<RoomEntity.EquipmentEntity> allEquipments(@RequestParam("user_id") String userID) {
+        return roomService.getAllEquipments();
     }
 }
