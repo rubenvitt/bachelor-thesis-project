@@ -33,7 +33,7 @@ public class CalendarController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/events", method = RequestMethod.GET)
+    @RequestMapping(value = "/events/today", method = RequestMethod.GET)
     public List<EventEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID) {
         return eventService.getAllEventsForToday(userID);
     }

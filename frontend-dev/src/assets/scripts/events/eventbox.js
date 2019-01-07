@@ -5,7 +5,7 @@ import * as cookie from '../cookie'
 const listGroup = $('#dashboard-todayMeetings-listGroup');
 if (listGroup.length === 1) {
     $.ajax({
-        url: url.apiUrl + "/calendar/events",
+        url: url.apiUrl + "/calendar/events/today",
         data: {
             user_id: cookie.getUserID()
         }

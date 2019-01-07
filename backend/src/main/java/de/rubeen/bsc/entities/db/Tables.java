@@ -7,6 +7,9 @@ package de.rubeen.bsc.entities.db;
 import de.rubeen.bsc.entities.db.tables.Appuser;
 import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.Credential;
+import de.rubeen.bsc.entities.db.tables.Room;
+import de.rubeen.bsc.entities.db.tables.RoomEquipment;
+import de.rubeen.bsc.entities.db.tables.RoomRoomEquipment;
 
 import javax.annotation.Generated;
 
@@ -38,4 +41,19 @@ public class Tables {
      * The table <code>public.credential</code>.
      */
     public static final Credential CREDENTIAL = de.rubeen.bsc.entities.db.tables.Credential.CREDENTIAL;
+
+    /**
+     * The table <code>public.room</code>.
+     */
+    public static final Room ROOM = de.rubeen.bsc.entities.db.tables.Room.ROOM;
+
+    /**
+     * The table <code>public.room_equipment</code>.
+     */
+    public static final RoomEquipment ROOM_EQUIPMENT = de.rubeen.bsc.entities.db.tables.RoomEquipment.ROOM_EQUIPMENT;
+
+    /**
+     * The table <code>public.room_room_equipment</code>.
+     */
+    public static final RoomRoomEquipment ROOM_ROOM_EQUIPMENT = de.rubeen.bsc.entities.db.tables.RoomRoomEquipment.ROOM_ROOM_EQUIPMENT;
 }

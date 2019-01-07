@@ -7,6 +7,9 @@ package de.rubeen.bsc.entities.db;
 import de.rubeen.bsc.entities.db.tables.Appuser;
 import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.Credential;
+import de.rubeen.bsc.entities.db.tables.Room;
+import de.rubeen.bsc.entities.db.tables.RoomEquipment;
+import de.rubeen.bsc.entities.db.tables.RoomRoomEquipment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +36,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 2002000553;
+    private static final long serialVersionUID = 990897395;
 
     /**
      * The reference instance of <code>public</code>
@@ -54,6 +57,21 @@ public class Public extends SchemaImpl {
      * The table <code>public.credential</code>.
      */
     public final Credential CREDENTIAL = de.rubeen.bsc.entities.db.tables.Credential.CREDENTIAL;
+
+    /**
+     * The table <code>public.room</code>.
+     */
+    public final Room ROOM = de.rubeen.bsc.entities.db.tables.Room.ROOM;
+
+    /**
+     * The table <code>public.room_equipment</code>.
+     */
+    public final RoomEquipment ROOM_EQUIPMENT = de.rubeen.bsc.entities.db.tables.RoomEquipment.ROOM_EQUIPMENT;
+
+    /**
+     * The table <code>public.room_room_equipment</code>.
+     */
+    public final RoomRoomEquipment ROOM_ROOM_EQUIPMENT = de.rubeen.bsc.entities.db.tables.RoomRoomEquipment.ROOM_ROOM_EQUIPMENT;
 
     /**
      * No further instances allowed
@@ -82,7 +100,9 @@ public class Public extends SchemaImpl {
         return Arrays.<Sequence<?>>asList(
             Sequences.APPUSER_ID_SEQ,
             Sequences.CALENDAR_ID_SEQ,
-            Sequences.CREDENTIAL_ID_SEQ);
+            Sequences.CREDENTIAL_ID_SEQ,
+            Sequences.ROOM_EQUIPMENT_EQUIP_ID_SEQ,
+            Sequences.ROOM_ROOM_ID_SEQ);
     }
 
     @Override
@@ -96,6 +116,9 @@ public class Public extends SchemaImpl {
         return Arrays.<Table<?>>asList(
             Appuser.APPUSER,
             Calendar.CALENDAR,
-            Credential.CREDENTIAL);
+            Credential.CREDENTIAL,
+            Room.ROOM,
+            RoomEquipment.ROOM_EQUIPMENT,
+            RoomRoomEquipment.ROOM_ROOM_EQUIPMENT);
     }
 }

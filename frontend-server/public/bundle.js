@@ -2181,7 +2181,7 @@ function getListItemFor(id, name, activated) {
 const listGroup = __WEBPACK_IMPORTED_MODULE_0_jquery__('#dashboard-todayMeetings-listGroup');
 if (listGroup.length === 1) {
     __WEBPACK_IMPORTED_MODULE_0_jquery__["ajax"]({
-        url: __WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */] + "/calendar/events",
+        url: __WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */] + "/calendar/events/today",
         data: {
             user_id: __WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */]()
         }
@@ -2282,7 +2282,6 @@ class CalendarEvent {
     }
 }
 
-//TODO change start & end date
 if (__WEBPACK_IMPORTED_MODULE_0_jquery__('#full-calendar').length > 0) {
     console.log("Creating full-cal data");
     __WEBPACK_IMPORTED_MODULE_0_jquery__["ajax"]({

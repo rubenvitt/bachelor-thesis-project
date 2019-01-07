@@ -27,3 +27,21 @@ create table calendar
   provider    calProvider   not null,
   user_id    int             not null references appUser (id)
 );
+
+create table room (
+  room_id  serial primary key,
+  room_name varchar(255) not null,
+  room_size int not null
+);
+
+create table room_Equipment (
+  equip_id serial primary key,
+  equip_name varchar(255) not null
+);
+
+create table room_room_Equipment (
+  room_id int references room (room_id) on update cascade on delete cascade,
+  room_Equipment_id int references room_Equipment (equip_id) on update cascade,
+
+  constraint room_room_Equipment_pkey primary key (room_id, room_Equipment_id)
+);
