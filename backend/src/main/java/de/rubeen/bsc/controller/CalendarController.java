@@ -4,6 +4,7 @@ import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.EventService;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,13 @@ public class CalendarController {
 
     @RequestMapping(value = "/events", method = RequestMethod.GET)
     public List<EventEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID) {
-        return eventService.getAllEventsForUser(userID);
+        return eventService.getAllEventsForToday(userID);
+    }
+
+    @RequestMapping(value = "/events/week", method = RequestMethod.GET)
+    public List<EventEntity> allEventsOfWeek(@RequestParam(value = "week", required = false) Integer week,
+                                             @RequestParam("user_id") String userID) {
+        return eventService.getAllEventsForWeekNumber(week, userID);
     }
 
     /*@RequestMapping(value = "/events", method = RequestMethod.GET)
@@ -47,5 +54,10 @@ public class CalendarController {
     @RequestMapping(value = "/events/create", method = RequestMethod.POST, consumes = "application/json")
     public void createNewEvent(@RequestBody NewEventEntity newEventEntity) {
         LOG.info("got event entity: " + newEventEntity);
+    }
+
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public DateTime testGetter(@RequestParam("week") int week, @RequestParam("t") int t) {
+        return eventService.getTest(week, t);
     }
 }

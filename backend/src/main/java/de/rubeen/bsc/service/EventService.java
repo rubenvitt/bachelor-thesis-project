@@ -35,8 +35,25 @@ public class EventService extends AbstractDatabaseService {
         this.loginService = loginService;
     }
 
-    public List<EventEntity> getAllEventsForUser(String userMail) {
+    public List<EventEntity> getAllEventsForToday(String userMail) {
         return this.getAllEventsForUser(userMail, getBeginOfToday().getMillis(), getEndOfToday().getMillis());
+    }
+
+    public List<EventEntity> getAllEventsForWeekNumber(Integer weekNumber, String userMail) {
+        DateTime begin = getBeginOfWeek(weekNumber);
+        DateTime end = getEndOfWeek(weekNumber);
+        return this.getAllEventsForUser(userMail, begin.getMillis(), end.getMillis());
+    }
+
+    public DateTime getTest(int week, int t) {
+        switch (t) {
+            case 0:
+                return getBeginOfWeek(week);
+            case 1:
+                return getEndOfWeek(week);
+            default:
+                return null;
+        }
     }
 
     public List<EventEntity> getAllEventsForUser(String userMail, Long startMillis, Long endMillis) {
@@ -76,11 +93,31 @@ public class EventService extends AbstractDatabaseService {
         return eventEntities;
     }
 
+    private DateTime getBeginOfWeek(Integer weekNumber) {
+        if (weekNumber == null)
+            weekNumber = DateTime.now().getWeekOfWeekyear();
+        return getBeginOfDay(new DateTime().withWeekOfWeekyear(weekNumber).dayOfWeek().withMinimumValue());
+    }
+
+    private DateTime getEndOfWeek(Integer weekNumber) {
+        if (weekNumber == null)
+            weekNumber = DateTime.now().getWeekOfWeekyear();
+        return getEndOfDay(new DateTime().withWeekOfWeekyear(weekNumber).dayOfWeek().withMaximumValue());
+    }
+
     private DateTime getEndOfToday() {
-        return DateTime.now().withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999);
+        return getEndOfDay(DateTime.now());
     }
 
     private DateTime getBeginOfToday() {
-        return DateTime.now().withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
+        return getBeginOfDay(DateTime.now());
+    }
+
+    private DateTime getBeginOfDay(DateTime day) {
+        return day.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
+    }
+
+    private DateTime getEndOfDay(DateTime day) {
+        return day.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999);
     }
 }
