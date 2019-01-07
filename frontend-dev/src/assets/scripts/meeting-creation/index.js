@@ -1,4 +1,6 @@
 import * as form from './form-sending-handler';
+import * as URLS from "../constants/urls";
+import * as cookie from "../cookie";
 
 if (document.getElementById("newMeeting-chooseMeetingType")) {
     $('#meeting-creation-intelligent-duration-time').find('a').click((evt) => {
@@ -23,6 +25,23 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
         $(this).addClass("active");
     });
 
+
+    $.ajax({
+        url: `${URLS.apiUrl}/rooms/equipments`,
+        data: {
+            user_id: cookie.getUserID()
+        }
+    }).done(function (content) {
+        let html = '';
+        content.forEach(item => {
+            html += `<option data-content="${item.id}">${item.name}</option>`
+        });
+        //TODO not working
+        $('#meeting-creation-equipment-select').html(html);
+    });
+
+    $('#meeting-creation-equipment-select').html();
+
     const meetingTypeLinks = $("#newMeeting-chooseMeetingType").find("a");
     meetingTypeLinks.click((evt) => {
         meetingTypeLinks.removeClass("active");
@@ -39,12 +58,12 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
 
     const attendeesLinks = $("#newMeeting-attendee-list").find("a");
     attendeesLinks.click(function () {
-       $(this).toggleClass("active");
+        $(this).toggleClass("active");
     });
 
     const attendeeSelectedLinks = $("#newMeeting-attendee-selected-list").find("a");
     attendeeSelectedLinks.click(function () {
-       $(this).remove();
+        $(this).remove();
     });
     /*attendeesLinks.click((evt) => {
         console.log("A");

@@ -6,10 +6,7 @@ webpackJsonp([0],[
 /* 4 */,
 /* 5 */,
 /* 6 */,
-/* 7 */,
-/* 8 */,
-/* 9 */,
-/* 10 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -21,8 +18,10 @@ const apiUrl = "https://localhost:3333/api";
 
 
 /***/ }),
-/* 11 */,
-/* 12 */
+/* 8 */,
+/* 9 */,
+/* 10 */,
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -51,6 +50,7 @@ function removeUserID() {
 
 
 /***/ }),
+/* 12 */,
 /* 13 */,
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -1665,8 +1665,8 @@ const Skycons = __WEBPACK_IMPORTED_MODULE_0_skycons___default()(window);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_fullcalendar_dist_fullcalendar_min_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_fullcalendar_dist_fullcalendar_min_js__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_fullcalendar_dist_fullcalendar_min_css__ = __webpack_require__(257);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_fullcalendar_dist_fullcalendar_min_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_fullcalendar_dist_fullcalendar_min_css__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants_urls__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__cookie__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants_urls__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__cookie__ = __webpack_require__(11);
 
 
 
@@ -1811,6 +1811,10 @@ if ($('dashboard-todayMeetings-dayDate') !== undefined) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__form_sending_handler__ = __webpack_require__(263);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(11);
+
+
 
 
 if (document.getElementById("newMeeting-chooseMeetingType")) {
@@ -1835,6 +1839,21 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
         $('#meeting-creation-time-manual-btn').removeClass("active");
         $(this).addClass("active");
     });
+
+    $.ajax({
+        url: `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/rooms/equipments`,
+        data: {
+            user_id: __WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */]()
+        }
+    }).done(function (content) {
+        let html = '';
+        content.forEach(item => {
+            html += `<option data-content="${item.id}">${item.name}</option>`;
+        });
+        $('#meeting-creation-equipment-select').html(html);
+    });
+
+    $('#meeting-creation-equipment-select').html();
 
     const meetingTypeLinks = $("#newMeeting-chooseMeetingType").find("a");
     meetingTypeLinks.click(evt => {
@@ -1886,7 +1905,7 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return sendForm; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_urls__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_urls__ = __webpack_require__(7);
 
 
 function sendForm() {
@@ -1930,8 +1949,8 @@ function sendForm() {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function($, jQuery) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__ = __webpack_require__(151);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(11);
 
 
 
@@ -2172,8 +2191,8 @@ function getListItemFor(id, name, activated) {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(11);
 
 
 
@@ -2232,8 +2251,8 @@ Number.prototype.pad = function () {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(11);
 
 
 
