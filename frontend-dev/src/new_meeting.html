@@ -762,13 +762,20 @@
                                 <h6 class="lh-1 c-grey-900 ta-l">Settings for regular meeting</h6>
                             </div>
                             <ul class="nav nav-tabs">
-                                <li role="presentation" class="nav-item"><a class="nav-link active"
-                                                                            href="javascript: void {}">
-                                    Intelligent</a></li>
-                                <li role="presentation" class="nav-item"><a class="nav-link" href="javascript: void {}">
-                                    Manual</a></li>
+                                <li role="presentation" class="nav-item">
+                                    <button id="meeting-creation-room-automatic-btn"
+                                            class="btn btn-outline-primary nav-link active">Intelligent
+                                    </button>
+                                </li>
+                                <li role="presentation" class="nav-item">
+                                    <button id="meeting-creation-room-manual-btn"
+                                            class="btn btn-outline-primary nav-link">Manual
+                                    </button>
+                                </li>
                             </ul>
-                            <div class="layer w-100 pX-20 pY-20">
+
+                            <!-- intelligent -->
+                            <div id="meeting-creation-room-manual-box" class="layer w-100 pX-20 pY-20">
                                 <form>
                                     <div class="form-group">
                                         <h6>Nothing to do!</h6>
@@ -790,6 +797,33 @@
                                         </select>
                                         <small class="form-text text-muted">
                                             The system will try to search for a room which fits all your needs.
+                                        </small>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- manual -->
+                            <div id="meeting-creation-room-automatic-box" class="layer w-100 pX-20 pY-20 d-none">
+                                <form>
+                                    <div class="form-group">
+                                        <label>Please select a room:</label>
+                                        <select id="meeting-creation-manual-room-select" title="Select a room"
+                                                class="selectpicker show-tick"
+                                                data-live-search="true"
+                                                data-style="btn-outline-primary">
+                                            <option>Room 1 (size: 11)</option>
+                                            <option>Room 2 (size: 3)</option>
+                                            <option>Room 3 (size: 5)</option>
+                                            <option>Room 4 (size: 6)</option>
+                                            <option>Room 5 (size: 2)</option>
+                                        </select>
+                                        <small class="form-text text-muted">
+                                            This rooms contains:
+                                            <ul id="meeting-creation-actual-room-equipList">
+                                                <li>windows</li>
+                                                <li>chairs</li>
+                                                <li>TV</li>
+                                                <li>projector</li>
+                                            </ul>
                                         </small>
                                     </div>
                                 </form>

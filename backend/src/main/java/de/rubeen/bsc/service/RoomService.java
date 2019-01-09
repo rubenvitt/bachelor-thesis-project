@@ -1,5 +1,6 @@
 package de.rubeen.bsc.service;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import de.rubeen.bsc.entities.web.RoomEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static de.rubeen.bsc.entities.db.tables.Room.ROOM;
 import static de.rubeen.bsc.entities.db.tables.RoomEquipment.ROOM_EQUIPMENT;
 import static de.rubeen.bsc.entities.db.tables.RoomRoomEquipment.ROOM_ROOM_EQUIPMENT;
@@ -83,5 +85,17 @@ public class RoomService extends AbstractDatabaseService {
             LOG.info("{} with {} equipments", entity.getName(), entity.getEquipments());
         });
         LOG.info("result: {}", fetch);*/
+    }
+
+    public Collection<RoomEntity.EquipmentEntity> getEquipments(Integer roomId) {
+        checkNotNull(roomId);
+        return dslContext.select()
+                .from(ROOM)
+                .innerJoin(ROOM_ROOM_EQUIPMENT).onKey()
+                .innerJoin(ROOM_EQUIPMENT).onKey()
+                .where(ROOM.ROOM_ID.eq(roomId))
+                .fetch().parallelStream()
+                .map(record -> modelMapper.map(record, RoomEntity.EquipmentEntity.class))
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 }

@@ -1850,6 +1850,9 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
         content.forEach(item => {
             html += `<option data-content="${item.id}">${item.name}</option>`;
         });
+        //TODO not working
+        console.log("Created content");
+        console.log(html);
         $('#meeting-creation-equipment-select').html(html);
     });
 

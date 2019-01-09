@@ -3,6 +3,8 @@ package de.rubeen.bsc.entities.web;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import javax.annotation.Nullable;
+
 import static java.text.MessageFormat.format;
 
 public class NewEventEntity {
@@ -10,6 +12,25 @@ public class NewEventEntity {
     private boolean autoTime;
     private String manTimeDateStart, manTimeDateEnd;
     private String manTimeTimeStart, manTimeTimeEnd;
+
+    public NewEventEntity() {}
+
+    public NewEventEntity(String subject, String description, boolean autoTime) {
+        this.subject = subject;
+        this.description = description;
+        this.autoTime = autoTime;
+    }
+
+    public NewEventEntity(String subject, String description, boolean autoTime,
+                          String manTimeDateStart, String manTimeDateEnd, String manTimeTimeStart, String manTimeTimeEnd) {
+        this.subject = subject;
+        this.description = description;
+        this.autoTime = autoTime;
+        this.manTimeDateStart = manTimeDateStart;
+        this.manTimeDateEnd = manTimeDateEnd;
+        this.manTimeTimeStart = manTimeTimeStart;
+        this.manTimeTimeEnd = manTimeTimeEnd;
+    }
 
     @JsonGetter
     public String getManTimeTimeStart() {

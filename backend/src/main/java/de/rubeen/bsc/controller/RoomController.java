@@ -24,7 +24,12 @@ public class RoomController {
     }
 
     @RequestMapping(value = "/equipments", method = RequestMethod.GET)
-    public Collection<RoomEntity.EquipmentEntity> allEquipments(@RequestParam("user_id") String userID) {
-        return roomService.getAllEquipments();
+    public Collection<RoomEntity.EquipmentEntity> allEquipments(@RequestParam("user_id") String userID,
+                                                                @RequestParam(value = "room_id", required = false) Integer roomId) {
+        if (roomId == null)
+            return roomService.getAllEquipments();
+        else {
+            return roomService.getEquipments(roomId);
+        }
     }
 }

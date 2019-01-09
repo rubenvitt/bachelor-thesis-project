@@ -14,6 +14,17 @@ var authRouter = require('./routes/auth');
 var app = express();
 
 app.use(logger('dev'));
+//defining api above parsers - only url-rewriting!
+app.use('/api', proxy({
+    target: 'https://localhost:8443',
+    secure: false,
+    changeOrigin: true,
+    logLevel: 'debug',
+    pathRewrite: {
+        '^/api': '/'
+    }
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
@@ -25,16 +36,6 @@ app.use(session({
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/api', proxy(
-    {
-        target: 'https://localhost:8443',
-        secure: false,
-        changeOrigin: true,
-        logLevel: 'debug',
-        pathRewrite: {
-            '^/api': '/'
-        }
-    }));
 app.use('/controller', authRouter);
 
 app.use(express.static(path.join(__dirname, '/public')));

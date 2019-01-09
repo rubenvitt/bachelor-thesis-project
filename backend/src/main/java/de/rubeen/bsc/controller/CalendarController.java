@@ -56,6 +56,7 @@ public class CalendarController {
         LOG.info("got event entity: " + newEventEntity);
     }
 
+
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public DateTime testGetter(@RequestParam("week") int week, @RequestParam("t") int t) {
         return eventService.getTest(week, t);

@@ -25,6 +25,19 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
         $(this).addClass("active");
     });
 
+    //room tabs
+    $('#meeting-creation-room-automatic-btn').click(function () {
+        $('#meeting-creation-room-automatic-box').addClass('d-none');
+        $('#meeting-creation-room-manual-box').removeClass('d-none');
+        $('#meeting-creation-room-manual-btn').removeClass('active');
+        $(this).addClass('active');
+    });
+    $('#meeting-creation-room-manual-btn').click(function () {
+        $('#meeting-creation-room-manual-box').addClass('d-none');
+        $('#meeting-creation-room-automatic-box').removeClass('d-none');
+        $('#meeting-creation-room-automatic-btn').removeClass('active');
+        $(this).addClass('active');
+    });
 
     $.ajax({
         url: `${URLS.apiUrl}/rooms/equipments`,
@@ -34,13 +47,53 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
     }).done(function (content) {
         let html = '';
         content.forEach(item => {
-            html += `<option data-content="${item.id}">${item.name}</option>`
+            html += `<option itemid="${item.id}">${item.name}</option>`
         });
         //TODO not working
-        $('#meeting-creation-equipment-select').html(html);
+        console.log("Created content");
+        console.log(html);
+        $('#meeting-creation-equipment-select').html(html).selectpicker('refresh');
+
     });
 
-    $('#meeting-creation-equipment-select').html();
+    $.ajax({
+        url: `${URLS.apiUrl}/rooms/all`,
+        data: {
+            user_id: cookie.getUserID()
+        }
+    }).done(
+        /**
+         * Set rooms to selectPicker
+         * @param content html json content
+         * @param content[].id id of the room
+         * @param content[].name name of the room
+         * @param content[].size size of the room (place for x people)
+         */
+        function (content) {
+            let html = '';
+            let equipments = '';
+            content.forEach(item => html += `<option title="${item.name}" itemId="${item.id}">${item.name} (${item.size} people)</option>`);
+            $('#meeting-creation-manual-room-select').html(html).selectpicker('refresh');
+
+            $('#meeting-creation-actual-room-equipList').html(equipments);
+        }
+    );
+
+    $('#meeting-creation-manual-room-select').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+        const roomId = $(this.selectedOptions.item(0)).attr('itemId');
+        //get equipments for this room
+        $.ajax({
+            url: `${URLS.apiUrl}/rooms/equipments`,
+            data: {
+                user_id: cookie.getUserID(),
+                room_id: roomId
+            }
+        }).done(function (content) {
+            let html = '';
+            content.forEach(item => html += `<li>${item.name}</li>`);
+            $('#meeting-creation-actual-room-equipList').html(html);
+        });
+    });
 
     const meetingTypeLinks = $("#newMeeting-chooseMeetingType").find("a");
     meetingTypeLinks.click((evt) => {

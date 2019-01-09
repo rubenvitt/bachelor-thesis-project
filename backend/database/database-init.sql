@@ -41,7 +41,7 @@ create table room_Equipment (
 
 create table room_room_Equipment (
   room_id int references room (room_id) on update cascade on delete cascade,
-  room_Equipment_id int references room_Equipment (equip_id) on update cascade,
+  room_Equipment_id int references room_Equipment (equip_id) on update cascade on delete cascade,
 
   constraint room_room_Equipment_pkey primary key (room_id, room_Equipment_id)
 );
