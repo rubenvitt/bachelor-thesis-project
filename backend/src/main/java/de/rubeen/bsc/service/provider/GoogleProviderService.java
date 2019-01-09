@@ -16,6 +16,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.web.CalendarEntity;
+import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +30,15 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+
+import static java.text.MessageFormat.format;
 
 @Service
 public class GoogleProviderService {
@@ -185,5 +189,30 @@ public class GoogleProviderService {
             LOG.error("Error while parsing: ", e);
         }
         return null;
+    }
+
+    public void createEvent(String user_id, String calendarId, NewEventEntity newEventEntity) throws IOException, CredentialException {
+        Credential credential = flow.loadCredential(user_id.replace("@", "%40"));
+        try {
+            validateCredential(credential);
+            Calendar calendar = getCalendar(credential);
+            LOG.info("Using calendar: " + calendarId);
+            DateTime dateTimeStart = new DateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(format("{0} {1}", newEventEntity.getManTimeDateStart(), newEventEntity.getManTimeTimeStart())));
+            DateTime dateTimeEnd = new DateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(format("{0} {1}", newEventEntity.getManTimeDateEnd(), newEventEntity.getManTimeTimeEnd())));
+            LOG.info(""+ dateTimeStart);
+            LOG.info("" + dateTimeEnd);
+            Event event = new Event()
+                    .setSummary(newEventEntity.getSubject())
+                    .setDescription(newEventEntity.getDescription())
+                    .setStart(new EventDateTime().setDateTime(dateTimeStart))
+                    .setEnd(new EventDateTime().setDateTime(dateTimeEnd))
+                    .setEtag("test");
+            calendar.events().insert(calendarId, event).execute();
+        } catch (CredentialException e) {
+            LOG.error("Credential exception: ", e);
+            throw e;
+        } catch (ParseException e) {
+            LOG.error("parsing-error", e);
+        }
     }
 }

@@ -18,10 +18,7 @@ const apiUrl = "https://localhost:3333/api";
 
 
 /***/ }),
-/* 8 */,
-/* 9 */,
-/* 10 */,
-/* 11 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50,6 +47,9 @@ function removeUserID() {
 
 
 /***/ }),
+/* 9 */,
+/* 10 */,
+/* 11 */,
 /* 12 */,
 /* 13 */,
 /* 14 */
@@ -1666,7 +1666,7 @@ const Skycons = __WEBPACK_IMPORTED_MODULE_0_skycons___default()(window);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_fullcalendar_dist_fullcalendar_min_css__ = __webpack_require__(257);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_fullcalendar_dist_fullcalendar_min_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_fullcalendar_dist_fullcalendar_min_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constants_urls__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__cookie__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__cookie__ = __webpack_require__(8);
 
 
 
@@ -1812,7 +1812,7 @@ if ($('dashboard-todayMeetings-dayDate') !== undefined) {
 "use strict";
 /* WEBPACK VAR INJECTION */(function($) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__form_sending_handler__ = __webpack_require__(263);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(8);
 
 
 
@@ -1840,6 +1840,20 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
         $(this).addClass("active");
     });
 
+    //room tabs
+    $('#meeting-creation-room-automatic-btn').click(function () {
+        $('#meeting-creation-room-automatic-box').addClass('d-none');
+        $('#meeting-creation-room-manual-box').removeClass('d-none');
+        $('#meeting-creation-room-manual-btn').removeClass('active');
+        $(this).addClass('active');
+    });
+    $('#meeting-creation-room-manual-btn').click(function () {
+        $('#meeting-creation-room-manual-box').addClass('d-none');
+        $('#meeting-creation-room-automatic-box').removeClass('d-none');
+        $('#meeting-creation-room-automatic-btn').removeClass('active');
+        $(this).addClass('active');
+    });
+
     $.ajax({
         url: `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/rooms/equipments`,
         data: {
@@ -1848,15 +1862,51 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
     }).done(function (content) {
         let html = '';
         content.forEach(item => {
-            html += `<option data-content="${item.id}">${item.name}</option>`;
+            html += `<option itemid="${item.id}">${item.name}</option>`;
         });
         //TODO not working
         console.log("Created content");
         console.log(html);
-        $('#meeting-creation-equipment-select').html(html);
+        $('#meeting-creation-equipment-select').html(html).selectpicker('refresh');
     });
 
-    $('#meeting-creation-equipment-select').html();
+    $.ajax({
+        url: `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/rooms/all`,
+        data: {
+            user_id: __WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */]()
+        }
+    }).done(
+    /**
+     * Set rooms to selectPicker
+     * @param content html json content
+     * @param content[].id id of the room
+     * @param content[].name name of the room
+     * @param content[].size size of the room (place for x people)
+     */
+    function (content) {
+        let html = '';
+        let equipments = '';
+        content.forEach(item => html += `<option title="${item.name}" itemId="${item.id}">${item.name} (${item.size} people)</option>`);
+        $('#meeting-creation-manual-room-select').html(html).selectpicker('refresh');
+
+        $('#meeting-creation-actual-room-equipList').html(equipments);
+    });
+
+    $('#meeting-creation-manual-room-select').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+        const roomId = $(this.selectedOptions.item(0)).attr('itemId');
+        //get equipments for this room
+        $.ajax({
+            url: `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/rooms/equipments`,
+            data: {
+                user_id: __WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */](),
+                room_id: roomId
+            }
+        }).done(function (content) {
+            let html = '';
+            content.forEach(item => html += `<li>${item.name}</li>`);
+            $('#meeting-creation-actual-room-equipList').html(html);
+        });
+    });
 
     const meetingTypeLinks = $("#newMeeting-chooseMeetingType").find("a");
     meetingTypeLinks.click(evt => {
@@ -1909,38 +1959,52 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
 "use strict";
 /* WEBPACK VAR INJECTION */(function($) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return sendForm; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants_urls__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__cookie__ = __webpack_require__(8);
+
 
 
 function sendForm() {
-    const subject = $('#meeting-creation-subject').val();
-    const description = $('#meeting-creation-description').val();
-    const autoTime = !$('#meeting-creation-time-manual-btn').hasClass('active');
-    const manTimeDateStart = $('#meeting-creation-manual-date-start').val();
-    const manTimeDateEnd = $('#meeting-creation-manual-date-end').val();
-    const manTimeTimeStart = $('#meeting-creation-manual-time-start').val();
-    const manTimeTimeEnd = $('#meeting-creation-manual-time-end').val();
+    //manual time settings:
+    $.ajax({
+        url: `${__WEBPACK_IMPORTED_MODULE_0__constants_urls__["b" /* webappUrl */]}/api/calendar/events/create?user_id=${Object(__WEBPACK_IMPORTED_MODULE_1__cookie__["a" /* getUserID */])()}`,
+        type: 'POST',
+        data: JSON.stringify(getFormData()),
+        contentType: "application/json"
+    }).done(function () {
+        console.log("Done creating new appointment");
+        window.location = '/finished';
+    });
+}
 
-    if (!autoTime) {
-        //manual time settings:
-        $.ajax({
-            url: __WEBPACK_IMPORTED_MODULE_0__constants_urls__["b" /* webappUrl */] + "/api/calendar/events/create",
-            type: 'POST',
-            data: JSON.stringify({
-                subject: subject,
-                description: description,
-                autoTime: autoTime,
-                manTimeDateStart: new Date(manTimeDateStart).toJSON(),
-                manTimeDateEnd: new Date(manTimeDateEnd).toJSON(),
-                manTimeTimeStart: manTimeTimeStart,
-                manTimeTimeEnd: manTimeTimeEnd
-            }),
-            contentType: "application/json"
-        }).done(function () {
-            console.log("Done creating new appointment");
-        });
-    } else {
-        //automatic time settings:
-    }
+/**
+ * @typedef {Object} formData
+ * @property {string} subject           the subject
+ * @property {string} description       the description
+ * @property {boolean} autoTime         choose by system?
+ * @property {string} manTimeDateStart  start of manual date
+ * @property {string} manTimeDateEnd    end of manual date
+ * @property {string} manTimeTimeStart  start of manual time
+ * @property {string} manTimeTimeEnd    end of manual time
+ */
+
+/**
+ * Create a form-data object from ui-form
+ *
+ * @return formData object
+ *
+ */
+function getFormData() {
+    const result = {};
+
+    result.subject = $("#meeting-creation-subject").val();
+    result.description = $("#meeting-creation-description").val();
+    result.autoTime = $('#meeting-creation-time-intelligent-btn').hasClass('active');
+    result.manTimeDateStart = $("#meeting-creation-manual-date-start").val();
+    result.manTimeDateEnd = $("#meeting-creation-manual-date-end").val();
+    result.manTimeTimeStart = $("#meeting-creation-manual-time-start").val();
+    result.manTimeTimeEnd = $("#meeting-creation-manual-time-end").val();
+
+    return result;
 }
 
 
@@ -1953,7 +2017,7 @@ function sendForm() {
 "use strict";
 /* WEBPACK VAR INJECTION */(function($, jQuery) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__checkbox_in_list_with_badge__ = __webpack_require__(151);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(8);
 
 
 
@@ -2195,7 +2259,7 @@ function getListItemFor(id, name, activated) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(8);
 
 
 
@@ -2255,7 +2319,7 @@ Number.prototype.pad = function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(8);
 
 
 

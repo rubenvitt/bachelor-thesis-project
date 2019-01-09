@@ -1,39 +1,50 @@
 import * as urls from '../constants/urls';
+import {getUserID} from "../cookie";
 
 function sendForm() {
-    const subject = $('#meeting-creation-subject').val();
-    const description = $('#meeting-creation-description').val();
-    const autoTime = !$('#meeting-creation-time-manual-btn').hasClass('active');
-    const manTimeDateStart = $('#meeting-creation-manual-date-start').val();
-    const manTimeDateEnd = $('#meeting-creation-manual-date-end').val();
-    const manTimeTimeStart = $('#meeting-creation-manual-time-start').val();
-    const manTimeTimeEnd = $('#meeting-creation-manual-time-end').val();
+    //manual time settings:
+    $.ajax({
+            url: `${urls.webappUrl}/api/calendar/events/create?user_id=${getUserID()}`,
+            type: 'POST',
+            data:
+                JSON.stringify(getFormData()),
+            contentType: "application/json"
+        }
+    ).done(function () {
+        console.log("Done creating new appointment");
+        window.location = '/finished';
+    });
+}
 
-    if (!autoTime) {
-        //manual time settings:
-        $.ajax({
-                url: urls.webappUrl + "/api/calendar/events/create",
-                type: 'POST',
-                data:
-                    JSON.stringify({
-                        subject: subject,
-                        description: description,
-                        autoTime: autoTime,
-                        manTimeDateStart: new Date(manTimeDateStart).toJSON(),
-                        manTimeDateEnd: new Date(manTimeDateEnd).toJSON(),
-                        manTimeTimeStart: manTimeTimeStart,
-                        manTimeTimeEnd: manTimeTimeEnd
-                    }),
-                contentType: "application/json"
-            }
-        )
+/**
+ * @typedef {Object} formData
+ * @property {string} subject           the subject
+ * @property {string} description       the description
+ * @property {boolean} autoTime         choose by system?
+ * @property {string} manTimeDateStart  start of manual date
+ * @property {string} manTimeDateEnd    end of manual date
+ * @property {string} manTimeTimeStart  start of manual time
+ * @property {string} manTimeTimeEnd    end of manual time
+ */
 
-            .done(function () {
-                console.log("Done creating new appointment");
-            });
-    } else {
-        //automatic time settings:
-    }
+/**
+ * Create a form-data object from ui-form
+ *
+ * @return formData object
+ *
+ */
+function getFormData() {
+    const result = {};
+
+    result.subject = $("#meeting-creation-subject").val();
+    result.description = $("#meeting-creation-description").val();
+    result.autoTime = $('#meeting-creation-time-intelligent-btn').hasClass('active');
+    result.manTimeDateStart = $("#meeting-creation-manual-date-start").val();
+    result.manTimeDateEnd = $("#meeting-creation-manual-date-end").val();
+    result.manTimeTimeStart = $("#meeting-creation-manual-time-start").val();
+    result.manTimeTimeEnd = $("#meeting-creation-manual-time-end").val();
+
+    return result;
 }
 
 export {

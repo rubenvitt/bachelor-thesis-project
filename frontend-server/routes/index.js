@@ -25,6 +25,17 @@ router.get("/create-meeting", function (req, res) {
     }
 });
 
+router.get('/finished', function (req, res, next) {
+    if (!showLoginIfNecessary(req)) {
+        debug("I know you!");
+        debug("TEEEST");
+        res.render('finished');
+    } else {
+        debug("You are new! Redirecting to login...");
+        res.redirect("/login");
+    }
+});
+
 router.get("/settings", function (req, res, next) {
     if (!showLoginIfNecessary(req)) {
         debug("I know you!");

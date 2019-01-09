@@ -10,7 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
 @RequestMapping("/calendar")
@@ -52,8 +56,22 @@ public class CalendarController {
     }*/
 
     @RequestMapping(value = "/events/create", method = RequestMethod.POST, consumes = "application/json")
-    public void createNewEvent(@RequestBody NewEventEntity newEventEntity) {
-        LOG.info("got event entity: " + newEventEntity);
+    public void createNewEvent(@RequestBody NewEventEntity newEventEntity, HttpServletResponse response, @RequestParam(value = "user_id") String userId) throws IOException {
+        try {
+            LOG.info("got event entity: " + newEventEntity);
+            checkNewEvent(newEventEntity);
+            eventService.addEvent(newEventEntity, userId);
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event not correct or filled completely!");
+        }
+    }
+
+    private void checkNewEvent(NewEventEntity newEventEntity) {
+        checkArgument(!newEventEntity.getSubject().isBlank());
+        //if manual time, manual date & time are required
+        checkArgument(/* auto-time */ (newEventEntity.isAutoTime()
+                /* man-time */ || !(newEventEntity.getManTimeDateEnd().isBlank() || newEventEntity.getManTimeDateStart().isBlank()
+                || newEventEntity.getManTimeTimeEnd().isBlank() || newEventEntity.getManTimeTimeStart().isBlank())));
     }
 
 

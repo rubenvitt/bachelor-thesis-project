@@ -1,11 +1,8 @@
 package de.rubeen.bsc.service;
 
-import de.rubeen.bsc.controller.GoogleController;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -45,4 +42,5 @@ public class CalendarService extends AbstractDatabaseService {
                 .where(CALENDAR.CALENDARID.eq(calendarID))
                 .and(CALENDAR.USER_ID.eq(loginService.getUserID(userMail.replace("%40", "@")))).executeAsync();
     }
+
 }

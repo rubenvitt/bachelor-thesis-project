@@ -3,13 +3,16 @@ package de.rubeen.bsc.service;
 import com.google.api.services.calendar.model.Events;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.web.EventEntity;
+import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.helper.EventComparatorFactory;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
+import jdk.jshell.spi.ExecutionControl;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.CredentialException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
@@ -91,6 +94,35 @@ public class EventService extends AbstractDatabaseService {
         ));
         eventEntities.sort(EventComparatorFactory.getDateComparator());
         return eventEntities;
+    }
+
+    public void addEvent(NewEventEntity newEventEntity, String userMail) {
+        try {
+            if (newEventEntity.isAutoTime()) //create auto event
+                createAutoEvent(newEventEntity);
+            else
+                createManualEvent(newEventEntity, userMail);
+        } catch (CredentialException | IOException e) {
+            LOG.error("Error while creating event", e);
+        }
+    }
+
+    private void createManualEvent(NewEventEntity newEventEntity, String userMail) throws IOException, CredentialException {
+        final Integer userID = loginService.getUserID(userMail);
+        final List<String> googleCalendars = dslContext
+                .select(CALENDAR.CALENDARID)
+                .from(CALENDAR)
+                .innerJoin(APPUSER).onKey()
+                .where(APPUSER.ID.eq(userID))
+                .and(CALENDAR.PROVIDER.eq(Calprovider.google))
+                .and(CALENDAR.ACTIVATED.eq(true))
+                .fetch(CALENDAR.CALENDARID);
+        String actual = googleCalendars.get(0);
+        googleProviderService.createEvent(userMail, actual, newEventEntity);
+    }
+
+    private void createAutoEvent(NewEventEntity newEventEntity) {
+
     }
 
     private DateTime getBeginOfWeek(Integer weekNumber) {
