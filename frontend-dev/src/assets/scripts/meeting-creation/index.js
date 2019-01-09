@@ -3,6 +3,9 @@ import * as URLS from "../constants/urls";
 import * as cookie from "../cookie";
 
 if (document.getElementById("newMeeting-chooseMeetingType")) {
+    $("#are-you-sure-modal").modal();
+
+
     $('#meeting-creation-intelligent-duration-time').find('a').click((evt) => {
         const targetLink = $(evt.target);
         $('#meeting-creation-intelligent-duration-btn').text(targetLink.text())
