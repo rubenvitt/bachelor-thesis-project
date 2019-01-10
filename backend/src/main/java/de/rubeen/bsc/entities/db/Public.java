@@ -10,6 +10,7 @@ import de.rubeen.bsc.entities.db.tables.Credential;
 import de.rubeen.bsc.entities.db.tables.Room;
 import de.rubeen.bsc.entities.db.tables.RoomEquipment;
 import de.rubeen.bsc.entities.db.tables.RoomRoomEquipment;
+import de.rubeen.bsc.entities.db.tables.Workinghours;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +37,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 990897395;
+    private static final long serialVersionUID = 268713017;
 
     /**
      * The reference instance of <code>public</code>
@@ -74,6 +75,11 @@ public class Public extends SchemaImpl {
     public final RoomRoomEquipment ROOM_ROOM_EQUIPMENT = de.rubeen.bsc.entities.db.tables.RoomRoomEquipment.ROOM_ROOM_EQUIPMENT;
 
     /**
+     * The table <code>public.workinghours</code>.
+     */
+    public final Workinghours WORKINGHOURS = de.rubeen.bsc.entities.db.tables.Workinghours.WORKINGHOURS;
+
+    /**
      * No further instances allowed
      */
     private Public() {
@@ -102,7 +108,8 @@ public class Public extends SchemaImpl {
             Sequences.CALENDAR_ID_SEQ,
             Sequences.CREDENTIAL_ID_SEQ,
             Sequences.ROOM_EQUIPMENT_EQUIP_ID_SEQ,
-            Sequences.ROOM_ROOM_ID_SEQ);
+            Sequences.ROOM_ROOM_ID_SEQ,
+            Sequences.WORKINGHOURS_ID_SEQ);
     }
 
     @Override
@@ -119,6 +126,7 @@ public class Public extends SchemaImpl {
             Credential.CREDENTIAL,
             Room.ROOM,
             RoomEquipment.ROOM_EQUIPMENT,
-            RoomRoomEquipment.ROOM_ROOM_EQUIPMENT);
+            RoomRoomEquipment.ROOM_ROOM_EQUIPMENT,
+            Workinghours.WORKINGHOURS);
     }
 }

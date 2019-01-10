@@ -47,4 +47,9 @@ public class Sequences {
      * The sequence <code>public.room_room_id_seq</code>
      */
     public static final Sequence<Integer> ROOM_ROOM_ID_SEQ = new SequenceImpl<Integer>("room_room_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.INTEGER.nullable(false));
+
+    /**
+     * The sequence <code>public.workinghours_id_seq</code>
+     */
+    public static final Sequence<Integer> WORKINGHOURS_ID_SEQ = new SequenceImpl<Integer>("workinghours_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.INTEGER.nullable(false));
 }

@@ -2,6 +2,61 @@ import * as checkboxController from '../checkbox-in-list-with-badge'
 import * as URLS from '../constants/urls'
 import * as cookie from '../cookie'
 import * as calendar from '../calendar'
+import * as workingHours from '../workingHours'
+
+
+/**
+ * @typedef {Object} workingHours
+ * @property {number} id
+ * @property {string} startTime
+ * @property {string} endTime
+ * @property {boolean} monday
+ * @property {boolean} tuesday
+ * @property {boolean} wednesday
+ * @property {boolean} thursday
+ * @property {boolean} friday
+ * @property {boolean} saturday
+ * @property {boolean} sunday
+ */
+
+/**
+ *
+ * @param {workingHours[]} workingHours
+ */
+function fillWorkingHours(workingHours) {
+    //TODO multiple working hour-definitions
+    workingHours.forEach(item => {
+        $('#settings-clock-picker-start').val(item.startTime);
+        $('#settings-clock-picker-end').val(item.endTime);
+        let actualBtn = $('#settings-working-mon');
+        actualBtn.addClass(item.monday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.monday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-tue');
+        actualBtn.addClass(item.tuesday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.tuesday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-wed');
+        actualBtn.addClass(item.wednesday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.wednesday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn =  $('#settings-working-thr');
+        actualBtn.addClass(item.thursday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.thursday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-fri');
+        actualBtn.addClass(item.friday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.friday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-sat');
+        actualBtn.addClass(item.saturday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.saturday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-sun');
+        actualBtn.addClass(item.sunday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.sunday ? 'btn-success' : 'btn-outline-primary');
+    });
+}
 
 if (document.getElementById("settings-workingHours")) {
     //this page is a settings-page
@@ -29,6 +84,8 @@ if (document.getElementById("settings-workingHours")) {
     });
     calendar.getAllCalendars('office', showOfficeCalendars);
     calendar.getAllCalendars('google', showGoogleCalendars);
+
+    workingHours.getWorkingHours(fillWorkingHours);
 
     $('#office-provider-link').click(function () {
         window.location = `${URLS.apiUrl}/auth-office?user_id=${cookie.getUserID()}`;

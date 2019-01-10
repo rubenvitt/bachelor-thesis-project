@@ -10,6 +10,7 @@ import de.rubeen.bsc.entities.db.tables.Credential;
 import de.rubeen.bsc.entities.db.tables.Room;
 import de.rubeen.bsc.entities.db.tables.RoomEquipment;
 import de.rubeen.bsc.entities.db.tables.RoomRoomEquipment;
+import de.rubeen.bsc.entities.db.tables.Workinghours;
 
 import javax.annotation.Generated;
 
@@ -40,7 +41,8 @@ public class Indexes {
     public static final Index CREDENTIAL_PKEY = Indexes0.CREDENTIAL_PKEY;
     public static final Index ROOM_PKEY = Indexes0.ROOM_PKEY;
     public static final Index ROOM_EQUIPMENT_PKEY = Indexes0.ROOM_EQUIPMENT_PKEY;
-    public static final Index ROOM_ROOMEQUIPMENT_PKEY = Indexes0.ROOM_ROOMEQUIPMENT_PKEY;
+    public static final Index ROOM_ROOM_EQUIPMENT_PKEY = Indexes0.ROOM_ROOM_EQUIPMENT_PKEY;
+    public static final Index WORKINGHOURS_PKEY = Indexes0.WORKINGHOURS_PKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -52,6 +54,7 @@ public class Indexes {
         public static Index CREDENTIAL_PKEY = Internal.createIndex("credential_pkey", Credential.CREDENTIAL, new OrderField[] { Credential.CREDENTIAL.ID }, true);
         public static Index ROOM_PKEY = Internal.createIndex("room_pkey", Room.ROOM, new OrderField[] { Room.ROOM.ROOM_ID }, true);
         public static Index ROOM_EQUIPMENT_PKEY = Internal.createIndex("room_equipment_pkey", RoomEquipment.ROOM_EQUIPMENT, new OrderField[] { RoomEquipment.ROOM_EQUIPMENT.EQUIP_ID }, true);
-        public static Index ROOM_ROOMEQUIPMENT_PKEY = Internal.createIndex("room_roomequipment_pkey", RoomRoomEquipment.ROOM_ROOM_EQUIPMENT, new OrderField[] { RoomRoomEquipment.ROOM_ROOM_EQUIPMENT.ROOM_ID, RoomRoomEquipment.ROOM_ROOM_EQUIPMENT.ROOM_EQUIPMENT_ID }, true);
+        public static Index ROOM_ROOM_EQUIPMENT_PKEY = Internal.createIndex("room_room_equipment_pkey", RoomRoomEquipment.ROOM_ROOM_EQUIPMENT, new OrderField[] { RoomRoomEquipment.ROOM_ROOM_EQUIPMENT.ROOM_ID, RoomRoomEquipment.ROOM_ROOM_EQUIPMENT.ROOM_EQUIPMENT_ID }, true);
+        public static Index WORKINGHOURS_PKEY = Internal.createIndex("workinghours_pkey", Workinghours.WORKINGHOURS, new OrderField[] { Workinghours.WORKINGHOURS.ID }, true);
     }
 }

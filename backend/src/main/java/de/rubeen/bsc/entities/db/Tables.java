@@ -10,6 +10,7 @@ import de.rubeen.bsc.entities.db.tables.Credential;
 import de.rubeen.bsc.entities.db.tables.Room;
 import de.rubeen.bsc.entities.db.tables.RoomEquipment;
 import de.rubeen.bsc.entities.db.tables.RoomRoomEquipment;
+import de.rubeen.bsc.entities.db.tables.Workinghours;
 
 import javax.annotation.Generated;
 
@@ -56,4 +57,9 @@ public class Tables {
      * The table <code>public.room_room_equipment</code>.
      */
     public static final RoomRoomEquipment ROOM_ROOM_EQUIPMENT = de.rubeen.bsc.entities.db.tables.RoomRoomEquipment.ROOM_ROOM_EQUIPMENT;
+
+    /**
+     * The table <code>public.workinghours</code>.
+     */
+    public static final Workinghours WORKINGHOURS = de.rubeen.bsc.entities.db.tables.Workinghours.WORKINGHOURS;
 }

@@ -4,10 +4,26 @@ grant all privileges on database testdatabase to testuser;
 
 create table appUser
 (
-  id       serial primary key ,
-  password varchar(255)    not null,
-  name     varchar(255)    not null,
-  mail     varchar(255)    not null
+  id       serial primary key,
+  password varchar(255) not null,
+  name     varchar(255) not null,
+  mail     varchar(255) not null,
+  avatar   varchar(500) not null default 'https://randomuser.me/api/portraits/lego/1.jpg'
+);
+
+create table workingHours
+(
+  id        serial primary key,
+  user_id   int references appUser (id),
+  startTime time    not null,
+  endTime   time    not null,
+  monday    boolean not null default false,
+  tuesday   boolean not null default false,
+  wednesday boolean not null default false,
+  thursday  boolean not null default false,
+  friday    boolean not null default false,
+  saturday  boolean not null default false,
+  sunday    boolean not null default false
 );
 
 create table credential

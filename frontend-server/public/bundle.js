@@ -657,10 +657,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17__dashboard___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_17__dashboard__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18__meeting_creation__ = __webpack_require__(263);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__settings__ = __webpack_require__(265);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__clockpicker__ = __webpack_require__(266);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__selectpicker__ = __webpack_require__(269);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__clockpicker__ = __webpack_require__(267);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21__selectpicker__ = __webpack_require__(270);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__checkbox_in_list_with_badge__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__events__ = __webpack_require__(272);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__events__ = __webpack_require__(273);
 
 
 
@@ -2171,10 +2171,65 @@ function getFormData() {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants_urls__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cookie__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__calendar__ = __webpack_require__(152);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__workingHours__ = __webpack_require__(266);
 
 
 
 
+
+
+/**
+ * @typedef {Object} workingHours
+ * @property {number} id
+ * @property {string} startTime
+ * @property {string} endTime
+ * @property {boolean} monday
+ * @property {boolean} tuesday
+ * @property {boolean} wednesday
+ * @property {boolean} thursday
+ * @property {boolean} friday
+ * @property {boolean} saturday
+ * @property {boolean} sunday
+ */
+
+/**
+ *
+ * @param {workingHours[]} workingHours
+ */
+function fillWorkingHours(workingHours) {
+    //TODO multiple working hour-definitions
+    workingHours.forEach(item => {
+        $('#settings-clock-picker-start').val(item.startTime);
+        $('#settings-clock-picker-end').val(item.endTime);
+        let actualBtn = $('#settings-working-mon');
+        actualBtn.addClass(item.monday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.monday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-tue');
+        actualBtn.addClass(item.tuesday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.tuesday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-wed');
+        actualBtn.addClass(item.wednesday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.wednesday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-thr');
+        actualBtn.addClass(item.thursday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.thursday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-fri');
+        actualBtn.addClass(item.friday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.friday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-sat');
+        actualBtn.addClass(item.saturday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.saturday ? 'btn-success' : 'btn-outline-primary');
+
+        actualBtn = $('#settings-working-sun');
+        actualBtn.addClass(item.sunday ? 'btn-success' : 'btn-outline-primary');
+        actualBtn.removeClass(!item.sunday ? 'btn-success' : 'btn-outline-primary');
+    });
+}
 
 if (document.getElementById("settings-workingHours")) {
     //this page is a settings-page
@@ -2202,6 +2257,8 @@ if (document.getElementById("settings-workingHours")) {
     });
     __WEBPACK_IMPORTED_MODULE_3__calendar__["b" /* getAllCalendars */]('office', showOfficeCalendars);
     __WEBPACK_IMPORTED_MODULE_3__calendar__["b" /* getAllCalendars */]('google', showGoogleCalendars);
+
+    __WEBPACK_IMPORTED_MODULE_4__workingHours__["a" /* getWorkingHours */](fillWorkingHours);
 
     $('#office-provider-link').click(function () {
         window.location = `${__WEBPACK_IMPORTED_MODULE_1__constants_urls__["a" /* apiUrl */]}/auth-office?user_id=${__WEBPACK_IMPORTED_MODULE_2__cookie__["a" /* getUserID */]()}`;
@@ -2294,11 +2351,58 @@ function getListItemFor(id, name, activated) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getWorkingHours; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__cookie__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jquery__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constants_urls__ = __webpack_require__(7);
+
+
+
+
+/**
+ * @typedef {Object} workingHour
+ * @property {string} startTime
+ * @property {string} endTime
+ */
+
+/**
+ * normalize the time of an item
+ * @param {workingHour} item
+ * @return {workingHour} item
+ */
+function normalizeTime(item) {
+    item.startTime = item.startTime.substr(0, 5);
+    item.endTime = item.endTime.substr(0, 5);
+    return item;
+}
+
+/**
+ *
+ * @param {function} handler
+ */
+function getWorkingHours(handler) {
+    __WEBPACK_IMPORTED_MODULE_1_jquery__["ajax"]({
+        url: `${__WEBPACK_IMPORTED_MODULE_2__constants_urls__["a" /* apiUrl */]}/user/workingHours?user_id=${__WEBPACK_IMPORTED_MODULE_0__cookie__["a" /* getUserID */]()}`
+    }).done(function (content) {
+        console.log(content);
+        content.forEach(item => normalizeTime(item));
+        handler(content);
+    });
+}
+
+
+
+/***/ }),
+/* 267 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min__ = __webpack_require__(267);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min__ = __webpack_require__(268);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_clockpicker_dist_bootstrap_clockpicker_min__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css__ = __webpack_require__(268);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css__ = __webpack_require__(269);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_clockpicker_dist_bootstrap_clockpicker_min_css__);
 
 
@@ -2311,17 +2415,17 @@ function getListItemFor(id, name, activated) {
 })());
 
 /***/ }),
-/* 267 */,
 /* 268 */,
-/* 269 */
+/* 269 */,
+/* 270 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_bootstrap_select_dist_js_bootstrap_select_min__ = __webpack_require__(270);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_bootstrap_select_dist_js_bootstrap_select_min__ = __webpack_require__(271);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_bootstrap_select_dist_js_bootstrap_select_min___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_bootstrap_select_dist_js_bootstrap_select_min__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_bootstrap_select_dist_css_bootstrap_select_min_css__ = __webpack_require__(271);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_bootstrap_select_dist_css_bootstrap_select_min_css__ = __webpack_require__(272);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_bootstrap_select_dist_css_bootstrap_select_min_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_bootstrap_select_dist_css_bootstrap_select_min_css__);
 
 
@@ -2332,19 +2436,19 @@ function getListItemFor(id, name, activated) {
 })());
 
 /***/ }),
-/* 270 */,
 /* 271 */,
-/* 272 */
+/* 272 */,
+/* 273 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__eventbox__ = __webpack_require__(273);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__calendar__ = __webpack_require__(274);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__eventbox__ = __webpack_require__(274);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__calendar__ = __webpack_require__(275);
 
 
 
 /***/ }),
-/* 273 */
+/* 274 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2404,7 +2508,7 @@ Number.prototype.pad = function () {
 };
 
 /***/ }),
-/* 274 */
+/* 275 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

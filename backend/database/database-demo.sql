@@ -15,6 +15,8 @@ values ('Room 1', 5),
 select *
 from room;
 
+select * from calendar;
+
 insert into room_Equipment (equip_name)
 values ('Windows'),
        ('Beamer'),

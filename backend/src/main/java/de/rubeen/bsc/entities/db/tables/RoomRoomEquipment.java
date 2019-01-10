@@ -40,7 +40,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RoomRoomEquipment extends TableImpl<RoomRoomEquipmentRecord> {
 
-    private static final long serialVersionUID = 1937156952;
+    private static final long serialVersionUID = 2086836501;
 
     /**
      * The reference instance of <code>public.room_room_equipment</code>
@@ -111,7 +111,7 @@ public class RoomRoomEquipment extends TableImpl<RoomRoomEquipmentRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.ROOM_ROOMEQUIPMENT_PKEY);
+        return Arrays.<Index>asList(Indexes.ROOM_ROOM_EQUIPMENT_PKEY);
     }
 
     /**
@@ -119,7 +119,7 @@ public class RoomRoomEquipment extends TableImpl<RoomRoomEquipmentRecord> {
      */
     @Override
     public UniqueKey<RoomRoomEquipmentRecord> getPrimaryKey() {
-        return Keys.ROOM_ROOMEQUIPMENT_PKEY;
+        return Keys.ROOM_ROOM_EQUIPMENT_PKEY;
     }
 
     /**
@@ -127,7 +127,7 @@ public class RoomRoomEquipment extends TableImpl<RoomRoomEquipmentRecord> {
      */
     @Override
     public List<UniqueKey<RoomRoomEquipmentRecord>> getKeys() {
-        return Arrays.<UniqueKey<RoomRoomEquipmentRecord>>asList(Keys.ROOM_ROOMEQUIPMENT_PKEY);
+        return Arrays.<UniqueKey<RoomRoomEquipmentRecord>>asList(Keys.ROOM_ROOM_EQUIPMENT_PKEY);
     }
 
     /**
