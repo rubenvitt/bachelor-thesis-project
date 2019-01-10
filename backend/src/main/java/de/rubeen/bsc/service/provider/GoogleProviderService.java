@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.DateFormat;
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -123,14 +122,16 @@ public class GoogleProviderService {
         return new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName(APP_NAME).build();
     }
 
-    public CalendarList getAllActiveCalendars(String user_id) throws IOException, GeneralSecurityException {
+    public List<CalendarEntity> getAllActiveCalendars(String user_id) throws IOException, GeneralSecurityException {
         Credential credential = flow.loadCredential(user_id);
         try {
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             CalendarList calendarList = calendar.calendarList().list().execute();
-            calendarList.getItems().removeIf(calendarListEntry -> !calendarService.isCalendarActivated(calendarListEntry.getId()));
-            return calendarList;
+            return calendarList.getItems().parallelStream()
+                    .filter(calendarListEntry -> calendarService.isCalendarActivated(calendarListEntry.getId()))
+                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId())))
+                    .collect(Collectors.toList());
         } catch (CredentialException e) {
             LOG.error("Credential exception: ", e);
             throw e;

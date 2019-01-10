@@ -97,7 +97,7 @@ public class GoogleController {
     }
 
     @RequestMapping("/google/calendar/active")
-    public CalendarList getActiveCalendar(@RequestParam("user_id") String user_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
+    public List<CalendarEntity> getActiveCalendar(@RequestParam("user_id") String user_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
         LOG.info("Getting a list of all activated calendars");
         try {
             return googleProviderService.getAllActiveCalendars(user_id);

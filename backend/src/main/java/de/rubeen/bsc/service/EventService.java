@@ -6,7 +6,6 @@ import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.helper.EventComparatorFactory;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
-import jdk.jshell.spi.ExecutionControl;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -96,33 +95,24 @@ public class EventService extends AbstractDatabaseService {
         return eventEntities;
     }
 
-    public void addEvent(NewEventEntity newEventEntity, String userMail) {
+    public void addEvent(NewEventEntity newEventEntity, String userMail, String calendarId) {
         try {
             if (newEventEntity.isAutoTime()) //create auto event
-                createAutoEvent(newEventEntity);
+                createAutoEvent(newEventEntity, calendarId);
             else
-                createManualEvent(newEventEntity, userMail);
+                createManualEvent(newEventEntity, userMail, calendarId);
         } catch (CredentialException | IOException e) {
             LOG.error("Error while creating event", e);
         }
     }
 
-    private void createManualEvent(NewEventEntity newEventEntity, String userMail) throws IOException, CredentialException {
+    private void createManualEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws IOException, CredentialException {
         final Integer userID = loginService.getUserID(userMail);
-        final List<String> googleCalendars = dslContext
-                .select(CALENDAR.CALENDARID)
-                .from(CALENDAR)
-                .innerJoin(APPUSER).onKey()
-                .where(APPUSER.ID.eq(userID))
-                .and(CALENDAR.PROVIDER.eq(Calprovider.google))
-                .and(CALENDAR.ACTIVATED.eq(true))
-                .fetch(CALENDAR.CALENDARID);
-        String actual = googleCalendars.get(0);
-        googleProviderService.createEvent(userMail, actual, newEventEntity);
+        googleProviderService.createEvent(userMail, calendarId, newEventEntity);
     }
 
-    private void createAutoEvent(NewEventEntity newEventEntity) {
-
+    private void createAutoEvent(NewEventEntity newEventEntity, String calendarId) {
+        LOG.error("not implemented");
     }
 
     private DateTime getBeginOfWeek(Integer weekNumber) {

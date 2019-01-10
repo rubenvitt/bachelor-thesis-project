@@ -1,10 +1,10 @@
 import * as urls from '../constants/urls';
 import {getUserID} from "../cookie";
 
-function sendForm() {
+function sendForm(calenderID) {
     //manual time settings:
     $.ajax({
-            url: `${urls.webappUrl}/api/calendar/events/create?user_id=${getUserID()}`,
+            url: `${urls.webappUrl}/api/calendar/events/create?user_id=${getUserID()}&calendar_id=${calenderID}`,
             type: 'POST',
             data:
                 JSON.stringify(getFormData()),

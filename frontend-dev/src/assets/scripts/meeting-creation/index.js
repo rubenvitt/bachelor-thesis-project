@@ -1,18 +1,51 @@
-import * as form from './form-sending-handler';
 import * as URLS from "../constants/urls";
 import * as cookie from "../cookie";
+import * as calendar from '../calendar';
+import * as checkboxController from "../checkbox-in-list-with-badge";
+import * as formSender from './form-sending-handler';
+
+function displayActiveCalendarsInModal(calendars) {
+    function getListItemFor(id, name) {
+        return `
+<label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+    <input data-content="${id}" type="checkbox" class="form-check-input">
+    ${name}
+    <i class="fa fa-check badge badge-primary badge-pill"></i>
+</label>`;
+    }
+
+    function getHtmlFromCalendarEntities(calendars) {
+        let html = '';
+        calendars.forEach(item => html += getListItemFor(item.id, item.name));
+        return html;
+    }
+
+    function getSelectedItem() {
+        return list.children().children('input:checked').attr('data-content');
+    }
+
+    const list = $('#meeting-creation-dialog-list-group-google-cal-list');
+    list.html(getHtmlFromCalendarEntities(calendars));
+    const inputList = list.children().children('input');
+    checkboxController.initRadioList(inputList, function (checked, id) {
+        console.log("DEBUG: " + checked + " --- " + id);
+    });
+
+    $('#calendar-select-modal-yes').click(function () {
+         formSender.sendForm(getSelectedItem());
+    });
+}
 
 if (document.getElementById("newMeeting-chooseMeetingType")) {
-    $("#are-you-sure-modal").modal();
-
-
     $('#meeting-creation-intelligent-duration-time').find('a').click((evt) => {
         const targetLink = $(evt.target);
         $('#meeting-creation-intelligent-duration-btn').text(targetLink.text())
     });
 
     $('#meeting-creation-submitButton').click(function () {
-        form.sendForm();
+        $("#calendar-select-modal").modal();
+        calendar.getAllActiveCalendars('google', displayActiveCalendarsInModal);
+        //form.sendForm();
     });
 
     $('#meeting-creation-time-manual-btn').click(function () {

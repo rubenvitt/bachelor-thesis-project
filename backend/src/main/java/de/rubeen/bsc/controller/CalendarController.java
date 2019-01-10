@@ -56,11 +56,13 @@ public class CalendarController {
     }*/
 
     @RequestMapping(value = "/events/create", method = RequestMethod.POST, consumes = "application/json")
-    public void createNewEvent(@RequestBody NewEventEntity newEventEntity, HttpServletResponse response, @RequestParam(value = "user_id") String userId) throws IOException {
+    public void createNewEvent(@RequestBody NewEventEntity newEventEntity, HttpServletResponse response,
+                               @RequestParam(value = "user_id") String userId,
+                               @RequestParam(value = "calendar_id") String calendarId) throws IOException {
         try {
             LOG.info("got event entity: " + newEventEntity);
             checkNewEvent(newEventEntity);
-            eventService.addEvent(newEventEntity, userId);
+            eventService.addEvent(newEventEntity, userId, calendarId);
         } catch (IllegalArgumentException | NullPointerException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event not correct or filled completely!");
         }
