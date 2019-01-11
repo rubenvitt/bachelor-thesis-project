@@ -37,3 +37,6 @@ values (1, 1),
        (4, 3),
        (4, 4),
        (4, 5);
+
+insert into workingHours (user_fk, startTime, endTime, monday, tuesday, wednesday, thursday, friday, saturday, sunday)
+VALUES (1, '08:00:00', '12:00:00', true, true, true, false, false, false, false);

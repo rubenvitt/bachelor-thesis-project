@@ -14,7 +14,7 @@ create table appUser
 create table workingHours
 (
   id        serial primary key,
-  user_id   int references appUser (id),
+  user_fk   int references appUser (id),
   startTime time    not null,
   endTime   time    not null,
   monday    boolean not null default false,

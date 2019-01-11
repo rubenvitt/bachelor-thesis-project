@@ -5,8 +5,16 @@ import * as URLS from "../constants/urls";
 
 /**
  * @typedef {Object} workingHour
+ * @property {number} id
  * @property {string} startTime
  * @property {string} endTime
+ * @property {boolean} monday
+ * @property {boolean} tuesday
+ * @property {boolean} wednesday
+ * @property {boolean} thursday
+ * @property {boolean} friday
+ * @property {boolean} saturday
+ * @property {boolean} sunday
  */
 
 /**
@@ -34,6 +42,22 @@ function getWorkingHours(handler) {
     });
 }
 
+/**
+ * @param {workingHour[]} workingHours[]
+ */
+function sendWorkingHours(workingHours) {
+    console.log(workingHours);
+    $.ajax({
+        url: `${URLS.apiUrl}/user/workingHours?user_id=${cookie.getUserID()}`,
+        type: 'post',
+        data: JSON.stringify(workingHours),
+        contentType: "application/json"
+    }).done(function (content) {
+        console.log('Saved workingHours');
+    });
+}
+
 export {
-    getWorkingHours
+    getWorkingHours,
+    sendWorkingHours
 }

@@ -398,41 +398,46 @@
                             <div class="layer w-100 pX-20 pT-20">
                                 <h6 class="lh-1 c-grey-900 ta-l">Availability</h6>
                             </div>
-                            <div class="layer w-100 pX-20 pY-20">
+                            <div class="layer w-100 pX-20 pY-20 pB-50">
+                                <label>Working hours</label>
                                 <form id="settings-workingHours">
                                     <div class="form-group">
-                                        <label>Working hours</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fa fa-clock-o"></i></span>
                                             </div>
                                             <div class="clockpicker">
-                                                <input id="settings-clock-picker-start" type="text" class="form-control" value="8:00">
+                                                <input type="text" class="form-control" value="8:00">
                                             </div>
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i
                                                         class="fa fa-hourglass-end"></i></span>
                                             </div>
                                             <div class="clockpicker">
-                                                <input id="settings-clock-picker-end" type="text" class="form-control" value="16:00">
+                                                <input type="text" class="form-control" value="16:00">
                                             </div>
                                             <div class="btn-group workingday" role="group">
-                                                <button id="settings-working-mon" type="button" class="btn btn-success">Mon</button>
-                                                <button id="settings-working-tue" type="button" class="btn btn-success">Tue</button>
-                                                <button id="settings-working-wed" type="button" class="btn btn-success">Wed</button>
-                                                <button id="settings-working-thr" type="button" class="btn btn-success">Thr</button>
-                                                <button id="settings-working-fri" type="button" class="btn btn-success">Fri</button>
-                                                <button id="settings-working-sat" type="button" class="btn btn-outline-primary">Sat</button>
-                                                <button id="settings-working-sun" type="button" class="btn btn-outline-primary">Sun</button>
+                                                <button type="button" class="btn btn-success">Mon</button>
+                                                <button type="button" class="btn btn-success">Tue</button>
+                                                <button type="button" class="btn btn-success">Wed</button>
+                                                <button type="button" class="btn btn-success">Thr</button>
+                                                <button type="button" class="btn btn-success">Fri</button>
+                                                <button type="button" class="btn btn-outline-primary">Sat</button>
+                                                <button type="button" class="btn btn-outline-primary">Sun</button>
                                             </div>
                                         </div>
-                                        <small class="form-text text-muted">
-                                            When are your normal working hours? (= when do you wish to have
-                                            meetings?)<br>
-                                            A break of minimum 30 minutes will be calculated automatically.
-                                        </small>
                                     </div>
                                 </form>
+                                <div class="col-12 text-center">
+                                    <button id="settings-add-working-hour-row" type="button" class="btn btn-dark m-auto"><span class="fa fa-plus-circle"></span></button>
+                                </div>
+                                <small class="form-text text-muted">
+                                    When are your normal working hours? (= when do you wish to have
+                                    meetings?)<br>
+                                    A break of minimum 30 minutes will be calculated automatically, if you specify
+                                    you're working-hours > 6h per day.
+                                </small>
+                                <button id="settings-save-working-hours" class="btn btn-primary float-right" type="button">Save working hours</button>
                             </div>
                         </div>
                     </div>

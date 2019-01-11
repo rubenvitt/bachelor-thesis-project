@@ -30,7 +30,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class WorkinghoursRecord extends UpdatableRecordImpl<WorkinghoursRecord> implements Record11<Integer, Integer, Time, Time, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean> {
 
-    private static final long serialVersionUID = -1418412165;
+    private static final long serialVersionUID = -1499911789;
 
     /**
      * Setter for <code>public.workinghours.id</code>.
@@ -47,16 +47,16 @@ public class WorkinghoursRecord extends UpdatableRecordImpl<WorkinghoursRecord> 
     }
 
     /**
-     * Setter for <code>public.workinghours.user_id</code>.
+     * Setter for <code>public.workinghours.user_fk</code>.
      */
-    public void setUserId(Integer value) {
+    public void setUserFk(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>public.workinghours.user_id</code>.
+     * Getter for <code>public.workinghours.user_fk</code>.
      */
-    public Integer getUserId() {
+    public Integer getUserFk() {
         return (Integer) get(1);
     }
 
@@ -231,7 +231,7 @@ public class WorkinghoursRecord extends UpdatableRecordImpl<WorkinghoursRecord> 
      */
     @Override
     public Field<Integer> field2() {
-        return Workinghours.WORKINGHOURS.USER_ID;
+        return Workinghours.WORKINGHOURS.USER_FK;
     }
 
     /**
@@ -319,7 +319,7 @@ public class WorkinghoursRecord extends UpdatableRecordImpl<WorkinghoursRecord> 
      */
     @Override
     public Integer component2() {
-        return getUserId();
+        return getUserFk();
     }
 
     /**
@@ -407,7 +407,7 @@ public class WorkinghoursRecord extends UpdatableRecordImpl<WorkinghoursRecord> 
      */
     @Override
     public Integer value2() {
-        return getUserId();
+        return getUserFk();
     }
 
     /**
@@ -496,7 +496,7 @@ public class WorkinghoursRecord extends UpdatableRecordImpl<WorkinghoursRecord> 
      */
     @Override
     public WorkinghoursRecord value2(Integer value) {
-        setUserId(value);
+        setUserFk(value);
         return this;
     }
 
@@ -614,11 +614,11 @@ public class WorkinghoursRecord extends UpdatableRecordImpl<WorkinghoursRecord> 
     /**
      * Create a detached, initialised WorkinghoursRecord
      */
-    public WorkinghoursRecord(Integer id, Integer userId, Time starttime, Time endtime, Boolean monday, Boolean tuesday, Boolean wednesday, Boolean thursday, Boolean friday, Boolean saturday, Boolean sunday) {
+    public WorkinghoursRecord(Integer id, Integer userFk, Time starttime, Time endtime, Boolean monday, Boolean tuesday, Boolean wednesday, Boolean thursday, Boolean friday, Boolean saturday, Boolean sunday) {
         super(Workinghours.WORKINGHOURS);
 
         set(0, id);
-        set(1, userId);
+        set(1, userFk);
         set(2, starttime);
         set(3, endtime);
         set(4, monday);

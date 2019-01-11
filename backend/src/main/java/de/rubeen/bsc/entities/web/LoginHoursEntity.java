@@ -2,14 +2,14 @@ package de.rubeen.bsc.entities.web;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
-import java.sql.Time;
+import java.text.MessageFormat;
 
 public class LoginHoursEntity {
-    private int id;
+    private Integer id;
     private String startTime, endTime;
     private boolean monday, tuesday, wednesday, thursday, friday, saturday, sunday;
 
-    public LoginHoursEntity(int id, String startTime, String endTime, boolean monday, boolean tuesday, boolean wednesday, boolean thursday, boolean friday, boolean saturday, boolean sunday) {
+    public LoginHoursEntity(Integer id, String startTime, String endTime, boolean monday, boolean tuesday, boolean wednesday, boolean thursday, boolean friday, boolean saturday, boolean sunday) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -26,16 +26,18 @@ public class LoginHoursEntity {
     }
 
     @JsonGetter
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
     @JsonGetter
     public String getStartTime() {
+        if (startTime.length() == 5)
+            return startTime + ":00";
         return startTime;
     }
 
@@ -45,6 +47,8 @@ public class LoginHoursEntity {
 
     @JsonGetter
     public String getEndTime() {
+        if (endTime.length() == 5)
+            return endTime + ":00";
         return endTime;
     }
 
@@ -113,5 +117,12 @@ public class LoginHoursEntity {
 
     public void setSunday(boolean sunday) {
         this.sunday = sunday;
+    }
+
+    @Override
+    public String toString() {
+        return MessageFormat.format(
+                "(id: {0}, startTime: {1}, endTime: {2}, monday: {3}, tuesday: {4}, wednesday: {5}, thursday: {6}, friday: {7}, saturday: {8}, sunday: {9})",
+                id, startTime, endTime, monday, tuesday, wednesday, thursday, friday, saturday, sunday);
     }
 }

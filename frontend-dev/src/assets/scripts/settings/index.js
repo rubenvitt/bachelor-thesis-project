@@ -4,9 +4,16 @@ import * as cookie from '../cookie'
 import * as calendar from '../calendar'
 import * as workingHours from '../workingHours'
 
+if (document.getElementById("settings-workingHours")) {
+    //this page is a settings-page
+    $("#provider-google").hover(function () {
+        $(this).attr('src', 'assets/static/images/google-signin-pressed.png')
+    }, function () {
+        $(this).attr('src', 'assets/static/images/google-signin-normal.png');
+    });
 
-/**
- * @typedef {Object} workingHours
+    /*
+     * @typedef {Object} workingHours
  * @property {number} id
  * @property {string} startTime
  * @property {string} endTime
@@ -17,58 +24,51 @@ import * as workingHours from '../workingHours'
  * @property {boolean} friday
  * @property {boolean} saturday
  * @property {boolean} sunday
- */
+     */
+    $('#settings-save-working-hours').click(function () {
+        /**
+         *
+         * @type {workingHour[]}
+         */
+        const data = [];
 
-/**
- *
- * @param {workingHours[]} workingHours
- */
-function fillWorkingHours(workingHours) {
-    //TODO multiple working hour-definitions
-    workingHours.forEach(item => {
-        $('#settings-clock-picker-start').val(item.startTime);
-        $('#settings-clock-picker-end').val(item.endTime);
-        let actualBtn = $('#settings-working-mon');
-        actualBtn.addClass(item.monday ? 'btn-success' : 'btn-outline-primary');
-        actualBtn.removeClass(!item.monday ? 'btn-success' : 'btn-outline-primary');
+        $('#settings-workingHours').find('.input-group').each(function () {
+            const buttons = $(this).find('.workingday').children('.btn');
 
-        actualBtn = $('#settings-working-tue');
-        actualBtn.addClass(item.tuesday ? 'btn-success' : 'btn-outline-primary');
-        actualBtn.removeClass(!item.tuesday ? 'btn-success' : 'btn-outline-primary');
+            const id = $(this).attr('itemid') === 'undefined' ? null : $(this).attr('itemid');
+            const startTime = $(this).find('.clockpicker').first().children('input').val();
+            const endTime = $($(this).find('.clockpicker').get(1)).children('input').val();
+            console.log($(buttons.get(0)));
+            console.log($(buttons.get(0)).hasClass('btn-success'));
+            const monday = $(buttons.get(0)).hasClass('btn-success');
+            const tuesday = $(buttons.get(1)).hasClass('btn-success');
+            const wednesday = $(buttons.get(2)).hasClass('btn-success');
+            const thursday = $(buttons.get(3)).hasClass('btn-success');
+            const friday = $(buttons.get(4)).hasClass('btn-success');
+            const saturday = $(buttons.get(5)).hasClass('btn-success');
+            const sunday = $(buttons.get(6)).hasClass('btn-success');
 
-        actualBtn = $('#settings-working-wed');
-        actualBtn.addClass(item.wednesday ? 'btn-success' : 'btn-outline-primary');
-        actualBtn.removeClass(!item.wednesday ? 'btn-success' : 'btn-outline-primary');
+            data.push({
+                id: id, startTime: startTime, endTime: endTime, monday: monday, tuesday: tuesday,
+                wednesday: wednesday, thursday: thursday, friday: friday, saturday: saturday, sunday: sunday
+            });
+        });
 
-        actualBtn =  $('#settings-working-thr');
-        actualBtn.addClass(item.thursday ? 'btn-success' : 'btn-outline-primary');
-        actualBtn.removeClass(!item.thursday ? 'btn-success' : 'btn-outline-primary');
-
-        actualBtn = $('#settings-working-fri');
-        actualBtn.addClass(item.friday ? 'btn-success' : 'btn-outline-primary');
-        actualBtn.removeClass(!item.friday ? 'btn-success' : 'btn-outline-primary');
-
-        actualBtn = $('#settings-working-sat');
-        actualBtn.addClass(item.saturday ? 'btn-success' : 'btn-outline-primary');
-        actualBtn.removeClass(!item.saturday ? 'btn-success' : 'btn-outline-primary');
-
-        actualBtn = $('#settings-working-sun');
-        actualBtn.addClass(item.sunday ? 'btn-success' : 'btn-outline-primary');
-        actualBtn.removeClass(!item.sunday ? 'btn-success' : 'btn-outline-primary');
-    });
-}
-
-if (document.getElementById("settings-workingHours")) {
-    //this page is a settings-page
-    $(".workingday").find("button").click(function () {
-        $(this).toggleClass("btn-success");
-        $(this).toggleClass("btn-outline-primary")
+        console.log(data);
+        workingHours.sendWorkingHours(data);
     });
 
-    $("#provider-google").hover(function () {
-        $(this).attr('src', 'assets/static/images/google-signin-pressed.png')
-    }, function () {
-        $(this).attr('src', 'assets/static/images/google-signin-normal.png');
+    $('#settings-add-working-hour-row').click(function () {
+        const container = $('#settings-workingHours');
+        $(container).html(container.html() + createWorkingHourLine({
+            startTime: '08:00', endTime: '16:00',
+            monday: true, tuesday: true, wednesday: true, thursday: true, friday: true, saturday: false, sunday: false
+        }));
+        $(".workingday").find("button").click(function () {
+            $(this).toggleClass("btn-success");
+            $(this).toggleClass("btn-outline-primary")
+        });
+        $('.clockpicker').clockpicker();
     });
 
     $("#account-settings-remove-microsoft-access-token-btn").click(function () {
@@ -172,4 +172,58 @@ function getListItemFor(id, name, activated) {
     ${name}
     <i class="fa fa-check badge badge-primary badge-pill"></i>
 </label>`;
+}
+
+/**
+ *
+ * @param {workingHour} item
+ * @return {string} html element
+ */
+function createWorkingHourLine(item) {
+    return `
+<div class="form-group">
+    <div class="input-group" itemid="${item.id}">
+        <div class="input-group-prepend">
+            <span class="input-group-text"><i class="fa fa-clock-o"></i></span>
+        </div>
+        <div class="clockpicker">
+            <input type="text" class="form-control" value="${item.startTime}">
+        </div>
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fa fa-hourglass-end"></i>
+            </span>
+        </div>
+        <div class="clockpicker">
+            <input type="text" class="form-control" value="${item.endTime}">
+        </div>
+        <div class="btn-group workingday" role="group">
+            <button type="button" class="btn ${item.monday ? 'btn-success' : 'btn-outline-primary'}">Mon</button>
+            <button type="button" class="btn ${item.tuesday ? 'btn-success' : 'btn-outline-primary'}">Tue</button>
+            <button type="button" class="btn ${item.wednesday ? 'btn-success' : 'btn-outline-primary'}">Wed</button>
+            <button type="button" class="btn ${item.thursday ? 'btn-success' : 'btn-outline-primary'}">Thr</button>
+            <button type="button" class="btn ${item.friday ? 'btn-success' : 'btn-outline-primary'}">Fri</button>
+            <button type="button" class="btn ${item.saturday ? 'btn-success' : 'btn-outline-primary'}">Sat</button>
+            <button type="button" class="btn ${item.sunday ? 'btn-success' : 'btn-outline-primary'}">Sun</button>
+        </div>
+    </div>
+</div>`;
+}
+
+/**
+ *
+ * @param {workingHour[]} workingHours
+ */
+function fillWorkingHours(workingHours) {
+    //TODO multiple working hour-definitions
+    let html = '';
+    workingHours.forEach(item => {
+        html += createWorkingHourLine(item);
+    });
+    $('#settings-workingHours').html(html);
+    $(".workingday").find("button").click(function () {
+        $(this).toggleClass("btn-success");
+        $(this).toggleClass("btn-outline-primary")
+    });
+    $('.clockpicker').clockpicker();
 }

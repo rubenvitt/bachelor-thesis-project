@@ -72,7 +72,7 @@ public class Keys {
     public static final ForeignKey<CredentialRecord, AppuserRecord> CREDENTIAL__CREDENTIAL_USERS_ID_FKEY = ForeignKeys0.CREDENTIAL__CREDENTIAL_USERS_ID_FKEY;
     public static final ForeignKey<RoomRoomEquipmentRecord, RoomRecord> ROOM_ROOM_EQUIPMENT__ROOM_ROOM_EQUIPMENT_ROOM_ID_FKEY = ForeignKeys0.ROOM_ROOM_EQUIPMENT__ROOM_ROOM_EQUIPMENT_ROOM_ID_FKEY;
     public static final ForeignKey<RoomRoomEquipmentRecord, RoomEquipmentRecord> ROOM_ROOM_EQUIPMENT__ROOM_ROOM_EQUIPMENT_ROOM_EQUIPMENT_ID_FKEY = ForeignKeys0.ROOM_ROOM_EQUIPMENT__ROOM_ROOM_EQUIPMENT_ROOM_EQUIPMENT_ID_FKEY;
-    public static final ForeignKey<WorkinghoursRecord, AppuserRecord> WORKINGHOURS__WORKINGHOURS_USER_ID_FKEY = ForeignKeys0.WORKINGHOURS__WORKINGHOURS_USER_ID_FKEY;
+    public static final ForeignKey<WorkinghoursRecord, AppuserRecord> WORKINGHOURS__WORKINGHOURS_USER_FK_FKEY = ForeignKeys0.WORKINGHOURS__WORKINGHOURS_USER_FK_FKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -102,6 +102,6 @@ public class Keys {
         public static final ForeignKey<CredentialRecord, AppuserRecord> CREDENTIAL__CREDENTIAL_USERS_ID_FKEY = Internal.createForeignKey(de.rubeen.bsc.entities.db.Keys.APPUSER_PKEY, Credential.CREDENTIAL, "credential__credential_users_id_fkey", Credential.CREDENTIAL.USERS_ID);
         public static final ForeignKey<RoomRoomEquipmentRecord, RoomRecord> ROOM_ROOM_EQUIPMENT__ROOM_ROOM_EQUIPMENT_ROOM_ID_FKEY = Internal.createForeignKey(de.rubeen.bsc.entities.db.Keys.ROOM_PKEY, RoomRoomEquipment.ROOM_ROOM_EQUIPMENT, "room_room_equipment__room_room_equipment_room_id_fkey", RoomRoomEquipment.ROOM_ROOM_EQUIPMENT.ROOM_ID);
         public static final ForeignKey<RoomRoomEquipmentRecord, RoomEquipmentRecord> ROOM_ROOM_EQUIPMENT__ROOM_ROOM_EQUIPMENT_ROOM_EQUIPMENT_ID_FKEY = Internal.createForeignKey(de.rubeen.bsc.entities.db.Keys.ROOM_EQUIPMENT_PKEY, RoomRoomEquipment.ROOM_ROOM_EQUIPMENT, "room_room_equipment__room_room_equipment_room_equipment_id_fkey", RoomRoomEquipment.ROOM_ROOM_EQUIPMENT.ROOM_EQUIPMENT_ID);
-        public static final ForeignKey<WorkinghoursRecord, AppuserRecord> WORKINGHOURS__WORKINGHOURS_USER_ID_FKEY = Internal.createForeignKey(de.rubeen.bsc.entities.db.Keys.APPUSER_PKEY, Workinghours.WORKINGHOURS, "workinghours__workinghours_user_id_fkey", Workinghours.WORKINGHOURS.USER_ID);
+        public static final ForeignKey<WorkinghoursRecord, AppuserRecord> WORKINGHOURS__WORKINGHOURS_USER_FK_FKEY = Internal.createForeignKey(de.rubeen.bsc.entities.db.Keys.APPUSER_PKEY, Workinghours.WORKINGHOURS, "workinghours__workinghours_user_fk_fkey", Workinghours.WORKINGHOURS.USER_FK);
     }
 }

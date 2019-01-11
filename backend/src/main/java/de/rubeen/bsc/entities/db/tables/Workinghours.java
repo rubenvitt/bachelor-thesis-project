@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Workinghours extends TableImpl<WorkinghoursRecord> {
 
-    private static final long serialVersionUID = 1385513977;
+    private static final long serialVersionUID = 606206519;
 
     /**
      * The reference instance of <code>public.workinghours</code>
@@ -63,9 +63,9 @@ public class Workinghours extends TableImpl<WorkinghoursRecord> {
     public final TableField<WorkinghoursRecord, Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('workinghours_id_seq'::regclass)", org.jooq.impl.SQLDataType.INTEGER)), this, "");
 
     /**
-     * The column <code>public.workinghours.user_id</code>.
+     * The column <code>public.workinghours.user_fk</code>.
      */
-    public final TableField<WorkinghoursRecord, Integer> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+    public final TableField<WorkinghoursRecord, Integer> USER_FK = createField("user_fk", org.jooq.impl.SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>public.workinghours.starttime</code>.
@@ -190,11 +190,11 @@ public class Workinghours extends TableImpl<WorkinghoursRecord> {
      */
     @Override
     public List<ForeignKey<WorkinghoursRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<WorkinghoursRecord, ?>>asList(Keys.WORKINGHOURS__WORKINGHOURS_USER_ID_FKEY);
+        return Arrays.<ForeignKey<WorkinghoursRecord, ?>>asList(Keys.WORKINGHOURS__WORKINGHOURS_USER_FK_FKEY);
     }
 
     public Appuser appuser() {
-        return new Appuser(this, Keys.WORKINGHOURS__WORKINGHOURS_USER_ID_FKEY);
+        return new Appuser(this, Keys.WORKINGHOURS__WORKINGHOURS_USER_FK_FKEY);
     }
 
     /**
