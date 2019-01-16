@@ -30,6 +30,7 @@ function sendForm(calenderID) {
  * @property {boolean} autoRoom         autoRoom enabled
  * @property {string[]} roomValues      values for room (equipments)
  * @property {number} roomId            id for room (manual mode)
+ * @property {number[]} attendees       attendees of this meeting (id's for them)
  */
 
 /**
@@ -52,6 +53,10 @@ function getFormData() {
     result.autoRoom = $('#meeting-creation-room-automatic-btn').hasClass('active');
     result.roomValues = $('#meeting-creation-equipment-select').val();
     result.roomId = getRoomId();
+    result.attendees = [];
+    $('#newMeeting-attendee-list').children('a.active').each(function () {
+        result.attendees.push($(this).attr('itemid'));
+    });
     return result;
 }
 

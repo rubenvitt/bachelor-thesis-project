@@ -19,6 +19,7 @@ import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.RoomService;
+import de.rubeen.bsc.service.UserService;
 import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,7 @@ public class GoogleProviderService {
     private static final Logger LOG = LoggerFactory.getLogger(GoogleProviderService.class);
     private final CalendarService calendarService;
     private final RoomService roomService;
+    private final UserService userService;
     @Value("${google.client.redirectUri}")
     private String redirectURL;
     @Value("${google.client.client-id}")
@@ -59,9 +62,10 @@ public class GoogleProviderService {
     private JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
     @Autowired
-    public GoogleProviderService(CalendarService calendarService, RoomService roomService) {
+    public GoogleProviderService(CalendarService calendarService, RoomService roomService, UserService userService) {
         this.calendarService = calendarService;
         this.roomService = roomService;
+        this.userService = userService;
     }
 
     @PostConstruct
@@ -207,19 +211,27 @@ public class GoogleProviderService {
             } else {
                 room = roomService.getRoomById(newEventEntity.getRoomId());
             }
+            List<EventAttendee> attendeeList = newEventEntity.getAttendees().parallelStream()
+                    .map(userService::getAppUser)
+                    .filter(Objects::nonNull)
+                    .map(appUserEntity -> new EventAttendee()
+                            .setDisplayName(appUserEntity.getName())
+                            .setEmail(appUserEntity.getMail()))
+                    .collect(Collectors.toList());
             LOG.info("Using calendar: " + calendarId);
             DateTime dateTimeStart = new DateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(format("{0} {1}", newEventEntity.getManTimeDateStart(), newEventEntity.getManTimeTimeStart())));
             DateTime dateTimeEnd = new DateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(format("{0} {1}", newEventEntity.getManTimeDateEnd(), newEventEntity.getManTimeTimeEnd())));
-            LOG.info(""+ dateTimeStart);
+            LOG.info("" + dateTimeStart);
             LOG.info("" + dateTimeEnd);
             Event event = new Event()
                     .setSummary(newEventEntity.getSubject())
                     .setDescription(newEventEntity.getDescription())
                     .setStart(new EventDateTime().setDateTime(dateTimeStart))
                     .setEnd(new EventDateTime().setDateTime(dateTimeEnd))
+                    .setAttendees(attendeeList)
                     .setLocation(room);
-                    //.setEtag("test");
-            calendar.events().insert(calendarId, event).execute();
+            //.setEtag("test");
+            calendar.events().insert(calendarId, event).setSendUpdates("all").execute();
         } catch (CredentialException e) {
             LOG.error("Credential exception: ", e);
             throw e;

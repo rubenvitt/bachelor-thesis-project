@@ -3,8 +3,6 @@ package de.rubeen.bsc.entities.web;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
-import javax.annotation.Nullable;
-
 import java.util.List;
 
 import static java.text.MessageFormat.format;
@@ -16,18 +14,20 @@ public class NewEventEntity {
     private String manTimeTimeStart, manTimeTimeEnd;
     private List<String> roomValues;
     private Integer roomId;
+    private List<Integer> attendees;
 
     public NewEventEntity() {}
 
-    public NewEventEntity(String subject, String description, boolean autoTime, boolean autoRoom) {
+    public NewEventEntity(String subject, String description, boolean autoTime, boolean autoRoom, List<Integer> attendees) {
         this.subject = subject;
         this.description = description;
         this.autoTime = autoTime;
+        this.attendees = attendees;
     }
 
     public NewEventEntity(String subject, String description, boolean autoTime, boolean autoRoom,
                           String manTimeDateStart, String manTimeDateEnd, String manTimeTimeStart, String manTimeTimeEnd,
-                          List<String> roomValues, Integer roomId) {
+                          List<String> roomValues, Integer roomId, List<Integer> attendees) {
         this.subject = subject;
         this.description = description;
         this.autoTime = autoTime;
@@ -38,6 +38,7 @@ public class NewEventEntity {
         this.manTimeTimeEnd = manTimeTimeEnd;
         this.roomValues = roomValues;
         this.roomId = roomId;
+        this.attendees = attendees;
     }
 
     @JsonGetter
@@ -139,5 +140,13 @@ public class NewEventEntity {
 
     public void setRoomId(Integer roomId) {
         this.roomId = roomId;
+    }
+
+    public List<Integer> getAttendees() {
+        return attendees;
+    }
+
+    public void setAttendees(List<Integer> attendees) {
+        this.attendees = attendees;
     }
 }

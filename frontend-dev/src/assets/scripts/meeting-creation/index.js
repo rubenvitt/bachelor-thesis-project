@@ -4,6 +4,7 @@ import * as calendar from '../calendar';
 import * as checkboxController from "../checkbox-in-list-with-badge";
 import * as formSender from './form-sending-handler';
 import * as localStorage from '../localStorage';
+import * as appUser from '../appuser'
 
 function displayActiveCalendarsInModal(calendars) {
     function getListItemFor(id, name) {
@@ -33,7 +34,7 @@ function displayActiveCalendarsInModal(calendars) {
     });
 
     $('#calendar-select-modal-yes').click(function () {
-         formSender.sendForm(getSelectedItem());
+        formSender.sendForm(getSelectedItem());
     });
 }
 
@@ -76,6 +77,43 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
         $(this).addClass('active');
     });
 
+    //attendees
+    appUser.getOtherAppUser(
+        /**
+         * @param {appUser[]} appUserList
+         */
+        function (appUserList) {
+            //fill attendee-list
+            let html = "";
+            appUserList.forEach(user => {
+                html += `
+                <a itemid="${user.id}" href="javascript:void {}"
+                   class="list-group-item list-group-item-action container">
+                    <div class="row">
+                        <div class="col-3">
+                            <img class="w-100p rounded-circle"
+                                 src="${user.avatar}">
+                        </div>
+                        <div class="col-9">
+                            <div class="container">
+                                <div class="row">
+                                    <h6 class="mb-0">${user.name}</h6>
+                                </div>
+                                <div class="row">
+                                    <small>${user.position}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>`;
+            });
+            const attendeeList = $('#newMeeting-attendee-list');
+            attendeeList.html(html);
+            const attendeesLinks = attendeeList.find("a");
+            attendeesLinks.click(function () {
+                $(this).toggleClass("active");
+            });
+        });
     $.ajax({
         url: `${URLS.apiUrl}/rooms/equipments`,
         data: {
@@ -146,11 +184,6 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
             else
                 settingBoxes[i].addClass("d-none");
         }
-    });
-
-    const attendeesLinks = $("#newMeeting-attendee-list").find("a");
-    attendeesLinks.click(function () {
-        $(this).toggleClass("active");
     });
 
     const attendeeSelectedLinks = $("#newMeeting-attendee-selected-list").find("a");

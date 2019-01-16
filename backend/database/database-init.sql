@@ -8,13 +8,14 @@ create table appUser
   password varchar(255) not null,
   name     varchar(255) not null,
   mail     varchar(255) not null,
+  position varchar(255) not null,
   avatar   varchar(500) not null default 'https://randomuser.me/api/portraits/lego/1.jpg'
 );
 
 create table workingHours
 (
   id        serial primary key,
-  user_fk   int references appUser (id),
+  user_fk   int references appUser (id) on delete cascade,
   startTime time    not null,
   endTime   time    not null,
   monday    boolean not null default false,
@@ -30,7 +31,7 @@ create table credential
 (
   id         serial primary key ,
   credential varchar(1000)   not null,
-  users_id   int             not null references appUser (id)
+  users_id   int             not null references appUser (id) on delete cascade
 );
 
 create type calProvider as enum ('google', 'office');

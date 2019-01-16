@@ -1,5 +1,7 @@
 package de.rubeen.bsc.service;
 
+import com.google.common.base.Preconditions;
+import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.NameTokenizers;
@@ -15,12 +17,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.*;
 import static de.rubeen.bsc.entities.db.tables.Appuser.APPUSER;
 import static de.rubeen.bsc.entities.db.tables.Workinghours.WORKINGHOURS;
 
 @Service
 public class UserService extends AbstractDatabaseService {
-
     private final ModelMapper modelMapper = new ModelMapper();
     private final LoginService loginService;
 
@@ -82,5 +84,33 @@ public class UserService extends AbstractDatabaseService {
                 .where(WORKINGHOURS.USER_FK.eq(loginService.getUserID(userMail)))
                 .and(WORKINGHOURS.ID.eq(loginHoursEntity.getId()))
                 .executeAsync();
+    }
+
+    public List<AppUserEntity> getAllAppUsers(String userMail) {
+        checkNotNull(userMail);
+        return dslContext.select()
+                .from(APPUSER)
+                .where(APPUSER.ID.notEqual(loginService.getUserID(userMail)))
+                .fetch().parallelStream()
+                .map(record -> modelMapper.map(record, AppUserEntity.class))
+                .collect(Collectors.toList());
+    }
+
+    public AppUserEntity getAppUser(String userMail) {
+        checkNotNull(userMail);
+        return dslContext.select()
+                .from(APPUSER)
+                .where(APPUSER.ID.eq(loginService.getUserID(userMail)))
+                .fetchOne()
+                .map(record -> modelMapper.map(record, AppUserEntity.class));
+    }
+
+    public AppUserEntity getAppUser(Integer userId) {
+        checkNotNull(userId);
+        return dslContext.select()
+                .from(APPUSER)
+                .where(APPUSER.ID.eq(userId))
+                .fetchOne()
+                .map(record -> modelMapper.map(record, AppUserEntity.class));
     }
 }
