@@ -3,6 +3,7 @@ import * as cookie from "../cookie";
 import * as calendar from '../calendar';
 import * as checkboxController from "../checkbox-in-list-with-badge";
 import * as formSender from './form-sending-handler';
+import * as localStorage from '../localStorage';
 
 function displayActiveCalendarsInModal(calendars) {
     function getListItemFor(id, name) {
@@ -85,11 +86,12 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
         content.forEach(item => {
             html += `<option itemid="${item.id}">${item.name}</option>`
         });
-        //TODO not working
         console.log("Created content");
         console.log(html);
         $('#meeting-creation-equipment-select').html(html).selectpicker('refresh');
-
+        $('#meeting-creation-equipment-select').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+            console.log(formSender.getFormData());
+        });
     });
 
     $.ajax({
@@ -117,6 +119,7 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
 
     $('#meeting-creation-manual-room-select').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
         const roomId = $(this.selectedOptions.item(0)).attr('itemId');
+        localStorage.setRoomId(roomId);
         //get equipments for this room
         $.ajax({
             url: `${URLS.apiUrl}/rooms/equipments`,
@@ -165,7 +168,7 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
             $(this).datepicker({
                 calendarWeeks: true,
                 assumeNearbyYear: true,
-
+                todayHighlight: true,
             });
             $(this).on('changeDate', () => {
                 $(this).datepicker('hide');

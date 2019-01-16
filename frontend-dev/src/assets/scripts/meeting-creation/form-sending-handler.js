@@ -1,5 +1,7 @@
 import * as urls from '../constants/urls';
 import {getUserID} from "../cookie";
+import * as localStorage from '../localStorage';
+import {getRoomId} from "../localStorage";
 
 function sendForm(calenderID) {
     //manual time settings:
@@ -25,6 +27,9 @@ function sendForm(calenderID) {
  * @property {string} manTimeDateEnd    end of manual date
  * @property {string} manTimeTimeStart  start of manual time
  * @property {string} manTimeTimeEnd    end of manual time
+ * @property {boolean} autoRoom         autoRoom enabled
+ * @property {string[]} roomValues      values for room (equipments)
+ * @property {number} roomId            id for room (manual mode)
  */
 
 /**
@@ -44,9 +49,13 @@ function getFormData() {
     result.manTimeTimeStart = $("#meeting-creation-manual-time-start").val();
     result.manTimeTimeEnd = $("#meeting-creation-manual-time-end").val();
 
+    result.autoRoom = $('#meeting-creation-room-automatic-btn').hasClass('active');
+    result.roomValues = $('#meeting-creation-equipment-select').val();
+    result.roomId = getRoomId();
     return result;
 }
 
 export {
-    sendForm
+    sendForm,
+    getFormData
 }

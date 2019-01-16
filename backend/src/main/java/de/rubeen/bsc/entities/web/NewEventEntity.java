@@ -5,31 +5,39 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import javax.annotation.Nullable;
 
+import java.util.List;
+
 import static java.text.MessageFormat.format;
 
 public class NewEventEntity {
     private String subject, description;
-    private boolean autoTime;
+    private boolean autoTime, autoRoom;
     private String manTimeDateStart, manTimeDateEnd;
     private String manTimeTimeStart, manTimeTimeEnd;
+    private List<String> roomValues;
+    private Integer roomId;
 
     public NewEventEntity() {}
 
-    public NewEventEntity(String subject, String description, boolean autoTime) {
+    public NewEventEntity(String subject, String description, boolean autoTime, boolean autoRoom) {
         this.subject = subject;
         this.description = description;
         this.autoTime = autoTime;
     }
 
-    public NewEventEntity(String subject, String description, boolean autoTime,
-                          String manTimeDateStart, String manTimeDateEnd, String manTimeTimeStart, String manTimeTimeEnd) {
+    public NewEventEntity(String subject, String description, boolean autoTime, boolean autoRoom,
+                          String manTimeDateStart, String manTimeDateEnd, String manTimeTimeStart, String manTimeTimeEnd,
+                          List<String> roomValues, Integer roomId) {
         this.subject = subject;
         this.description = description;
         this.autoTime = autoTime;
+        this.autoRoom = autoRoom;
         this.manTimeDateStart = manTimeDateStart;
         this.manTimeDateEnd = manTimeDateEnd;
         this.manTimeTimeStart = manTimeTimeStart;
         this.manTimeTimeEnd = manTimeTimeEnd;
+        this.roomValues = roomValues;
+        this.roomId = roomId;
     }
 
     @JsonGetter
@@ -107,5 +115,29 @@ public class NewEventEntity {
         return format("(subject: {0}, description: {1}, autoTime: {2}, manTimeDateStart: {3}, manTimeDateEnd: {4}, manTimeTimeStart: {5}, manTimeTimeEnd: {6})",
                 this.subject, this.description, this.autoTime, this.manTimeDateStart, this.manTimeDateEnd,
                 this.manTimeTimeStart, this.manTimeTimeEnd);
+    }
+
+    public boolean isAutoRoom() {
+        return autoRoom;
+    }
+
+    public void setAutoRoom(boolean autoRoom) {
+        this.autoRoom = autoRoom;
+    }
+
+    public List<String> getRoomValues() {
+        return roomValues;
+    }
+
+    public void setRoomValues(List<String> roomValues) {
+        this.roomValues = roomValues;
+    }
+
+    public Integer getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(Integer roomId) {
+        this.roomId = roomId;
     }
 }

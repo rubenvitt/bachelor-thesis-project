@@ -27,14 +27,16 @@ import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
 public class EventService extends AbstractDatabaseService {
     private final GoogleProviderService googleProviderService;
     private final LoginService loginService;
+    private final RoomService roomService;
 
     @Autowired
     public EventService(@Value("${database.url}") final String url,
                         @Value("${database.user}") final String user,
-                        @Value("${database.pass}") final String password, GoogleProviderService googleProviderService, LoginService loginService) throws SQLException {
+                        @Value("${database.pass}") final String password, GoogleProviderService googleProviderService, LoginService loginService, RoomService roomService) throws SQLException {
         super(url, user, password);
         this.googleProviderService = googleProviderService;
         this.loginService = loginService;
+        this.roomService = roomService;
     }
 
     public List<EventEntity> getAllEventsForToday(String userMail) {
@@ -86,11 +88,26 @@ public class EventService extends AbstractDatabaseService {
                 }).filter(Objects::nonNull)
                 .collect(Collectors.toList());
         List<EventEntity> eventEntities = new LinkedList<>();
-        eventsList.forEach(events -> eventEntities.addAll(
-                events.getItems().parallelStream()
-                        .map(event -> new EventEntity(event.getSummary(), new DateTime(event.getStart().getDateTime().toString()), new DateTime(event.getEnd().getDateTime().toString())))
-                        .collect(Collectors.toList())
-        ));
+        eventsList.stream()
+                .filter(events -> events.getItems().size() > 0)
+                .forEach(events -> eventEntities.addAll(
+                        events.getItems().stream()
+                                .map(event -> {
+                                    LOG.info("Mapping: {}", event);
+                                    DateTime start, end;
+                                    LOG.info("START-DT: {}", event.getStart().getDateTime());
+                                    if (event.getStart().getDateTime() == null)
+                                        start = new DateTime(event.getStart().getDate().toString());
+                                    else
+                                        start = new DateTime(event.getStart().getDateTime().toString());
+                                    if (event.getEnd().getDateTime() == null)
+                                        end = new DateTime(event.getEnd().getDate().toString());
+                                    else
+                                        end = new DateTime(event.getEnd().getDateTime().toString());
+                                    return new EventEntity(event.getSummary(), start, end);
+                                })
+                                .collect(Collectors.toList())
+                ));
         eventEntities.sort(EventComparatorFactory.getDateComparator());
         return eventEntities;
     }

@@ -74,6 +74,7 @@ public class CalendarController {
         checkArgument(/* auto-time */ (newEventEntity.isAutoTime()
                 /* man-time */ || !(newEventEntity.getManTimeDateEnd().isBlank() || newEventEntity.getManTimeDateStart().isBlank()
                 || newEventEntity.getManTimeTimeEnd().isBlank() || newEventEntity.getManTimeTimeStart().isBlank())));
+        checkArgument(/* auto-room // man-room */ !newEventEntity.isAutoRoom() || newEventEntity.getRoomId() != null);
     }
 
 

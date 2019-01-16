@@ -18,6 +18,8 @@ import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
+import de.rubeen.bsc.service.RoomService;
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ public class GoogleProviderService {
             CREDENTIAL_DATA_STORE_PATH = "google-auth-clients";
     private static final Logger LOG = LoggerFactory.getLogger(GoogleProviderService.class);
     private final CalendarService calendarService;
+    private final RoomService roomService;
     @Value("${google.client.redirectUri}")
     private String redirectURL;
     @Value("${google.client.client-id}")
@@ -56,8 +59,9 @@ public class GoogleProviderService {
     private JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
     @Autowired
-    public GoogleProviderService(CalendarService calendarService) {
+    public GoogleProviderService(CalendarService calendarService, RoomService roomService) {
         this.calendarService = calendarService;
+        this.roomService = roomService;
     }
 
     @PostConstruct
@@ -197,6 +201,12 @@ public class GoogleProviderService {
         try {
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
+            String room = "";
+            if (newEventEntity.isAutoRoom()) {
+                throw new NotImplementedException("AutoRoom was not implemented, yet");
+            } else {
+                room = roomService.getRoomById(newEventEntity.getRoomId());
+            }
             LOG.info("Using calendar: " + calendarId);
             DateTime dateTimeStart = new DateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(format("{0} {1}", newEventEntity.getManTimeDateStart(), newEventEntity.getManTimeTimeStart())));
             DateTime dateTimeEnd = new DateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(format("{0} {1}", newEventEntity.getManTimeDateEnd(), newEventEntity.getManTimeTimeEnd())));
@@ -207,7 +217,8 @@ public class GoogleProviderService {
                     .setDescription(newEventEntity.getDescription())
                     .setStart(new EventDateTime().setDateTime(dateTimeStart))
                     .setEnd(new EventDateTime().setDateTime(dateTimeEnd))
-                    .setEtag("test");
+                    .setLocation(room);
+                    //.setEtag("test");
             calendar.events().insert(calendarId, event).execute();
         } catch (CredentialException e) {
             LOG.error("Credential exception: ", e);

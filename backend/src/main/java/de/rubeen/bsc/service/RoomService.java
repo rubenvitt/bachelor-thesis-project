@@ -98,4 +98,12 @@ public class RoomService extends AbstractDatabaseService {
                 .map(record -> modelMapper.map(record, RoomEntity.EquipmentEntity.class))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
+
+    public String getRoomById(Integer roomId) {
+        checkNotNull(roomId);
+        return dslContext.select(ROOM.ROOM_NAME)
+                .from(ROOM)
+                .where(ROOM.ROOM_ID.eq(roomId))
+                .fetchOne().value1();
+    }
 }
