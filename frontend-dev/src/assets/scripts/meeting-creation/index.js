@@ -5,6 +5,7 @@ import * as checkboxController from "../checkbox-in-list-with-badge";
 import * as formSender from './form-sending-handler';
 import * as localStorage from '../localStorage';
 import * as appUser from '../appuser'
+import * as clockPicker from '../clockpicker';
 
 function displayActiveCalendarsInModal(calendars) {
     function getListItemFor(id, name) {
@@ -211,5 +212,12 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
 
         $('.input-daterange').datepicker({});
         //$('.input-daterange input').datepicker().on('dateChanged', () => alert("test"));
+    });
+
+    //clock-picker
+    clockPicker.createClockPicker($('#meeting-creation-manual-time-start'), function (value) {
+        clockPicker.fillInputWithTime($('#meeting-creation-manual-time-end'), value, 15);
+    });
+    clockPicker.createClockPicker($('#meeting-creation-manual-time-end'), function () {
     });
 }

@@ -14,6 +14,7 @@ var authRouter = require('./routes/auth');
 var app = express();
 
 app.use(logger('dev'));
+
 //defining api above parsers - only url-rewriting!
 app.use('/api', proxy({
     target: 'https://localhost:8443',

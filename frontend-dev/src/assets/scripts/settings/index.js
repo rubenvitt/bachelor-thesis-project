@@ -68,7 +68,7 @@ if (document.getElementById("settings-workingHours")) {
             $(this).toggleClass("btn-success");
             $(this).toggleClass("btn-outline-primary")
         });
-        $('.clockpicker').clockpicker();
+        $('.clockpicker').clockpicker(undefined);
     });
 
     $("#account-settings-remove-microsoft-access-token-btn").click(function () {
