@@ -1,3 +1,5 @@
+import * as colors from '../constants/colors';
+
 global.jQuery = require('jquery');
 require('jquery-clock-timepicker');
 
@@ -10,6 +12,10 @@ function createClockPicker(clockPicker, handler) {
     clockPicker.clockTimePicker({
         precision: 5,
         onChange: handler,
+        buttonTextColor: colors.COLORS["deep-orange-500"],
+        popupHeaderBackgroundColor: colors.COLORS["deep-orange-500"],
+        selectorColor: colors.COLORS["deep-orange-500"],
+        required: true
     });
 }
 

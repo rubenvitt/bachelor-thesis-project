@@ -3,6 +3,7 @@ import * as URLS from '../constants/urls'
 import * as cookie from '../cookie'
 import * as calendar from '../calendar'
 import * as workingHours from '../workingHours'
+import * as clockPicker from '../clockpicker';
 
 if (document.getElementById("settings-workingHours")) {
     //this page is a settings-page
@@ -38,8 +39,6 @@ if (document.getElementById("settings-workingHours")) {
             const id = $(this).attr('itemid') === 'undefined' ? null : $(this).attr('itemid');
             const startTime = $(this).find('.clockpicker').first().children('input').val();
             const endTime = $($(this).find('.clockpicker').get(1)).children('input').val();
-            console.log($(buttons.get(0)));
-            console.log($(buttons.get(0)).hasClass('btn-success'));
             const monday = $(buttons.get(0)).hasClass('btn-success');
             const tuesday = $(buttons.get(1)).hasClass('btn-success');
             const wednesday = $(buttons.get(2)).hasClass('btn-success');
@@ -53,8 +52,6 @@ if (document.getElementById("settings-workingHours")) {
                 wednesday: wednesday, thursday: thursday, friday: friday, saturday: saturday, sunday: sunday
             });
         });
-
-        console.log(data);
         workingHours.sendWorkingHours(data);
     });
 
@@ -68,7 +65,7 @@ if (document.getElementById("settings-workingHours")) {
             $(this).toggleClass("btn-success");
             $(this).toggleClass("btn-outline-primary")
         });
-        $('.clockpicker').clockpicker(undefined);
+        clockPicker.createClockPicker($('.clockpicker input'), undefined);
     });
 
     $("#account-settings-remove-microsoft-access-token-btn").click(function () {
@@ -121,9 +118,7 @@ function showOfficeCalendars(calendars) {
     const list = $('#settings-list-group-office-cal-list');
     list.html(getHtmlFromCalendarEntities(calendars));
     const inputList = list.children().children('input');
-    checkboxController.initCheckboxList(inputList, function (checked) {
-        console.log(checked);
-    });
+    checkboxController.initCheckboxList(inputList, undefined);
 }
 
 /**
@@ -135,7 +130,6 @@ function showGoogleCalendars(calendars) {
     list.html(getHtmlFromCalendarEntities(calendars));
     const inputList = list.children().children('input');
     checkboxController.initCheckboxList(inputList, function (checked, id) {
-        console.log("AJAX: " + checked + " --- " + id);
         $.ajax({
             url: `${URLS.apiUrl}/calendar/activate?${jQuery.param({
                 "calendar_id": id,
@@ -225,5 +219,5 @@ function fillWorkingHours(workingHours) {
         $(this).toggleClass("btn-success");
         $(this).toggleClass("btn-outline-primary")
     });
-    $('.clockpicker').clockpicker();
+    clockPicker.createClockPicker($('.clockpicker input'), undefined);
 }
