@@ -44,6 +44,8 @@ backend-build:
 backend-deploy-docker:
   image: docker:latest
   stage: deploy
+  before_script:
+    - chmod +x backend/mvnw
   script:
     - cd backend
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
