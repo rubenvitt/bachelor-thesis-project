@@ -1,8 +1,9 @@
 package de.rubeen.bsc.service;
 
-import com.google.common.base.Preconditions;
 import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.NameTokenizers;
 import org.modelmapper.jooq.RecordValueReader;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static de.rubeen.bsc.entities.db.tables.Appuser.APPUSER;
 import static de.rubeen.bsc.entities.db.tables.Workinghours.WORKINGHOURS;
 
@@ -86,11 +87,21 @@ public class UserService extends AbstractDatabaseService {
                 .executeAsync();
     }
 
-    public List<AppUserEntity> getAllAppUsers(String userMail) {
+    public List<AppUserEntity> getAllAppUsers(String userMail, String filter) {
         checkNotNull(userMail);
-        return dslContext.select()
+        SelectConditionStep<Record> select = dslContext.select()
                 .from(APPUSER)
-                .where(APPUSER.ID.notEqual(loginService.getUserID(userMail)))
+                .where(APPUSER.ID.notEqual(loginService.getUserID(userMail)));
+        if (filter != null && !filter.isBlank()) {
+            filter = filter.toUpperCase();
+            select = select
+                    .and(APPUSER.NAME.upper().contains(filter)
+                            .or(APPUSER.MAIL.upper().contains(filter))
+                            .or(APPUSER.POSITION.upper().contains(filter))
+                    );
+        }
+        return select
+                .orderBy(APPUSER.NAME, APPUSER.POSITION, APPUSER.MAIL ,APPUSER.ID)
                 .fetch().parallelStream()
                 .map(record -> modelMapper.map(record, AppUserEntity.class))
                 .collect(Collectors.toList());

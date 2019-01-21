@@ -39,6 +39,45 @@ function displayActiveCalendarsInModal(calendars) {
     });
 }
 
+function getAppUsers(filter) {
+    appUser.getOtherAppUser(filter,
+        /**
+         * @param {appUser[]} appUserList
+         */
+        function (appUserList) {
+            //fill attendee-list
+            let html = "";
+            appUserList.forEach(user => {
+                html += `
+                <a itemid="${user.id}" href="javascript:void {}"
+                   class="list-group-item list-group-item-action container">
+                    <div class="row">
+                        <div class="col-3">
+                            <img class="w-100p rounded-circle"
+                                 src="${user.avatar}">
+                        </div>
+                        <div class="col-9">
+                            <div class="container">
+                                <div class="row">
+                                    <h6 class="mb-0">${user.name}</h6>
+                                </div>
+                                <div class="row">
+                                    <small>${user.position}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>`;
+            });
+            const attendeeList = $('#newMeeting-attendee-list');
+            attendeeList.html(html);
+            const attendeesLinks = attendeeList.find("a");
+            attendeesLinks.click(function () {
+                $(this).toggleClass("active");
+            });
+        });
+}
+
 if (document.getElementById("newMeeting-chooseMeetingType")) {
     $('#meeting-creation-intelligent-duration-time').find('a').click((evt) => {
         const targetLink = $(evt.target);
@@ -79,42 +118,14 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
     });
 
     //attendees
-    appUser.getOtherAppUser(
-        /**
-         * @param {appUser[]} appUserList
-         */
-        function (appUserList) {
-            //fill attendee-list
-            let html = "";
-            appUserList.forEach(user => {
-                html += `
-                <a itemid="${user.id}" href="javascript:void {}"
-                   class="list-group-item list-group-item-action container">
-                    <div class="row">
-                        <div class="col-3">
-                            <img class="w-100p rounded-circle"
-                                 src="${user.avatar}">
-                        </div>
-                        <div class="col-9">
-                            <div class="container">
-                                <div class="row">
-                                    <h6 class="mb-0">${user.name}</h6>
-                                </div>
-                                <div class="row">
-                                    <small>${user.position}</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>`;
-            });
-            const attendeeList = $('#newMeeting-attendee-list');
-            attendeeList.html(html);
-            const attendeesLinks = attendeeList.find("a");
-            attendeesLinks.click(function () {
-                $(this).toggleClass("active");
-            });
-        });
+    getAppUsers(undefined);
+    const filter = $('#attendee-filter');
+    filter.change(function () {
+        getAppUsers($(this).val());
+    });
+    filter.keyup(function () {
+        getAppUsers($(this).val());
+    });
     $.ajax({
         url: `${URLS.apiUrl}/rooms/equipments`,
         data: {

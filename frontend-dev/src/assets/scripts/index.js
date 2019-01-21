@@ -23,3 +23,4 @@ import './clockpicker';
 import './selectpicker';
 import './checkbox-in-list-with-badge';
 import './events';
+import './topbar';

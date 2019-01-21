@@ -36,8 +36,9 @@ public class UserController {
     }
 
     @RequestMapping(path = "/list", method = RequestMethod.GET)
-    public List<AppUserEntity> getAppUserList(@RequestParam(value = "user_id") String userId) {
-        return userService.getAllAppUsers(userId);
+    public List<AppUserEntity> getAppUserList(@RequestParam(value = "user_id") String userId,
+                                              @RequestParam(value = "filter", required = false) String filter) {
+        return userService.getAllAppUsers(userId, filter);
     }
 
     @RequestMapping(method = RequestMethod.GET)
