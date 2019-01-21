@@ -42,5 +42,4 @@ public class CalendarService extends AbstractDatabaseService {
                 .where(CALENDAR.CALENDARID.eq(calendarID))
                 .and(CALENDAR.USER_ID.eq(loginService.getUserID(userMail.replace("%40", "@")))).executeAsync();
     }
-
 }

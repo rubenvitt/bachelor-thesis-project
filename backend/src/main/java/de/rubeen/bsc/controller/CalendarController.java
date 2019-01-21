@@ -48,13 +48,6 @@ public class CalendarController {
         return eventService.getAllEventsForWeekNumber(week, userID);
     }
 
-    /*@RequestMapping(value = "/events", method = RequestMethod.GET)
-    public List<EventEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID,
-                                                           @RequestParam("time-start") Long startMillis,
-                                                           @RequestParam("time-end") Long endMillis) {
-        return eventService.getAllEventsForUser(userID, startMillis, endMillis);
-    }*/
-
     @RequestMapping(value = "/events/create", method = RequestMethod.POST, consumes = "application/json")
     public void createNewEvent(@RequestBody NewEventEntity newEventEntity, HttpServletResponse response,
                                @RequestParam(value = "user_id") String userId,
