@@ -43,7 +43,7 @@ backend-build:
 
 backend-deploy-docker:
   image: docker:latest
-  stage: deploy
+  #stage: deploy
   before_script:
     - chmod +x backend/mvnw
   script:
