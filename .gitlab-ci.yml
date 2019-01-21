@@ -41,18 +41,18 @@ backend-build:
   tags:
     - docker
 
-backend-deploy-docker:
-  image: docker:latest
-  #stage: deploy
-  before_script:
-    - chmod +x backend/mvnw
-  script:
-    - cd backend
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
-    - ./mvnw install dockerfile:build mvn package -DskipTests -Dskip.jooq.generation=true
-    - ./mvnw dockerfile:push mvn package -DskipTests -Dskip.jooq.generation=true
-  tags:
-    - docker
+#backend-deploy-docker:
+#  image: docker:latest
+#  stage: deploy
+#  before_script:
+#    - chmod +x backend/mvnw
+#  script:
+#    - cd backend
+#    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
+#    - ./mvnw install dockerfile:build mvn package -DskipTests -Dskip.jooq.generation=true
+#    - ./mvnw dockerfile:push mvn package -DskipTests -Dskip.jooq.generation=true
+#  tags:
+#    - docker
 
 frontend-build:
   image: node:latest
