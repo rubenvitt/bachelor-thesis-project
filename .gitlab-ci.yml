@@ -24,7 +24,7 @@ backend-test:
     when: on_failure
   script:
     - cd backend
-    - mvn test
+    - mvn test -Dskip.jooq.generation=true
   tags:
     - docker
 
@@ -37,7 +37,7 @@ backend-build:
       - ./backend/target/*.jar
   script:
     - cd backend
-    - mvn package -DskipTests
+    - mvn package -DskipTests -Dskip.jooq.generation=true
   tags:
     - docker
 
@@ -47,8 +47,8 @@ backend-deploy-docker:
   script:
     - cd backend
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
-    - ./mvnw install dockerfile:build
-    - ./mvnw dockerfile:push
+    - ./mvnw install dockerfile:build mvn package -DskipTests -Dskip.jooq.generation=true
+    - ./mvnw dockerfile:push mvn package -DskipTests -Dskip.jooq.generation=true
   tags:
     - docker
 

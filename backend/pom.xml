@@ -24,6 +24,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
         <docker.image.prefix>docker.fme.de/r.vitt/bsc</docker.image.prefix>
+        <skip.jooq.generation>false</skip.jooq.generation>
     </properties>
 
     <dependencies>
@@ -174,7 +175,6 @@
             <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
-
                 <executions>
                     <execution>
                         <goals>
@@ -192,6 +192,7 @@
                 </dependencies>
 
                 <configuration>
+                    <skip>${skip.jooq.generation}</skip>
                     <jdbc>
                         <driver>org.postgresql.Driver</driver>
                         <url>jdbc:postgresql://localhost:5432/testdatabase</url>
