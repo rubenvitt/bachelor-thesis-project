@@ -62,9 +62,9 @@ public class CalendarController {
         try {
             LOG.info("got event entity: " + newEventEntity);
             checkNewEvent(newEventEntity);
-            eventService.addEvent(newEventEntity, userId, calendarId);
+            eventService.addEvent(newEventEntity, userId.replace("@", "%40"), calendarId);
         } catch (IllegalArgumentException | NullPointerException ex) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event not correct or filled completely!");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.toString());
         }
     }
 

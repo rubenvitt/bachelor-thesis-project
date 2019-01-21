@@ -16,11 +16,14 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.web.CalendarEntity;
+import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
+import de.rubeen.bsc.service.LoginService;
 import de.rubeen.bsc.service.RoomService;
 import de.rubeen.bsc.service.UserService;
 import org.apache.commons.lang3.NotImplementedException;
+import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +35,11 @@ import javax.security.auth.login.CredentialException;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
@@ -62,7 +63,7 @@ public class GoogleProviderService {
     private JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
     @Autowired
-    public GoogleProviderService(CalendarService calendarService, RoomService roomService, UserService userService) {
+    public GoogleProviderService(CalendarService calendarService, RoomService roomService, UserService userService, LoginService loginService) {
         this.calendarService = calendarService;
         this.roomService = roomService;
         this.userService = userService;
@@ -162,42 +163,92 @@ public class GoogleProviderService {
         }
     }
 
-    public FreeBusyResponse getFreeBusyTimes(String user_id) throws IOException, CredentialException {
-        Credential credential = flow.loadCredential(user_id);
+    public void createAutoEvent(String userId, String calendarId, NewEventEntity eventEntity) throws IOException, GeneralSecurityException {
+        Credential credential = flow.loadCredential(userId.replace("@", "%40"));
         try {
             validateCredential(credential);
-            //FreeBusyRequest request =
-            String dIn = "2018-12-20 08:00:00";
-            String dIne = "2018-12-20 20:00:00";
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Calendar calendar = getCalendar(credential);
+            //if manual room, search for time with specific room...
+            if (eventEntity.isAutoRoom()) {
+                throw new NotImplementedException("Auto-Room was not implemented, yet");
+            } else {
+                int roomId = eventEntity.getRoomId();
+                //roomService can only return room-name
+                //TODO implement roomService functionality to get calendar (with provider) for rooms
+                LOG.info("using room: {}", roomService.getRoomById(roomId));
 
-            Date d = df.parse(dIn);
-            DateTime startTime = new DateTime(d, TimeZone.getDefault());
+                LOG.info("Meeting will be between {} and {} with a duration of {} {}",
+                        eventEntity.getAutoTimeDateStart(), eventEntity.getAutoTimeDateEnd(),
+                        eventEntity.getMeetingDuration(), eventEntity.getDurationUnit());
+            }
+            List<TimePeriod> busyTimes = getBusyTimes(userId, eventEntity, calendar);
+            List<LoginHoursEntity> workingHours = userService.getWorkingHours(userId);
+            LOG.debug("Got {} busyTimes: {}", busyTimes.size(), busyTimes);
+            LOG.info("Meeting cannot be between:");
+            busyTimes.forEach(timePeriod -> {
+                org.joda.time.DateTime start = new org.joda.time.DateTime(timePeriod.getStart().getValue());
+                org.joda.time.DateTime end = new org.joda.time.DateTime(timePeriod.getEnd().getValue());
+                LOG.info("{} - {}", start.toString("d.M.y (H:m)"), end.toString("d.M.y (H:m)"));
+            });
 
-            Date de = df.parse(dIne);
-            DateTime endTime = new DateTime(de, TimeZone.getDefault());
-
-            FreeBusyRequest req = new FreeBusyRequest();
-            req.setTimeMin(startTime);
-            req.setTimeMax(endTime);
-            req.setItems(List.of(new FreeBusyRequestItem().setId("rubeenv3@gmail.com")));
-            Calendar.Freebusy.Query fbq = getCalendar(credential).freebusy().query(req);
-
-            FreeBusyResponse fbresponse = fbq.execute();
-            System.out.println("-------------------------------");
-            System.out.println(fbresponse.toString());
-            System.out.println(fbresponse.getCalendars());
-            fbresponse.getCalendars().forEach((s, freeBusyCalendar) -> System.out.println(freeBusyCalendar));
-            fbresponse.getCalendars().forEach((s, freeBusyCalendar) -> freeBusyCalendar.getBusy().forEach(System.out::println));
-            System.out.println("-------------------------------");
-            return fbresponse;
-        } catch (CredentialException e) {
-            LOG.error("Credential exception: ", e);
+            LOG.debug("Got {} workingHours: {}", workingHours.size(), workingHours);
+            workingHours.forEach(loginHoursEntity -> {
+                LocalTime start = new LocalTime(loginHoursEntity.getStartTime());
+                LocalTime end = new LocalTime(loginHoursEntity.getEndTime());
+                String dayString = (loginHoursEntity.isMonday() ? "Mon " : "") +
+                        (loginHoursEntity.isTuesday() ? "Tue " : "") +
+                        (loginHoursEntity.isWednesday() ? "Wed " : "") +
+                        (loginHoursEntity.isThursday() ? "Thr " : "") +
+                        (loginHoursEntity.isFriday() ? "Fri " : "") +
+                        (loginHoursEntity.isSaturday() ? "Sat " : "") +
+                        (loginHoursEntity.isSunday() ? "Sun " : "");
+                LOG.info("{}{} - {}", dayString, start.toString("H:m"), end.toString("H:m"));
+            });
+        } catch (GeneralSecurityException e) {
+            LOG.error("Security-Exception: ", e);
             throw e;
-        } catch (ParseException e) {
-            LOG.error("Error while parsing: ", e);
         }
-        return null;
+    }
+
+    private List<TimePeriod> getBusyTimes(String userId, NewEventEntity eventEntity, Calendar calendar) throws IOException, GeneralSecurityException {
+        try {
+            DateTime timeMin = new DateTime(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()).toDate());
+            DateTime timeMax = new DateTime(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()).toDate());
+            LOG.debug("Creating response");
+            FreeBusyResponse response = calendar.freebusy().query(
+                    new FreeBusyRequest()
+                            .setTimeMin(timeMin)
+                            .setTimeMax(timeMax)
+                            .setItems(getFreeBusyRequestItems(userId))
+            ).execute();
+            LOG.debug("Executed request");
+            List<TimePeriod> result = new LinkedList<>();
+            LOG.debug("List created... Filling list");
+            response.getCalendars().forEach((s, freeBusyCalendar) -> result.addAll(freeBusyCalendar.getBusy()));
+            LOG.debug("List was filled. finished getBusyTimes");
+            return result;
+        } catch (IOException | GeneralSecurityException e) {
+            LOG.error("Unable to get free/busy request items for {}", userId, e);
+            throw e;
+        }
+    }
+
+    private List<FreeBusyRequestItem> getFreeBusyRequestItems(String userId) throws IOException, GeneralSecurityException {
+        try {
+            LOG.debug("Getting freeBusyRequest items...");
+            LOG.debug("Getting all active calendars for {}", userId);
+            List<CalendarEntity> allActiveCalendars = getAllActiveCalendars(userId);
+            LOG.debug("Got all calendars, size: " + allActiveCalendars.size());
+            if (allActiveCalendars.size() == 0)
+                throw new IOException("Active calendars is empty");
+            LOG.debug("Creating freeBusyRequestItems now...t");
+            return allActiveCalendars.parallelStream()
+                    .map(calendarEntity -> new FreeBusyRequestItem().setId(calendarEntity.getCalendarID()))
+                    .collect(Collectors.toList());
+        } catch (IOException | GeneralSecurityException e) {
+            LOG.error("Unable to get calendars for user {}", userId);
+            throw e;
+        }
     }
 
     public void createEvent(String user_id, String calendarId, NewEventEntity newEventEntity) throws IOException, CredentialException {

@@ -1,7 +1,6 @@
 import * as urls from '../constants/urls';
 import {getUserID} from "../cookie";
-import * as localStorage from '../localStorage';
-import {getRoomId} from "../localStorage";
+import {getRoomId} from '../localStorage';
 
 function sendForm(calenderID) {
     //manual time settings:
@@ -23,6 +22,10 @@ function sendForm(calenderID) {
  * @property {string} subject           the subject
  * @property {string} description       the description
  * @property {boolean} autoTime         choose by system?
+ * @property {string} autoTimeDateStart start of auto date
+ * @property {string} autoTimeDateStart start of auto time
+ * @property {number} meetingDuration   duration of an auto-time meeting
+ * @property {string} durationUnit      unit of auto-time meetingDuration
  * @property {string} manTimeDateStart  start of manual date
  * @property {string} manTimeDateEnd    end of manual date
  * @property {string} manTimeTimeStart  start of manual time
@@ -45,6 +48,12 @@ function getFormData() {
     result.subject = $("#meeting-creation-subject").val();
     result.description = $("#meeting-creation-description").val();
     result.autoTime = $('#meeting-creation-time-intelligent-btn').hasClass('active');
+
+    result.autoTimeDateStart = $('#meeting-creation-auto-date-start').val();
+    result.autoTimeDateEnd = $('#meeting-creation-auto-date-end').val();
+    result.meetingDuration = $('#meeting-creation-intelligent-duration').val();
+    result.durationUnit = $('#meeting-creation-intelligent-duration-btn').text();
+
     result.manTimeDateStart = $("#meeting-creation-manual-date-start").val();
     result.manTimeDateEnd = $("#meeting-creation-manual-date-end").val();
     result.manTimeTimeStart = $("#meeting-creation-manual-time-start").val();

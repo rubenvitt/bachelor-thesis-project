@@ -115,10 +115,10 @@ public class EventService extends AbstractDatabaseService {
     public void addEvent(NewEventEntity newEventEntity, String userMail, String calendarId) {
         try {
             if (newEventEntity.isAutoTime()) //create auto event
-                createAutoEvent(newEventEntity, calendarId);
+                createAutoEvent(newEventEntity, userMail, calendarId);
             else
                 createManualEvent(newEventEntity, userMail, calendarId);
-        } catch (CredentialException | IOException e) {
+        } catch (GeneralSecurityException | IOException e) {
             LOG.error("Error while creating event", e);
         }
     }
@@ -128,8 +128,8 @@ public class EventService extends AbstractDatabaseService {
         googleProviderService.createEvent(userMail, calendarId, newEventEntity);
     }
 
-    private void createAutoEvent(NewEventEntity newEventEntity, String calendarId) {
-        LOG.error("not implemented");
+    private void createAutoEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws IOException, GeneralSecurityException {
+        googleProviderService.createAutoEvent(userMail, calendarId, newEventEntity);
     }
 
     private DateTime getBeginOfWeek(Integer weekNumber) {

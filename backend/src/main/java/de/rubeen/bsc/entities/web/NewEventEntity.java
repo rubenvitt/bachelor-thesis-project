@@ -11,6 +11,9 @@ public class NewEventEntity {
     private String subject, description;
     private boolean autoTime, autoRoom;
     private String manTimeDateStart, manTimeDateEnd;
+    private String autoTimeDateStart, autoTimeDateEnd;
+    private Integer meetingDuration;
+    private String durationUnit;
     private String manTimeTimeStart, manTimeTimeEnd;
     private List<String> roomValues;
     private Integer roomId;
@@ -18,15 +21,19 @@ public class NewEventEntity {
 
     public NewEventEntity() {}
 
-    public NewEventEntity(String subject, String description, boolean autoTime, boolean autoRoom, List<Integer> attendees) {
+    public NewEventEntity(String subject, String description, boolean autoTime, boolean autoRoom, String autoTimeDateStart, String autoTimeDateEnd, Integer meetingDuration, String durationUnit, List<Integer> attendees) {
         this.subject = subject;
         this.description = description;
         this.autoTime = autoTime;
+        this.autoTimeDateStart = autoTimeDateStart;
+        this.autoTimeDateEnd = autoTimeDateEnd;
+        this.meetingDuration = meetingDuration;
+        this.durationUnit = durationUnit;
         this.attendees = attendees;
     }
 
     public NewEventEntity(String subject, String description, boolean autoTime, boolean autoRoom,
-                          String manTimeDateStart, String manTimeDateEnd, String manTimeTimeStart, String manTimeTimeEnd,
+                          String manTimeDateStart, String manTimeDateEnd, String autoTimeDateStart, String autoTimeDateEnd, Integer meetingDuration, String durationUnit, String manTimeTimeStart, String manTimeTimeEnd,
                           List<String> roomValues, Integer roomId, List<Integer> attendees) {
         this.subject = subject;
         this.description = description;
@@ -34,6 +41,10 @@ public class NewEventEntity {
         this.autoRoom = autoRoom;
         this.manTimeDateStart = manTimeDateStart;
         this.manTimeDateEnd = manTimeDateEnd;
+        this.autoTimeDateStart = autoTimeDateStart;
+        this.autoTimeDateEnd = autoTimeDateEnd;
+        this.meetingDuration = meetingDuration;
+        this.durationUnit = durationUnit;
         this.manTimeTimeStart = manTimeTimeStart;
         this.manTimeTimeEnd = manTimeTimeEnd;
         this.roomValues = roomValues;
@@ -148,5 +159,37 @@ public class NewEventEntity {
 
     public void setAttendees(List<Integer> attendees) {
         this.attendees = attendees;
+    }
+
+    public String getAutoTimeDateStart() {
+        return autoTimeDateStart;
+    }
+
+    public void setAutoTimeDateStart(String autoTimeDateStart) {
+        this.autoTimeDateStart = autoTimeDateStart;
+    }
+
+    public String getAutoTimeDateEnd() {
+        return autoTimeDateEnd;
+    }
+
+    public void setAutoTimeDateEnd(String autoTimeDateEnd) {
+        this.autoTimeDateEnd = autoTimeDateEnd;
+    }
+
+    public Integer getMeetingDuration() {
+        return meetingDuration;
+    }
+
+    public void setMeetingDuration(Integer meetingDuration) {
+        this.meetingDuration = meetingDuration;
+    }
+
+    public String getDurationUnit() {
+        return durationUnit;
+    }
+
+    public void setDurationUnit(String durationUnit) {
+        this.durationUnit = durationUnit;
     }
 }
