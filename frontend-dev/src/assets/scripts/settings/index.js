@@ -37,8 +37,8 @@ if (document.getElementById("settings-workingHours")) {
             const buttons = $(this).find('.workingday').children('.btn');
 
             const id = $(this).attr('itemid') === 'undefined' ? null : $(this).attr('itemid');
-            const startTime = $(this).find('.clockpicker').first().children('input').val();
-            const endTime = $($(this).find('.clockpicker').get(1)).children('input').val();
+            const startTime = $(this).find('.clockpicker input').first().val();
+            const endTime = $($(this).find('.clockpicker input').get(1)).val();
             const monday = $(buttons.get(0)).hasClass('btn-success');
             const tuesday = $(buttons.get(1)).hasClass('btn-success');
             const wednesday = $(buttons.get(2)).hasClass('btn-success');

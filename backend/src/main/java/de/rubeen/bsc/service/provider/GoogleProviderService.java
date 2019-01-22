@@ -172,7 +172,7 @@ public class GoogleProviderService {
             if (eventEntity.isAutoRoom()) {
                 throw new NotImplementedException("Auto-Room was not implemented, yet");
             } else {
-                int roomId = eventEntity.getRoomId();
+                final int roomId = eventEntity.getRoomId();
                 //roomService can only return room-name
                 //TODO implement roomService functionality to get calendar (with provider) for rooms
                 LOG.info("using room: {}", roomService.getRoomById(roomId));

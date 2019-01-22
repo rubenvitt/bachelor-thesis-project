@@ -30,7 +30,7 @@ function fillInputWithTime(endInput, value, offset) {
     const regexHours = /(\d)+(?=:)/g;
     let minutesResult = Number.parseInt(regexMinutes.exec(value)[0]);
     let hoursResult = Number.parseInt(regexHours.exec(value)[0]);
-    if (endInput.val() === "")
+    if (endInput.val() === "" || endInput.val() === '00:00')
         endInput.val(`${pad(minutesResult + offset >= 60 ? ++hoursResult : hoursResult)}:${pad((minutesResult = minutesResult + offset) >= 60 ? minutesResult - 60 : minutesResult)}`);
 
     function pad(num) {
