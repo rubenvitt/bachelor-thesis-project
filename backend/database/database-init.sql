@@ -1,6 +1,4 @@
-create DATABASE testdatabase;
-create user testuser with encrypted password 'testpass';
-grant all privileges on database testdatabase to testuser;
+create type calProvider as enum ('google', 'office');
 
 create table appUser
 (
@@ -33,8 +31,6 @@ create table credential
   credential varchar(1000)   not null,
   users_id   int             not null references appUser (id) on delete cascade
 );
-
-create type calProvider as enum ('google', 'office');
 
 create table calendar
 (
