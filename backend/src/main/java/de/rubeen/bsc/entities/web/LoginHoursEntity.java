@@ -1,6 +1,7 @@
 package de.rubeen.bsc.entities.web;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import org.joda.time.LocalTime;
 
 import java.text.MessageFormat;
 
@@ -121,8 +122,15 @@ public class LoginHoursEntity {
 
     @Override
     public String toString() {
-        return MessageFormat.format(
-                "(id: {0}, startTime: {1}, endTime: {2}, monday: {3}, tuesday: {4}, wednesday: {5}, thursday: {6}, friday: {7}, saturday: {8}, sunday: {9})",
-                id, startTime, endTime, monday, tuesday, wednesday, thursday, friday, saturday, sunday);
+        LocalTime start = new LocalTime(this.getStartTime());
+        LocalTime end = new LocalTime(this.getEndTime());
+        String dayString = (this.isMonday() ? "Mon " : "") +
+                (this.isTuesday() ? "Tue " : "") +
+                (this.isWednesday() ? "Wed " : "") +
+                (this.isThursday() ? "Thr " : "") +
+                (this.isFriday() ? "Fri " : "") +
+                (this.isSaturday() ? "Sat " : "") +
+                (this.isSunday() ? "Sun " : "");
+        return MessageFormat.format("{0} {1} - {2}", dayString, start, end);
     }
 }

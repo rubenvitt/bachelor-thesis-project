@@ -23,7 +23,10 @@ import de.rubeen.bsc.service.LoginService;
 import de.rubeen.bsc.service.RoomService;
 import de.rubeen.bsc.service.UserService;
 import org.apache.commons.lang3.NotImplementedException;
+import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.LocalTime;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,6 +186,11 @@ public class GoogleProviderService {
             }
             List<TimePeriod> busyTimes = getBusyTimes(userId, eventEntity, calendar);
             List<LoginHoursEntity> workingHours = userService.getWorkingHours(userId);
+            List<Interval> freeTimes =
+                    calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
+                            org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()),
+                            org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()));
+
             LOG.debug("Got {} busyTimes: {}", busyTimes.size(), busyTimes);
             LOG.info("Meeting cannot be between:");
             busyTimes.forEach(timePeriod -> {
@@ -192,18 +200,7 @@ public class GoogleProviderService {
             });
 
             LOG.debug("Got {} workingHours: {}", workingHours.size(), workingHours);
-            workingHours.forEach(loginHoursEntity -> {
-                LocalTime start = new LocalTime(loginHoursEntity.getStartTime());
-                LocalTime end = new LocalTime(loginHoursEntity.getEndTime());
-                String dayString = (loginHoursEntity.isMonday() ? "Mon " : "") +
-                        (loginHoursEntity.isTuesday() ? "Tue " : "") +
-                        (loginHoursEntity.isWednesday() ? "Wed " : "") +
-                        (loginHoursEntity.isThursday() ? "Thr " : "") +
-                        (loginHoursEntity.isFriday() ? "Fri " : "") +
-                        (loginHoursEntity.isSaturday() ? "Sat " : "") +
-                        (loginHoursEntity.isSunday() ? "Sun " : "");
-                LOG.info("{}{} - {}", dayString, start.toString("H:m"), end.toString("H:m"));
-            });
+            workingHours.forEach(loginHoursEntity -> LOG.info(loginHoursEntity.toString()));
         } catch (GeneralSecurityException e) {
             LOG.error("Security-Exception: ", e);
             throw e;
