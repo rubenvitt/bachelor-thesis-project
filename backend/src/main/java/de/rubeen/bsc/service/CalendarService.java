@@ -8,15 +8,14 @@ import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalTime;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.time.DayOfWeek;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,7 +53,7 @@ public class CalendarService extends LoggableService {
                 .and(CALENDAR.USER_ID.eq(loginService.getUserID(userMail.replace("%40", "@")))).executeAsync();
     }
 
-    public List<Interval> getFreeTimes(Stream<TimePeriod> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end) {
+    public Collection<Interval> getFreeTimes(Stream<TimePeriod> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end) {
         LOG.debug("Searching for available meeting suggestions with busyTimes & workingHours between {} and {}",
                 start.toLocalDate(), end.toLocalDate());
         final Interval initInterval = new Interval(start, end);
@@ -86,15 +85,14 @@ public class CalendarService extends LoggableService {
                 interval.getStart().toLocalDate(), interval.getStart().toLocalTime(),
                 interval.getEnd().toLocalDate(), interval.getEnd().toLocalTime()));
 
-        return null;
+        return intervals;
     }
 
     Collection<Interval> calculateFreeTimeWith(final Stream<Interval> workingIntervals,
                                                final Collection<Interval> busyIntervals) {
         List<Interval> resultIntervals = new LinkedList<>();
         workingIntervals.forEach(workingInterval -> {
-            if (busyIntervals.isEmpty())
-                resultIntervals.add(workingInterval);
+            AtomicBoolean meetingAtThisDay = new AtomicBoolean(false);
             busyIntervals.parallelStream().forEach(busyInterval -> {
                 //for each busyInterval:
                 //#1:
@@ -105,6 +103,7 @@ public class CalendarService extends LoggableService {
                         resultIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
                     if (!workingInterval.getEnd().equals(busyInterval.getEnd()))
                         resultIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
+                    meetingAtThisDay.set(true);
                 }
                 //#2:
                 if (workingInterval.contains(busyInterval.getStart())
@@ -112,6 +111,7 @@ public class CalendarService extends LoggableService {
                     //meeting begins in workingTime & ends after workingTime
                     LOG.info("#2: {} starts in and ends after {}", busyInterval, workingInterval);
                     resultIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
+                    meetingAtThisDay.set(true);
                 }
                 //#3:
                 if (busyInterval.getStart().isBefore(workingInterval.getStart())
@@ -119,13 +119,17 @@ public class CalendarService extends LoggableService {
                     //meeting begins before workingTime & ends in workingTime
                     LOG.info("#3: {} starts before and ends in {}", busyInterval, workingInterval);
                     resultIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
+                    meetingAtThisDay.set(true);
                 }
                 //#4:
                 if (busyInterval.contains(workingInterval)) {
                     //workingHours are in meetingTime
                     LOG.info("#4: Working times {} were illuminated by busyTimes: {}", workingInterval, busyInterval);
+                    meetingAtThisDay.set(true);
                 }
             });
+            if (!meetingAtThisDay.get())
+                resultIntervals.add(workingInterval);
         });
         return resultIntervals;
     }

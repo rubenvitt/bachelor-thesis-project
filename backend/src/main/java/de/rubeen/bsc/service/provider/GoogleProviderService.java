@@ -34,12 +34,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.lang.model.type.UnknownTypeException;
 import javax.security.auth.login.CredentialException;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -186,24 +188,49 @@ public class GoogleProviderService {
             }
             List<TimePeriod> busyTimes = getBusyTimes(userId, eventEntity, calendar);
             List<LoginHoursEntity> workingHours = userService.getWorkingHours(userId);
-            List<Interval> freeTimes =
+            Collection<Interval> freeTimes =
                     calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
                             org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()),
                             org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()));
 
-            LOG.debug("Got {} busyTimes: {}", busyTimes.size(), busyTimes);
-            LOG.info("Meeting cannot be between:");
-            busyTimes.forEach(timePeriod -> {
-                org.joda.time.DateTime start = new org.joda.time.DateTime(timePeriod.getStart().getValue());
-                org.joda.time.DateTime end = new org.joda.time.DateTime(timePeriod.getEnd().getValue());
-                LOG.info("{} - {}", start.toString("d.M.y (H:m)"), end.toString("d.M.y (H:m)"));
-            });
-
-            LOG.debug("Got {} workingHours: {}", workingHours.size(), workingHours);
-            workingHours.forEach(loginHoursEntity -> LOG.info(loginHoursEntity.toString()));
+            Collection<Interval> timeSlots = searchTimeSlot(freeTimes, eventEntity);
+            LOG.info("Got {} available time-slots for {}", timeSlots.size(), eventEntity);
         } catch (GeneralSecurityException e) {
             LOG.error("Security-Exception: ", e);
             throw e;
+        }
+    }
+
+    private Collection<Interval> searchTimeSlot(Collection<Interval> freeTimes, NewEventEntity eventEntity) {
+        final List<Interval> resultIntervals = new LinkedList<>();
+        LOG.info("Looking for time-slots for {} in {}", eventEntity, freeTimes);
+        Period eventPeriod = getMeetingDuration(eventEntity.getMeetingDuration(), eventEntity.getDurationUnit());
+        freeTimes.forEach(interval -> {
+            Period timeSlotPeriod = interval.toPeriod();
+            if (eventPeriod.getHours() < timeSlotPeriod.getHours()
+                    || (eventPeriod.getHours() == timeSlotPeriod.getHours()
+                    && eventPeriod.getMinutes() <= timeSlotPeriod.getMinutes())) {
+                LOG.info("found timeSlot: {} ({}) - {} ({})",
+                        interval.getStart().toLocalDate(), interval.getStart().toLocalTime(),
+                        interval.getEnd().toLocalDate(), interval.getEnd().toLocalTime());
+                resultIntervals.add(interval);
+            }
+        });
+        return resultIntervals;
+    }
+
+    private Period getMeetingDuration(Integer meetingDuration, String durationUnit) {
+        switch (durationUnit.toLowerCase()) {
+            case "minutes":
+            case "minute":
+            case "min":
+                return new Period().withMinutes(meetingDuration);
+            case "hours":
+            case "hour":
+            case "h":
+                return new Period().withHours(meetingDuration);
+            default:
+                throw new IllegalArgumentException("meetingDuration not specified correctly");
         }
     }
 
