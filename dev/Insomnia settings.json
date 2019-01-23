@@ -1,0 +1,480 @@
+{
+	"_type": "export",
+	"__export_format": 3,
+	"__export_date": "2019-01-23T08:01:27.526Z",
+	"__export_source": "insomnia.desktop.app:v6.3.2",
+	"resources": [
+		{
+			"_id": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"created": 1548226689627,
+			"description": "",
+			"modified": 1548226715820,
+			"name": "Bachelorarbeit",
+			"parentId": null,
+			"_type": "workspace"
+		},
+		{
+			"_id": "env_46f224afa55f437a8dab8fc6ca95156c",
+			"color": null,
+			"created": 1548226689653,
+			"data": {},
+			"isPrivate": false,
+			"metaSortKey": 1548226689653,
+			"modified": 1548226689653,
+			"name": "New Environment",
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"_type": "environment"
+		},
+		{
+			"_id": "jar_4eb8dcf06f0b45e4809a516713d0b0b2",
+			"cookies": [],
+			"created": 1548226689654,
+			"modified": 1548226689654,
+			"name": "Default Jar",
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"_type": "cookie_jar"
+		},
+		{
+			"_id": "req_c3971400aff246c68e5e9265b3a02cbf",
+			"authentication": {},
+			"body": {},
+			"created": 1548226759486,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548226759486,
+			"method": "GET",
+			"modified": 1548228224475,
+			"name": "CAL-EVENTS: today",
+			"parameters": [
+				{
+					"id": "pair_1cc0f62450454faea9081f75571fe8cf",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/calendar/events/today",
+			"_type": "request"
+		},
+		{
+			"_id": "req_aa0657919a83419ebb67b838c2174206",
+			"authentication": {},
+			"body": {},
+			"created": 1548228218309,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548226759436,
+			"method": "GET",
+			"modified": 1548228234818,
+			"name": "CAL-EVENTS: week",
+			"parameters": [
+				{
+					"id": "pair_1cc0f62450454faea9081f75571fe8cf",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/calendar/events/week",
+			"_type": "request"
+		},
+		{
+			"_id": "req_9a844792b61e4b9f99a57d242d99a71d",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"subject\": \"Test-Betreff\",\n\t\"description\": \"\",\n\t\"autoTime\": true,\n\t\"autoTimeDateStart\": \"2019-01-23\",\n\t\"autoTimeDateEnd\": \"2019-01-31\",\n\t\"meetingDuration\": 15,\n  \"durationUnit\": \"Minutes\",\n  \"manTimeDateStart\": \"2019-01-22\",\n\t\"manTimeDateEnd\": \"2019-01-22\",\n\t\"manTimeTimeStart\": \"10:00\",\n\t\"manTimeTimeEnd\": \"11:00\",\n\t\"autoRoom\": false,\n\t\"roomValues\": [],\n\t\"roomId\": 3,\n\t\"attendees\": []\n}"
+			},
+			"created": 1548228291141,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_4684df17636246448abd7a98ebaf5ff6",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1548228291141,
+			"method": "POST",
+			"modified": 1548228615134,
+			"name": "CAL-EVENTS: create",
+			"parameters": [
+				{
+					"id": "pair_ca98ebc19b4a4d01945e14d2a12000de",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				},
+				{
+					"id": "pair_c0c27e5a43054331a6f3a737cb9677eb",
+					"name": "calendar_id",
+					"value": "rubyrubyruby22@gmail.com"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/calendar/events/create",
+			"_type": "request"
+		},
+		{
+			"_id": "req_ce81d09da13a4044876ac33209345c2a",
+			"authentication": {},
+			"body": {},
+			"created": 1548228713106,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548228713106,
+			"method": "GET",
+			"modified": 1548228738714,
+			"name": "GOOGLE-CALENDAR: list",
+			"parameters": [
+				{
+					"id": "pair_6f2c56e02330473c80b594d325dda946",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/google/calendar",
+			"_type": "request"
+		},
+		{
+			"_id": "req_768f77cbce4c4e23b4ca04ab7b6f63df",
+			"authentication": {},
+			"body": {},
+			"created": 1548228747289,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548228502123.5,
+			"method": "GET",
+			"modified": 1548228761796,
+			"name": "GOOGLE-CALENDAR: active-list",
+			"parameters": [
+				{
+					"id": "pair_6f2c56e02330473c80b594d325dda946",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/google/calendar/active",
+			"_type": "request"
+		},
+		{
+			"_id": "req_ba1ae1174e6d4d3d875573a6efd91bf5",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"r.vitt@fme.de\",\n\t\"password\": \"333\"\n}"
+			},
+			"created": 1548228800552,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_5241728ebfbb4bd89dfdc204a9e23bec",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1548228800552,
+			"method": "POST",
+			"modified": 1548228880528,
+			"name": "LOGIN: login",
+			"parameters": [],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/login",
+			"_type": "request"
+		},
+		{
+			"_id": "req_3ae7094fc5bc48bdad087e6a78f95b5c",
+			"authentication": {},
+			"body": {},
+			"created": 1548228933535,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548228933535,
+			"method": "GET",
+			"modified": 1548228947140,
+			"name": "ROOMS: all",
+			"parameters": [
+				{
+					"id": "pair_ef45d931ca0640af9cc25cb86211baf2",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/rooms/all",
+			"_type": "request"
+		},
+		{
+			"_id": "req_51bd1cdaac4b425c91e7232bff6c862d",
+			"authentication": {},
+			"body": {},
+			"created": 1548228956558,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548228867043.5,
+			"method": "GET",
+			"modified": 1548228966842,
+			"name": "ROOMS: equipments",
+			"parameters": [
+				{
+					"id": "pair_ef45d931ca0640af9cc25cb86211baf2",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/rooms/equipments",
+			"_type": "request"
+		},
+		{
+			"_id": "req_68882047cee040a199b7cdf6f5392eaf",
+			"authentication": {},
+			"body": {},
+			"created": 1548228980620,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548228833797.75,
+			"method": "GET",
+			"modified": 1548228991800,
+			"name": "ROOMS: equipments / room",
+			"parameters": [
+				{
+					"id": "pair_ef45d931ca0640af9cc25cb86211baf2",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				},
+				{
+					"id": "pair_c567856d136740da9ff3c1db7256964a",
+					"name": "room_id",
+					"value": "2"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/rooms/equipments",
+			"_type": "request"
+		},
+		{
+			"_id": "req_d51992eae528474fa8382a74f3d9a49b",
+			"authentication": {},
+			"body": {},
+			"created": 1548229037055,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548229037055,
+			"method": "GET",
+			"modified": 1548229066207,
+			"name": "USER: workingHours",
+			"parameters": [
+				{
+					"id": "pair_5a374fbcf8df4cda991a981d76cbb93b",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/user/workingHours",
+			"_type": "request"
+		},
+		{
+			"_id": "req_e3815e03c5ef4441a5061d35ec467030",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "[{\n\t\"startTime\": \"08:00\",\n\t\"endTime\": \"16:00\",\n\t\"monday\": true,\n\t\"tuesday\": false,\n\t\"wednesday\": false,\n\t\"thursday\": false,\n\t\"friday\": false,\n\t\"saturday\": false,\n\t\"sunday\": false\n}]"
+			},
+			"created": 1548229072885,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_7d62e126aa4c4c35aac37a9b76946ebe",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1548228985295,
+			"method": "POST",
+			"modified": 1548229200199,
+			"name": "USER: workingHours",
+			"parameters": [
+				{
+					"id": "pair_5a374fbcf8df4cda991a981d76cbb93b",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/user/workingHours",
+			"_type": "request"
+		},
+		{
+			"_id": "req_b27136968d444b9fbf7fc9f1770cb482",
+			"authentication": {},
+			"body": {},
+			"created": 1548230207713,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548230207713,
+			"method": "GET",
+			"modified": 1548230223357,
+			"name": "USER: user",
+			"parameters": [
+				{
+					"id": "pair_e97855f69d0c4b0ead3ccf4861ca601d",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/user",
+			"_type": "request"
+		},
+		{
+			"_id": "req_dbecadd9cd914473a93c39285ff9f02a",
+			"authentication": {},
+			"body": {},
+			"created": 1548230234877,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548229622384,
+			"method": "GET",
+			"modified": 1548230266851,
+			"name": "USER: user-list",
+			"parameters": [
+				{
+					"id": "pair_e97855f69d0c4b0ead3ccf4861ca601d",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/user/list",
+			"_type": "request"
+		},
+		{
+			"_id": "req_fc91fc9d20e541958f5abc67df8398b1",
+			"authentication": {},
+			"body": {},
+			"created": 1548230244358,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1548229329719.5,
+			"method": "GET",
+			"modified": 1548230292581,
+			"name": "USER: user-list filtered",
+			"parameters": [
+				{
+					"id": "pair_e97855f69d0c4b0ead3ccf4861ca601d",
+					"name": "user_id",
+					"value": "r.vitt%252540fme.de"
+				},
+				{
+					"id": "pair_cd7586487b934ea1b033bd6a785999c7",
+					"name": "filter",
+					"value": "kast"
+				}
+			],
+			"parentId": "wrk_ad19518931f24b92b0e7d783cd5f387f",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "https://localhost:3333/api/user/list",
+			"_type": "request"
+		}
+	]
+}
