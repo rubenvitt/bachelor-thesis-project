@@ -80,11 +80,12 @@ public class CalendarService extends LoggableService {
                 }).flatMap(List::stream);
         LOG.info("Working-Hours mapped to dateTimes");
 
-        calculateFreeTimeWith(workingIntervals, busyInvervals);
-        //wh minus meetings...
-        //all workingHours have to be checked for all events...
+        Collection<Interval> intervals = calculateFreeTimeWith(workingIntervals, busyInvervals);
+        LOG.info("got {} freeTimes in following intervals:", intervals.size());
+        intervals.forEach(interval -> LOG.info("{} ({}) - {} ({})",
+                interval.getStart().toLocalDate(), interval.getStart().toLocalTime(),
+                interval.getEnd().toLocalDate(), interval.getEnd().toLocalTime()));
 
-        //get times, where user is available in a given timeSpan
         return null;
     }
 
@@ -92,6 +93,8 @@ public class CalendarService extends LoggableService {
                                                final Collection<Interval> busyIntervals) {
         List<Interval> resultIntervals = new LinkedList<>();
         workingIntervals.forEach(workingInterval -> {
+            if (busyIntervals.isEmpty())
+                resultIntervals.add(workingInterval);
             busyIntervals.parallelStream().forEach(busyInterval -> {
                 //for each busyInterval:
                 //#1:
@@ -120,7 +123,7 @@ public class CalendarService extends LoggableService {
                 //#4:
                 if (busyInterval.contains(workingInterval)) {
                     //workingHours are in meetingTime
-                    LOG.info("#4: {} contains {}", busyInterval, busyInterval);
+                    LOG.info("#4: Working times {} were illuminated by busyTimes: {}", workingInterval, busyInterval);
                 }
             });
         });
