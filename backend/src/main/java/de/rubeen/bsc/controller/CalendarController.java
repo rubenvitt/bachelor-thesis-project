@@ -69,10 +69,4 @@ public class CalendarController {
                 || newEventEntity.getManTimeTimeEnd().isBlank() || newEventEntity.getManTimeTimeStart().isBlank())));
         checkArgument(/* auto-room // man-room */ !newEventEntity.isAutoRoom() || newEventEntity.getRoomId() != null);
     }
-
-
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public DateTime testGetter(@RequestParam("week") int week, @RequestParam("t") int t) {
-        return eventService.getTest(week, t);
-    }
 }

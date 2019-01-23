@@ -49,17 +49,6 @@ public class EventService extends AbstractDatabaseService {
         return this.getAllEventsForUser(userMail, begin.getMillis(), end.getMillis());
     }
 
-    public DateTime getTest(int week, int t) {
-        switch (t) {
-            case 0:
-                return getBeginOfWeek(week);
-            case 1:
-                return getEndOfWeek(week);
-            default:
-                return null;
-        }
-    }
-
     public List<EventEntity> getAllEventsForUser(String userMail, Long startMillis, Long endMillis) {
         final DateTime startTime = new DateTime(startMillis),
                 endTime = new DateTime(endMillis);
