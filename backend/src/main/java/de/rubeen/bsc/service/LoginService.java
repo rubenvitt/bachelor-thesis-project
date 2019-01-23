@@ -12,15 +12,15 @@ import java.sql.SQLException;
 import static de.rubeen.bsc.entities.db.Tables.APPUSER;
 
 @Service
-public class LoginService extends AbstractDatabaseService {
-    public LoginService(@Value("${database.url}") final String url,
-                        @Value("${database.user}") final String user,
-                        @Value("${database.pass}") final String password) throws SQLException {
-        super(url, user, password);
+public class LoginService extends LoggableService {
+    private final DatabaseService databaseService;
+
+    public LoginService(DatabaseService databaseService) throws SQLException {
+        this.databaseService = databaseService;
     }
 
     public Boolean login(final String user, final String password) {
-        Result<Record> result = dslContext
+        Result<Record> result = databaseService.getContext()
                 .select()
                 .from(APPUSER)
                 .where(Appuser.APPUSER.MAIL.eq(normalizeMail(user))
@@ -31,7 +31,7 @@ public class LoginService extends AbstractDatabaseService {
     }
 
     public Boolean login(LoginUser loginUser) {
-        Result<Record> result = dslContext
+        Result<Record> result = databaseService.getContext()
                 .select()
                 .from(APPUSER)
                 .where(Appuser.APPUSER.MAIL.eq(normalizeMail(loginUser.getEmail()))
@@ -43,7 +43,7 @@ public class LoginService extends AbstractDatabaseService {
 
     Integer getUserID(String email) {
         LOG.info("Looking for user with mail: " + email);
-        return dslContext.select(APPUSER.ID).from(APPUSER).where(APPUSER.MAIL.eq(normalizeMail(email))).fetchOne(0, int.class);
+        return databaseService.getContext().select(APPUSER.ID).from(APPUSER).where(APPUSER.MAIL.eq(normalizeMail(email))).fetchOne(0, int.class);
     }
 
 

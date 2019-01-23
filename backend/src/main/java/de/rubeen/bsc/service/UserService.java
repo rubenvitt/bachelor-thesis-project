@@ -23,23 +23,22 @@ import static de.rubeen.bsc.entities.db.tables.Appuser.APPUSER;
 import static de.rubeen.bsc.entities.db.tables.Workinghours.WORKINGHOURS;
 
 @Service
-public class UserService extends AbstractDatabaseService {
+public class UserService extends LoggableService {
     private final ModelMapper modelMapper = new ModelMapper();
     private final LoginService loginService;
+    private final DatabaseService databaseService;
 
-    public UserService(@Value("${database.url}") final String url,
-                       @Value("${database.user}") final String user,
-                       @Value("${database.pass}") final String password,
-                       LoginService loginService) throws SQLException {
-        super(url, user, password);
+    public UserService(LoginService loginService, DatabaseService databaseService) throws SQLException {
         this.loginService = loginService;
+        this.databaseService = databaseService;
         modelMapper.getConfiguration().addValueReader(new RecordValueReader());
         modelMapper.getConfiguration().setSourceNameTokenizer(NameTokenizers.UNDERSCORE);
     }
 
     public List<LoginHoursEntity> getWorkingHours(String userMail) {
         LOG.info("Looking for working hours for user: {}", userMail);
-        return dslContext.select(WORKINGHOURS.ID, WORKINGHOURS.STARTTIME, WORKINGHOURS.ENDTIME,
+        return databaseService.getContext()
+                .select(WORKINGHOURS.ID, WORKINGHOURS.STARTTIME, WORKINGHOURS.ENDTIME,
                 WORKINGHOURS.MONDAY, WORKINGHOURS.TUESDAY, WORKINGHOURS.WEDNESDAY, WORKINGHOURS.THURSDAY,
                 WORKINGHOURS.FRIDAY, WORKINGHOURS.SATURDAY, WORKINGHOURS.SUNDAY)
                 .from(APPUSER)
@@ -60,7 +59,8 @@ public class UserService extends AbstractDatabaseService {
     }
 
     private void createWorkingHour(LoginHoursEntity loginHoursEntity, String userMail) {
-        dslContext.insertInto(WORKINGHOURS)
+        databaseService.getContext()
+                .insertInto(WORKINGHOURS)
                 .columns(WORKINGHOURS.USER_FK, WORKINGHOURS.STARTTIME, WORKINGHOURS.ENDTIME,
                         WORKINGHOURS.MONDAY, WORKINGHOURS.TUESDAY, WORKINGHOURS.WEDNESDAY, WORKINGHOURS.THURSDAY,
                         WORKINGHOURS.FRIDAY, WORKINGHOURS.SATURDAY, WORKINGHOURS.SUNDAY)
@@ -72,7 +72,8 @@ public class UserService extends AbstractDatabaseService {
     }
 
     private void updateWorkingHour(LoginHoursEntity loginHoursEntity, String userMail) {
-        dslContext.update(WORKINGHOURS)
+        databaseService.getContext()
+                .update(WORKINGHOURS)
                 .set(WORKINGHOURS.STARTTIME, Time.valueOf(loginHoursEntity.getStartTime()))
                 .set(WORKINGHOURS.ENDTIME, Time.valueOf(loginHoursEntity.getEndTime()))
                 .set(WORKINGHOURS.MONDAY, loginHoursEntity.isMonday())
@@ -89,7 +90,8 @@ public class UserService extends AbstractDatabaseService {
 
     public List<AppUserEntity> getAllAppUsers(String userMail, String filter) {
         checkNotNull(userMail);
-        SelectConditionStep<Record> select = dslContext.select()
+        SelectConditionStep<Record> select = databaseService.getContext()
+                .select()
                 .from(APPUSER)
                 .where(APPUSER.ID.notEqual(loginService.getUserID(userMail)));
         if (filter != null && !filter.isBlank()) {
@@ -101,7 +103,7 @@ public class UserService extends AbstractDatabaseService {
                     );
         }
         return select
-                .orderBy(APPUSER.NAME, APPUSER.POSITION, APPUSER.MAIL ,APPUSER.ID)
+                .orderBy(APPUSER.NAME, APPUSER.POSITION, APPUSER.MAIL, APPUSER.ID)
                 .fetch().parallelStream()
                 .map(record -> modelMapper.map(record, AppUserEntity.class))
                 .collect(Collectors.toList());
@@ -109,7 +111,8 @@ public class UserService extends AbstractDatabaseService {
 
     public AppUserEntity getAppUser(String userMail) {
         checkNotNull(userMail);
-        return dslContext.select()
+        return databaseService.getContext()
+                .select()
                 .from(APPUSER)
                 .where(APPUSER.ID.eq(loginService.getUserID(userMail)))
                 .fetchOne()
@@ -118,7 +121,8 @@ public class UserService extends AbstractDatabaseService {
 
     public AppUserEntity getAppUser(Integer userId) {
         checkNotNull(userId);
-        return dslContext.select()
+        return databaseService.getContext()
+                .select()
                 .from(APPUSER)
                 .where(APPUSER.ID.eq(userId))
                 .fetchOne()

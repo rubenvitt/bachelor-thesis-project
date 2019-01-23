@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,33 +24,31 @@ import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
 import static java.time.DayOfWeek.*;
 
 @Service
-public class CalendarService extends AbstractDatabaseService {
-
+public class CalendarService extends LoggableService {
     private final LoginService loginService;
+    private final DatabaseService databaseService;
 
-    public CalendarService(@Value("${database.url}") final String url,
-                           @Value("${database.user}") final String user,
-                           @Value("${database.pass}") final String password, LoginService loginService) throws SQLException {
-        super(url, user, password);
+    public CalendarService(LoginService loginService, DatabaseService databaseService) throws SQLException {
         this.loginService = loginService;
+        this.databaseService = databaseService;
     }
 
     public void addCalendarToDatabase(String calendarID, String user, Calprovider provider) {
-        Integer integer = dslContext.selectCount().from(CALENDAR).where(Calendar.CALENDAR.CALENDARID.eq(calendarID)).fetchOne(0, int.class);
+        Integer integer = databaseService.getContext().selectCount().from(CALENDAR).where(Calendar.CALENDAR.CALENDARID.eq(calendarID)).fetchOne(0, int.class);
         LOG.info("Found: " + integer);
         if (integer < 1) {
-            dslContext.insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED, CALENDAR.PROVIDER)
+            databaseService.getContext().insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED, CALENDAR.PROVIDER)
                     .values(calendarID, loginService.getUserID(user), true, provider).execute();
         }
     }
 
     public boolean isCalendarActivated(String id) {
-        CalendarRecord calendar = dslContext.selectFrom(CALENDAR).where(CALENDAR.CALENDARID.eq(id)).fetchOne();
+        CalendarRecord calendar = databaseService.getContext().selectFrom(CALENDAR).where(CALENDAR.CALENDARID.eq(id)).fetchOne();
         return calendar.getActivated();
     }
 
     public void setCalendarState(String calendarID, String userMail, boolean state) {
-        dslContext.update(CALENDAR)
+        databaseService.getContext().update(CALENDAR)
                 .set(CALENDAR.ACTIVATED, state)
                 .where(CALENDAR.CALENDARID.eq(calendarID))
                 .and(CALENDAR.USER_ID.eq(loginService.getUserID(userMail.replace("%40", "@")))).executeAsync();
@@ -57,10 +57,10 @@ public class CalendarService extends AbstractDatabaseService {
     public List<Interval> getFreeTimes(Stream<TimePeriod> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end) {
         LOG.debug("Searching for available meeting suggestions with busyTimes & workingHours between {} and {}",
                 start.toLocalDate(), end.toLocalDate());
-        final Stream<Interval> busyInvervals = busyTimePeriods
-                .map(timePeriod -> new Interval(timePeriod.getStart().getValue(), timePeriod.getEnd().getValue()));
         final Interval initInterval = new Interval(start, end);
-
+        final List<Interval> busyInvervals = busyTimePeriods
+                .map(timePeriod -> new Interval(timePeriod.getStart().getValue(), timePeriod.getEnd().getValue()))
+                .collect(Collectors.toList());
         final Stream<Interval> workingIntervals = workingHours
                 .map(loginHoursEntity -> {
                     List<Interval> intervals = new LinkedList<>();
@@ -79,10 +79,52 @@ public class CalendarService extends AbstractDatabaseService {
                     return intervals;
                 }).flatMap(List::stream);
         LOG.info("Working-Hours mapped to dateTimes");
-        workingIntervals.collect(Collectors.toList());
+
+        calculateFreeTimeWith(workingIntervals, busyInvervals);
+        //wh minus meetings...
+        //all workingHours have to be checked for all events...
 
         //get times, where user is available in a given timeSpan
         return null;
+    }
+
+    Collection<Interval> calculateFreeTimeWith(final Stream<Interval> workingIntervals,
+                                               final Collection<Interval> busyIntervals) {
+        List<Interval> resultIntervals = new LinkedList<>();
+        workingIntervals.forEach(workingInterval -> {
+            busyIntervals.parallelStream().forEach(busyInterval -> {
+                //for each busyInterval:
+                //#1:
+                if (workingInterval.contains(busyInterval)) {
+                    //meeting is in workingTime
+                    LOG.info("#1: {} contains {}", workingInterval, busyInterval);
+                    if (!workingInterval.getStart().equals(busyInterval.getStart()))
+                        resultIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
+                    if (!workingInterval.getEnd().equals(busyInterval.getEnd()))
+                        resultIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
+                }
+                //#2:
+                if (workingInterval.contains(busyInterval.getStart())
+                        && busyInterval.getEnd().isAfter(workingInterval.getEnd())) {
+                    //meeting begins in workingTime & ends after workingTime
+                    LOG.info("#2: {} starts in and ends after {}", busyInterval, workingInterval);
+                    resultIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
+                }
+                //#3:
+                if (busyInterval.getStart().isBefore(workingInterval.getStart())
+                        && workingInterval.contains(busyInterval.getEnd())) {
+                    //meeting begins before workingTime & ends in workingTime
+                    LOG.info("#3: {} starts before and ends in {}", busyInterval, workingInterval);
+                    resultIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
+                }
+                //#4:
+                if (busyInterval.contains(workingInterval)) {
+                    //workingHours are in meetingTime
+                    LOG.info("#4: {} contains {}", busyInterval, busyInterval);
+                }
+            });
+        });
+        return resultIntervals;
     }
 
     @SuppressWarnings("Duplicates")

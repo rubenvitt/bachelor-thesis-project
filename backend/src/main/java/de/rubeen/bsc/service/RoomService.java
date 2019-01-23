@@ -1,6 +1,5 @@
 package de.rubeen.bsc.service;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import de.rubeen.bsc.entities.web.RoomEntity;
@@ -9,7 +8,6 @@ import org.jooq.Result;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.NameTokenizers;
 import org.modelmapper.jooq.RecordValueReader;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -25,20 +23,20 @@ import static de.rubeen.bsc.entities.db.tables.RoomEquipment.ROOM_EQUIPMENT;
 import static de.rubeen.bsc.entities.db.tables.RoomRoomEquipment.ROOM_ROOM_EQUIPMENT;
 
 @Service
-public class RoomService extends AbstractDatabaseService {
+public class RoomService extends LoggableService {
     private final ModelMapper modelMapper = new ModelMapper();
+    private final DatabaseService databaseService;
 
-    public RoomService(@Value("${database.url}") final String url,
-                       @Value("${database.user}") final String user,
-                       @Value("${database.pass}") final String password) throws SQLException {
-        super(url, user, password);
+    public RoomService(DatabaseService databaseService) throws SQLException {
+        this.databaseService = databaseService;
         modelMapper.getConfiguration().addValueReader(new RecordValueReader());
         modelMapper.getConfiguration().setSourceNameTokenizer(NameTokenizers.UNDERSCORE);
 
     }
 
     public Collection<RoomEntity.EquipmentEntity> getAllEquipments() {
-        return dslContext.select()
+        return databaseService.getContext()
+                .select()
                 .from(ROOM_EQUIPMENT)
                 .fetch().parallelStream()
                 .map(record -> modelMapper.map(record, RoomEntity.EquipmentEntity.class))
@@ -58,7 +56,8 @@ public class RoomService extends AbstractDatabaseService {
         Multimap<RoomEntity, RoomEntity.EquipmentEntity> roomEntityEquipmentEntityMultimap =
                 MultimapBuilder.treeKeys().arrayListValues().build();
 
-        final Result<Record> records = dslContext.select()
+        final Result<Record> records = databaseService.getContext()
+                .select()
                 .from(ROOM)
                 .join(ROOM_ROOM_EQUIPMENT).onKey()
                 .join(ROOM_EQUIPMENT).onKey()
@@ -89,7 +88,8 @@ public class RoomService extends AbstractDatabaseService {
 
     public Collection<RoomEntity.EquipmentEntity> getEquipments(Integer roomId) {
         checkNotNull(roomId);
-        return dslContext.select()
+        return databaseService.getContext()
+                .select()
                 .from(ROOM)
                 .innerJoin(ROOM_ROOM_EQUIPMENT).onKey()
                 .innerJoin(ROOM_EQUIPMENT).onKey()
@@ -101,7 +101,8 @@ public class RoomService extends AbstractDatabaseService {
 
     public String getRoomById(Integer roomId) {
         checkNotNull(roomId);
-        return dslContext.select(ROOM.ROOM_NAME)
+        return databaseService.getContext()
+                .select(ROOM.ROOM_NAME)
                 .from(ROOM)
                 .where(ROOM.ROOM_ID.eq(roomId))
                 .fetchOne().value1();

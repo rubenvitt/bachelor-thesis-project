@@ -24,19 +24,18 @@ import static de.rubeen.bsc.entities.db.Tables.APPUSER;
 import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
 
 @Service
-public class EventService extends AbstractDatabaseService {
+public class EventService extends LoggableService {
     private final GoogleProviderService googleProviderService;
     private final LoginService loginService;
     private final RoomService roomService;
+    private final DatabaseService databaseService;
 
     @Autowired
-    public EventService(@Value("${database.url}") final String url,
-                        @Value("${database.user}") final String user,
-                        @Value("${database.pass}") final String password, GoogleProviderService googleProviderService, LoginService loginService, RoomService roomService) throws SQLException {
-        super(url, user, password);
+    public EventService(GoogleProviderService googleProviderService, LoginService loginService, RoomService roomService, DatabaseService databaseService) throws SQLException {
         this.googleProviderService = googleProviderService;
         this.loginService = loginService;
         this.roomService = roomService;
+        this.databaseService = databaseService;
     }
 
     public List<EventEntity> getAllEventsForToday(String userMail) {
@@ -53,7 +52,7 @@ public class EventService extends AbstractDatabaseService {
         final DateTime startTime = new DateTime(startMillis),
                 endTime = new DateTime(endMillis);
         final Integer userID = loginService.getUserID(userMail);
-        final List<String> googleCalendars = dslContext
+        final List<String> googleCalendars = databaseService.getContext()
                 .select(CALENDAR.CALENDARID)
                 .from(CALENDAR)
                 .innerJoin(APPUSER).onKey()
