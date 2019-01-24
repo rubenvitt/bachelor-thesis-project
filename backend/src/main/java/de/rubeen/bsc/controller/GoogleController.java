@@ -2,6 +2,7 @@ package de.rubeen.bsc.controller;
 
 import com.google.api.services.calendar.model.FreeBusyResponse;
 import de.rubeen.bsc.entities.web.CalendarEntity;
+import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ public class GoogleController {
         LOG.info("Getting a list of calendars");
         try {
             return googleProviderService.getAllCalendars(user_id);
-        } catch (CredentialException e) {
+        } catch (CalendarProvider.CalendarException e) {
             response.setStatus(401);
             response.setHeader("auth-url", googleProviderService.authorize());
             return null;
@@ -100,7 +101,7 @@ public class GoogleController {
         LOG.info("Getting a list of all activated calendars");
         try {
             return googleProviderService.getAllActiveCalendars(user_id);
-        } catch (CredentialException e) {
+        } catch (CalendarProvider.CalendarException e) {
             response.setStatus(401);
             response.setHeader("auth-url", googleProviderService.authorize());
             return null;

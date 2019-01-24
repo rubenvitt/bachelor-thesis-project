@@ -15,6 +15,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
+import de.rubeen.bsc.entities.provider.NewCalendarEvent;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
 import static java.text.MessageFormat.format;
 
 @Service
-public class GoogleProviderService {
+public class GoogleProviderService implements CalendarProvider {
     private static final String APP_NAME = "My-Business-Day",
             CREDENTIAL_DATA_STORE_PATH = "google-auth-clients";
     private static final Logger LOG = LoggerFactory.getLogger(GoogleProviderService.class);
@@ -69,6 +70,48 @@ public class GoogleProviderService {
         this.calendarService = calendarService;
         this.roomService = roomService;
         this.userService = userService;
+    }
+
+    @Deprecated
+    public Events getEvents(final String user_id, final String calendarId, final org.joda.time.DateTime startDateTime, final org.joda.time.DateTime endDateTime) throws IOException, GeneralSecurityException {
+        return this.getEvents(user_id, calendarId, new DateTime(startDateTime.toDate()), new DateTime(endDateTime.toDate()));
+    }
+
+    @Deprecated
+    public void createAutoEvent(String userId, String calendarId, NewEventEntity eventEntity) throws IOException, GeneralSecurityException, CalendarException {
+        Credential credential = flow.loadCredential(userId.replace("@", "%40"));
+        try {
+            validateCredential(credential);
+            Calendar calendar = getCalendar(credential);
+            //if manual room, search for time with specific room...
+            String room = "testRoom";
+            if (eventEntity.isAutoRoom()) {
+                throw new NotImplementedException("Auto-Room was not implemented, yet");
+            } else {
+                final int roomId = eventEntity.getRoomId();
+                //roomService can only return room-name
+                //TODO implement roomService functionality to get calendar (with provider) for rooms
+                LOG.info("using room: {}", roomService.getRoomById(roomId));
+
+                LOG.info("Meeting will be between {} and {} with a duration of {} {}",
+                        eventEntity.getAutoTimeDateStart(), eventEntity.getAutoTimeDateEnd(),
+                        eventEntity.getMeetingDuration(), eventEntity.getDurationUnit());
+            }
+            List<TimePeriod> busyTimes = getBusyTimes(userId, eventEntity, calendar);
+            List<LoginHoursEntity> workingHours = userService.getWorkingHours(userId);
+            Collection<Interval> freeTimes =
+                    calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
+                            org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()),
+                            org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()));
+
+            Collection<Interval> timeSlots = searchTimeSlot(freeTimes, eventEntity);
+            LOG.info("Got {} available time-slots for {}", timeSlots.size(), eventEntity);
+            LOG.info("So I'll take the first time-slot to create the meeting...");
+            createMeeting(timeSlots.stream().findFirst().get(), eventEntity, calendar, room, calendarId);
+        } catch (GeneralSecurityException | CalendarException e) {
+            LOG.error("Security-Exception: ", e);
+            throw e;
+        }
     }
 
     @PostConstruct
@@ -113,47 +156,11 @@ public class GoogleProviderService {
 
     }
 
-    public List<CalendarEntity> getAllCalendars(String user_id) throws IOException, GeneralSecurityException {
-        Credential credential = flow.loadCredential(user_id);
-        try {
-            validateCredential(credential);
-            Calendar calendar = getCalendar(credential);
-            CalendarList calendarList = calendar.calendarList().list().execute();
-            calendarList.getItems().parallelStream().forEach(calendarListEntry -> calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id, Calprovider.google));
-            return calendarList.getItems().parallelStream()
-                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId())))
-                    .collect(Collectors.toList());
-        } catch (CredentialException e) {
-            LOG.error("Credential exception: ", e);
-            throw e;
-        }
-    }
-
     private Calendar getCalendar(Credential credential) {
         return new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName(APP_NAME).build();
     }
 
-    public List<CalendarEntity> getAllActiveCalendars(String user_id) throws IOException, GeneralSecurityException {
-        Credential credential = flow.loadCredential(user_id);
-        try {
-            validateCredential(credential);
-            Calendar calendar = getCalendar(credential);
-            CalendarList calendarList = calendar.calendarList().list().execute();
-            return calendarList.getItems().parallelStream()
-                    .filter(calendarListEntry -> calendarService.isCalendarActivated(calendarListEntry.getId()))
-                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId())))
-                    .collect(Collectors.toList());
-        } catch (CredentialException e) {
-            LOG.error("Credential exception: ", e);
-            throw e;
-        }
-    }
-
-    public Events getEvents(final String user_id, final String calendarId, final org.joda.time.DateTime startDateTime, final org.joda.time.DateTime endDateTime) throws IOException, GeneralSecurityException {
-        return this.getEvents(user_id, calendarId, new DateTime(startDateTime.toDate()), new DateTime(endDateTime.toDate()));
-    }
-
-    public Events getEvents(final String user_id, final String calendarId, final DateTime startDateTime, final DateTime endDateTime) throws IOException, GeneralSecurityException {
+    private Events getEvents(final String user_id, final String calendarId, final DateTime startDateTime, final DateTime endDateTime) throws IOException, GeneralSecurityException {
         Credential credential = flow.loadCredential(user_id);
         try {
             validateCredential(credential);
@@ -165,40 +172,43 @@ public class GoogleProviderService {
         }
     }
 
-    public void createAutoEvent(String userId, String calendarId, NewEventEntity eventEntity) throws IOException, GeneralSecurityException {
-        Credential credential = flow.loadCredential(userId.replace("@", "%40"));
+    @Override
+    public List<CalendarEntity> getAllCalendars(String user_id) throws CalendarException {
         try {
+            Credential credential = flow.loadCredential(user_id);
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
-            //if manual room, search for time with specific room...
-            String room = "testRoom";
-            if (eventEntity.isAutoRoom()) {
-                throw new NotImplementedException("Auto-Room was not implemented, yet");
-            } else {
-                final int roomId = eventEntity.getRoomId();
-                //roomService can only return room-name
-                //TODO implement roomService functionality to get calendar (with provider) for rooms
-                LOG.info("using room: {}", roomService.getRoomById(roomId));
-
-                LOG.info("Meeting will be between {} and {} with a duration of {} {}",
-                        eventEntity.getAutoTimeDateStart(), eventEntity.getAutoTimeDateEnd(),
-                        eventEntity.getMeetingDuration(), eventEntity.getDurationUnit());
-            }
-            List<TimePeriod> busyTimes = getBusyTimes(userId, eventEntity, calendar);
-            List<LoginHoursEntity> workingHours = userService.getWorkingHours(userId);
-            Collection<Interval> freeTimes =
-                    calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
-                            org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()),
-                            org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()));
-
-            Collection<Interval> timeSlots = searchTimeSlot(freeTimes, eventEntity);
-            LOG.info("Got {} available time-slots for {}", timeSlots.size(), eventEntity);
-            LOG.info("So I'll take the first time-slot to create the meeting...");
-            createMeeting(timeSlots.stream().findFirst().get(), eventEntity, calendar, room, calendarId);
-        } catch (GeneralSecurityException e) {
-            LOG.error("Security-Exception: ", e);
-            throw e;
+            CalendarList calendarList = calendar.calendarList().list().execute();
+            calendarList.getItems().parallelStream().forEach(calendarListEntry -> calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id, Calprovider.google));
+            return calendarList.getItems().parallelStream()
+                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId())))
+                    .collect(Collectors.toList());
+        } catch (CredentialException | IOException e) {
+            LOG.error("Credential exception: ", e);
+            throw new CalendarException("failure...", e);
         }
+    }
+
+    @Override
+    public List<CalendarEntity> getAllActiveCalendars(String user_id) throws CalendarException {
+        try {
+            Credential credential = flow.loadCredential(user_id);
+            validateCredential(credential);
+            Calendar calendar = getCalendar(credential);
+            CalendarList calendarList = calendar.calendarList().list().execute();
+            return calendarList.getItems().parallelStream()
+                    .filter(calendarListEntry -> calendarService.isCalendarActivated(calendarListEntry.getId()))
+                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId())))
+                    .collect(Collectors.toList());
+        } catch (CredentialException | IOException e) {
+            LOG.error("Credential exception: ", e);
+            throw new CalendarException("Unable to get all active calendars", e);
+        }
+    }
+
+    @Override
+    public boolean createEvent(NewCalendarEvent newCalendarEvent) {
+        throw new NotImplementedException("This create-event wasn't implemented, yet :(");
     }
 
     private void createMeeting(Interval interval, NewEventEntity eventEntity, Calendar calendar, String room, String calendarId) throws IOException {
@@ -224,7 +234,6 @@ public class GoogleProviderService {
                 .setEnd(new EventDateTime().setDateTime(new DateTime(endMillis)))
                 .setAttendees(attendeeList)
                 .setLocation(room);
-        //.setEtag("test");
         calendar.events().insert(calendarId, event).setSendUpdates("all").execute();
     }
 
@@ -261,7 +270,7 @@ public class GoogleProviderService {
         }
     }
 
-    private List<TimePeriod> getBusyTimes(String userId, NewEventEntity eventEntity, Calendar calendar) throws IOException, GeneralSecurityException {
+    private List<TimePeriod> getBusyTimes(String userId, NewEventEntity eventEntity, Calendar calendar) throws IOException, CalendarException {
         try {
             DateTime timeMin = new DateTime(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()).toDate());
             DateTime timeMax = new DateTime(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()).toDate());
@@ -278,13 +287,13 @@ public class GoogleProviderService {
             response.getCalendars().forEach((s, freeBusyCalendar) -> result.addAll(freeBusyCalendar.getBusy()));
             LOG.debug("List was filled. finished getBusyTimes");
             return result;
-        } catch (IOException | GeneralSecurityException e) {
+        } catch (IOException | CalendarException e) {
             LOG.error("Unable to get free/busy request items for {}", userId, e);
             throw e;
         }
     }
 
-    private List<FreeBusyRequestItem> getFreeBusyRequestItems(String userId) throws IOException, GeneralSecurityException {
+    private List<FreeBusyRequestItem> getFreeBusyRequestItems(String userId) throws IOException, CalendarException {
         try {
             LOG.debug("Getting freeBusyRequest items...");
             LOG.debug("Getting all active calendars for {}", userId);
@@ -296,7 +305,7 @@ public class GoogleProviderService {
             return allActiveCalendars.parallelStream()
                     .map(calendarEntity -> new FreeBusyRequestItem().setId(calendarEntity.getCalendarID()))
                     .collect(Collectors.toList());
-        } catch (IOException | GeneralSecurityException e) {
+        } catch (IOException | CalendarException e) {
             LOG.error("Unable to get calendars for user {}", userId);
             throw e;
         }

@@ -5,10 +5,11 @@ import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.helper.EventComparatorFactory;
+import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
+import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.CredentialException;
@@ -26,13 +27,15 @@ import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
 @Service
 public class EventService extends LoggableService {
     private final GoogleProviderService googleProviderService;
+    private final ProviderService providerService;
     private final LoginService loginService;
     private final RoomService roomService;
     private final DatabaseService databaseService;
 
     @Autowired
-    public EventService(GoogleProviderService googleProviderService, LoginService loginService, RoomService roomService, DatabaseService databaseService) throws SQLException {
+    public EventService(GoogleProviderService googleProviderService, ProviderService providerService, LoginService loginService, RoomService roomService, DatabaseService databaseService) throws SQLException {
         this.googleProviderService = googleProviderService;
+        this.providerService = providerService;
         this.loginService = loginService;
         this.roomService = roomService;
         this.databaseService = databaseService;
@@ -101,14 +104,26 @@ public class EventService extends LoggableService {
     }
 
     public void addEvent(NewEventEntity newEventEntity, String userMail, String calendarId) {
-        try {
+        CalendarProvider calendarProvider = providerService.getCalendarProvider(calendarId);
+        if (newEventEntity.isAutoTime())
+            createAutoEvent(newEventEntity, userMail, calendarId, calendarProvider);
+        else
+            throw new NotImplementedException("Manual events are not implemented yet");
+
+        /*try {
             if (newEventEntity.isAutoTime()) //create auto event
                 createAutoEvent(newEventEntity, userMail, calendarId);
             else
                 createManualEvent(newEventEntity, userMail, calendarId);
         } catch (GeneralSecurityException | IOException e) {
             LOG.error("Error while creating event", e);
-        }
+        }*/
+    }
+
+    private void createAutoEvent(final NewEventEntity newEventEntity, final String userMail, final String calendarId,
+                                 final CalendarProvider calendarProvider) {
+        LOG.info("using calendarProvider: {} to create an event for {} - calendarId: {} - event: {}",
+                calendarProvider, userMail, calendarId, newEventEntity);
     }
 
     private void createManualEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws IOException, CredentialException {
@@ -116,7 +131,7 @@ public class EventService extends LoggableService {
         googleProviderService.createEvent(userMail, calendarId, newEventEntity);
     }
 
-    private void createAutoEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws IOException, GeneralSecurityException {
+    private void createAutoEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws IOException, GeneralSecurityException, CalendarProvider.CalendarException {
         googleProviderService.createAutoEvent(userMail, calendarId, newEventEntity);
     }
 

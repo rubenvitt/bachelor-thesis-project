@@ -1,5 +1,6 @@
 package de.rubeen.bsc.service;
 
+import de.rubeen.bsc.service.provider.GoogleProviderService;
 import org.assertj.core.api.Condition;
 import org.joda.time.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,12 +11,9 @@ import org.mockito.Mock;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.endsWith;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -29,6 +27,9 @@ class CalendarServiceTest {
 
     @Mock
     DatabaseService databaseService;
+
+    @Mock
+    GoogleProviderService googleProviderService;
 
     @BeforeEach
     void setup() throws SQLException {

@@ -5,6 +5,8 @@ import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
+import de.rubeen.bsc.service.provider.CalendarProvider;
+import de.rubeen.bsc.service.provider.GoogleProviderService;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalTime;
