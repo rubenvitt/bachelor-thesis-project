@@ -124,6 +124,13 @@ public class EventService extends LoggableService {
                                  final CalendarProvider calendarProvider) {
         LOG.info("using calendarProvider: {} to create an event for {} - calendarId: {} - event: {}",
                 calendarProvider, userMail, calendarId, newEventEntity);
+        /*TODO: 2019-01-24 add and remove googleProvider-functions that work for all events...
+         * do same as in googleProvider...
+         * #1: get workingHours
+         * #2: remove meetings from wh's
+         * #3: find time-slots for meetings
+         * #4: insert meeting into timeSlot
+         */
     }
 
     private void createManualEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws IOException, CredentialException {
