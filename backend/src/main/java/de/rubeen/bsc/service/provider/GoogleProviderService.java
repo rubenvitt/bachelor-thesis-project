@@ -23,9 +23,7 @@ import de.rubeen.bsc.service.LoginService;
 import de.rubeen.bsc.service.RoomService;
 import de.rubeen.bsc.service.UserService;
 import org.apache.commons.lang3.NotImplementedException;
-import org.joda.time.Duration;
 import org.joda.time.Interval;
-import org.joda.time.LocalTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.lang.model.type.UnknownTypeException;
 import javax.security.auth.login.CredentialException;
 import java.io.File;
 import java.io.IOException;
@@ -174,6 +171,7 @@ public class GoogleProviderService {
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             //if manual room, search for time with specific room...
+            String room = "testRoom";
             if (eventEntity.isAutoRoom()) {
                 throw new NotImplementedException("Auto-Room was not implemented, yet");
             } else {
@@ -195,10 +193,39 @@ public class GoogleProviderService {
 
             Collection<Interval> timeSlots = searchTimeSlot(freeTimes, eventEntity);
             LOG.info("Got {} available time-slots for {}", timeSlots.size(), eventEntity);
+            LOG.info("So I'll take the first time-slot to create the meeting...");
+            createMeeting(timeSlots.stream().findFirst().get(), eventEntity, calendar, room, calendarId);
         } catch (GeneralSecurityException e) {
             LOG.error("Security-Exception: ", e);
             throw e;
         }
+    }
+
+    private void createMeeting(Interval interval, NewEventEntity eventEntity, Calendar calendar, String room, String calendarId) throws IOException {
+        if (interval == null)
+            return;
+        long startMillis = interval.getStartMillis(),
+                endMillis = interval.getStart()
+                        .plus(getMeetingDuration(eventEntity.getMeetingDuration(), eventEntity.getDurationUnit()))
+                        .getMillis();
+
+        List<EventAttendee> attendeeList = eventEntity.getAttendees().parallelStream()
+                .map(userService::getAppUser)
+                .filter(Objects::nonNull)
+                .map(appUserEntity -> new EventAttendee()
+                        .setDisplayName(appUserEntity.getName())
+                        .setEmail(appUserEntity.getMail()))
+                .collect(Collectors.toList());
+
+        Event event = new Event()
+                .setSummary(eventEntity.getSubject())
+                .setDescription(eventEntity.getDescription())
+                .setStart(new EventDateTime().setDateTime(new DateTime(startMillis)))
+                .setEnd(new EventDateTime().setDateTime(new DateTime(endMillis)))
+                .setAttendees(attendeeList)
+                .setLocation(room);
+        //.setEtag("test");
+        calendar.events().insert(calendarId, event).setSendUpdates("all").execute();
     }
 
     private Collection<Interval> searchTimeSlot(Collection<Interval> freeTimes, NewEventEntity eventEntity) {
