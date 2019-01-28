@@ -1,15 +1,18 @@
 package de.rubeen.bsc.entities.provider;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.List;
 
-public class NewCalendarEvent {
+import static java.text.MessageFormat.format;
+
+public class CalendarEvent {
     private String subject, description, room, calendarId;
     private DateTime startDateTime, endDateTime;
     private List<Attendee> attendees;
 
-    public NewCalendarEvent(String subject, String description, String room, String calendarId, DateTime startDateTime, DateTime endDateTime, List<Attendee> attendees) {
+    public CalendarEvent(String subject, String description, String room, String calendarId, DateTime startDateTime, DateTime endDateTime, List<Attendee> attendees) {
         this.subject = subject;
         this.description = description;
         this.room = room;
@@ -19,7 +22,12 @@ public class NewCalendarEvent {
         this.attendees = attendees;
     }
 
-    public NewCalendarEvent() {}
+    public CalendarEvent() {
+    }
+
+    public CalendarEvent(String subject, String description, String room, String calendarId, Interval meetingInterval, List<Attendee> attendees) {
+        this(subject, description, room, calendarId, meetingInterval.getStart(), meetingInterval.getEnd(), attendees);
+    }
 
     public String getSubject() {
         return subject;
@@ -77,10 +85,18 @@ public class NewCalendarEvent {
         this.calendarId = calendarId;
     }
 
-    private class Attendee {
+    @Override
+    public String toString() {
+        return format(
+                "CalendarEvent=[subject: \"{0}\", description: \"{1}\", room: \"{2}\", calendarId: \"{3}\"startDateTime: \"{4}\", endDateTime: \"{5}\", attendees: \"{6}\"]",
+                subject, description, room, calendarId, startDateTime, endDateTime, attendees);
+    }
+
+    public static class Attendee {
         private String name, mail;
 
-        public Attendee() {}
+        public Attendee() {
+        }
 
         public Attendee(String name, String mail) {
             this.name = name;
@@ -101,6 +117,12 @@ public class NewCalendarEvent {
 
         public void setMail(String mail) {
             this.mail = mail;
+        }
+
+        @Override
+        public String toString() {
+            return format("Attendee=[name: \"{0}\", email: \"{1}\"]",
+                    name, mail);
         }
     }
 }

@@ -15,17 +15,14 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
-import de.rubeen.bsc.entities.provider.NewCalendarEvent;
+import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.CalendarEntity;
-import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.LoginService;
 import de.rubeen.bsc.service.RoomService;
 import de.rubeen.bsc.service.UserService;
-import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.Interval;
-import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +34,11 @@ import javax.security.auth.login.CredentialException;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static java.text.MessageFormat.format;
 
 @Service
 public class GoogleProviderService implements CalendarProvider {
@@ -72,60 +65,13 @@ public class GoogleProviderService implements CalendarProvider {
         this.userService = userService;
     }
 
-    @Deprecated
-    public Events getEvents(final String user_id, final String calendarId, final org.joda.time.DateTime startDateTime, final org.joda.time.DateTime endDateTime) throws IOException, GeneralSecurityException {
-        return this.getEvents(user_id, calendarId, new DateTime(startDateTime.toDate()), new DateTime(endDateTime.toDate()));
-    }
-
-    @Deprecated
-    public void createAutoEvent(String userId, String calendarId, NewEventEntity eventEntity) throws IOException, GeneralSecurityException, CalendarException {
-        Credential credential = flow.loadCredential(userId.replace("@", "%40"));
-        try {
-            validateCredential(credential);
-            Calendar calendar = getCalendar(credential);
-            //if manual room, search for time with specific room...
-            String room = "testRoom";
-            if (eventEntity.isAutoRoom()) {
-                throw new NotImplementedException("Auto-Room was not implemented, yet");
-            } else {
-                final int roomId = eventEntity.getRoomId();
-                //roomService can only return room-name
-                //TODO implement roomService functionality to get calendar (with provider) for rooms
-                LOG.info("using room: {}", roomService.getRoomById(roomId));
-
-                LOG.info("Meeting will be between {} and {} with a duration of {} {}",
-                        eventEntity.getAutoTimeDateStart(), eventEntity.getAutoTimeDateEnd(),
-                        eventEntity.getMeetingDuration(), eventEntity.getDurationUnit());
-            }
-            List<TimePeriod> busyTimes = getBusyTimes(userId, eventEntity, calendar);
-            List<LoginHoursEntity> workingHours = userService.getWorkingHours(userId);
-            Collection<Interval> freeTimes =
-                    calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
-                            org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()),
-                            org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()));
-
-            Collection<Interval> timeSlots = searchTimeSlot(freeTimes, eventEntity);
-            LOG.info("Got {} available time-slots for {}", timeSlots.size(), eventEntity);
-            LOG.info("So I'll take the first time-slot to create the meeting...");
-            createMeeting(timeSlots.stream().findFirst().get(), eventEntity, calendar, room, calendarId);
-        } catch (GeneralSecurityException | CalendarException e) {
-            LOG.error("Security-Exception: ", e);
-            throw e;
-        }
+    private static EventDateTime getEventDateTime(org.joda.time.DateTime startDateTime) {
+        return new EventDateTime().setDateTime(new DateTime(startDateTime.getMillis()));
     }
 
     @PostConstruct
     public void init() throws IOException, GeneralSecurityException {
         createFlow();
-    }
-
-    public String authorize() throws GeneralSecurityException, IOException {
-        LOG.info("Try to authenticate user...");
-        AuthorizationCodeRequestUrl authorizationCodeRequestUrl;
-        authorizationCodeRequestUrl = flow
-                .newAuthorizationUrl()
-                .setRedirectUri(redirectURL);
-        return authorizationCodeRequestUrl.build();
     }
 
     private void createFlow() throws IOException, GeneralSecurityException {
@@ -150,26 +96,40 @@ public class GoogleProviderService implements CalendarProvider {
         credential.refreshToken();
     }
 
-    public void createCredentialFromCallback(String code, String userID) throws IOException {
-        TokenResponse tokenResponse = flow.newTokenRequest(code).setRedirectUri(redirectURL).execute();
-        Credential credential = flow.createAndStoreCredential(tokenResponse, userID);
-
-    }
-
     private Calendar getCalendar(Credential credential) {
         return new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName(APP_NAME).build();
     }
 
-    private Events getEvents(final String user_id, final String calendarId, final DateTime startDateTime, final DateTime endDateTime) throws IOException, GeneralSecurityException {
-        Credential credential = flow.loadCredential(user_id);
+    private List<FreeBusyRequestItem> getFreeBusyRequestItems(String userId) throws IOException, CalendarException {
         try {
-            validateCredential(credential);
-            Calendar calendar = getCalendar(credential);
-            return calendar.events().list(calendarId).setTimeMin(startDateTime).setTimeMax(endDateTime).execute();
-        } catch (CredentialException e) {
-            LOG.error("Credential exception: ", e);
+            LOG.debug("Getting freeBusyRequest items...");
+            LOG.debug("Getting all active calendars for {}", userId);
+            List<CalendarEntity> allActiveCalendars = getAllActiveCalendars(userId);
+            LOG.debug("Got all calendars, size: " + allActiveCalendars.size());
+            if (allActiveCalendars.size() == 0)
+                throw new IOException("Active calendars is empty");
+            LOG.debug("Creating freeBusyRequestItems now...");
+            return allActiveCalendars.parallelStream()
+                    .map(calendarEntity -> new FreeBusyRequestItem().setId(calendarEntity.getCalendarID()))
+                    .collect(Collectors.toList());
+        } catch (IOException | CalendarException e) {
+            LOG.error("Unable to get calendars for user {}", userId);
             throw e;
         }
+    }
+
+    public String createAuthRequestUrl() {
+        LOG.info("Try to authenticate user...");
+        AuthorizationCodeRequestUrl authorizationCodeRequestUrl;
+        authorizationCodeRequestUrl = flow
+                .newAuthorizationUrl()
+                .setRedirectUri(redirectURL);
+        return authorizationCodeRequestUrl.build();
+    }
+
+    public void createCredentialFromCallback(String code, String userID) throws IOException {
+        TokenResponse tokenResponse = flow.newTokenRequest(code).setRedirectUri(redirectURL).execute();
+        flow.createAndStoreCredential(tokenResponse, userID);
     }
 
     @Override
@@ -207,75 +167,101 @@ public class GoogleProviderService implements CalendarProvider {
     }
 
     @Override
-    public boolean createEvent(NewCalendarEvent newCalendarEvent) {
-        throw new NotImplementedException("This create-event wasn't implemented, yet :(");
-    }
+    public List<CalendarEvent> getEventsBetween(Interval interval, String userId, String calendarId) throws CalendarException {
+        Credential credential;
+        try {
+            credential = flow.loadCredential(userId);
+            validateCredential(credential);
+        } catch (IOException | CredentialException e) {
+            LOG.error("Error while getting credential for user {}", userId, e);
+            throw new CalendarException("Unable to get credential for user " + userId, e);
+        }
+        Calendar calendar = getCalendar(credential);
+        DateTime startDateTime = new DateTime(interval.getStartMillis()),
+                endDateTime = new DateTime(interval.getEndMillis());
+        try {
+            return calendar.events().list(calendarId).setTimeMin(startDateTime).setTimeMax(endDateTime).execute()
+                    .getItems().parallelStream()
+                    .filter(Objects::nonNull)
+                    .map(event -> {
+                        List<CalendarEvent.Attendee> attendees;
+                        if (event.getAttendees() == null || event.getAttendees().size() == 0)
+                            attendees = Collections.emptyList();
+                        else
+                            attendees = event.getAttendees().parallelStream()
+                                    .map(eventAttendee ->
+                                            new CalendarEvent.Attendee(
+                                                    eventAttendee.getDisplayName(),
+                                                    eventAttendee.getEmail()))
+                                    .collect(Collectors.toList());
 
-    private void createMeeting(Interval interval, NewEventEntity eventEntity, Calendar calendar, String room, String calendarId) throws IOException {
-        if (interval == null)
-            return;
-        long startMillis = interval.getStartMillis(),
-                endMillis = interval.getStart()
-                        .plus(getMeetingDuration(eventEntity.getMeetingDuration(), eventEntity.getDurationUnit()))
-                        .getMillis();
+                        Interval eventInterval =
+                                event.getStart().getDateTime() != null ?
+                                        new Interval(
+                                                event.getStart().getDateTime().getValue(),
+                                                event.getEnd().getDateTime().getValue()) :
+                                        //all-day-event:
+                                        new Interval(
+                                                event.getStart().getDate().getValue(),
+                                                event.getEnd().getDate().getValue());
 
-        List<EventAttendee> attendeeList = eventEntity.getAttendees().parallelStream()
-                .map(userService::getAppUser)
-                .filter(Objects::nonNull)
-                .map(appUserEntity -> new EventAttendee()
-                        .setDisplayName(appUserEntity.getName())
-                        .setEmail(appUserEntity.getMail()))
-                .collect(Collectors.toList());
-
-        Event event = new Event()
-                .setSummary(eventEntity.getSubject())
-                .setDescription(eventEntity.getDescription())
-                .setStart(new EventDateTime().setDateTime(new DateTime(startMillis)))
-                .setEnd(new EventDateTime().setDateTime(new DateTime(endMillis)))
-                .setAttendees(attendeeList)
-                .setLocation(room);
-        calendar.events().insert(calendarId, event).setSendUpdates("all").execute();
-    }
-
-    private Collection<Interval> searchTimeSlot(Collection<Interval> freeTimes, NewEventEntity eventEntity) {
-        final List<Interval> resultIntervals = new LinkedList<>();
-        LOG.info("Looking for time-slots for {} in {}", eventEntity, freeTimes);
-        Period eventPeriod = getMeetingDuration(eventEntity.getMeetingDuration(), eventEntity.getDurationUnit());
-        freeTimes.forEach(interval -> {
-            Period timeSlotPeriod = interval.toPeriod();
-            if (eventPeriod.getHours() < timeSlotPeriod.getHours()
-                    || (eventPeriod.getHours() == timeSlotPeriod.getHours()
-                    && eventPeriod.getMinutes() <= timeSlotPeriod.getMinutes())) {
-                LOG.info("found timeSlot: {} ({}) - {} ({})",
-                        interval.getStart().toLocalDate(), interval.getStart().toLocalTime(),
-                        interval.getEnd().toLocalDate(), interval.getEnd().toLocalTime());
-                resultIntervals.add(interval);
-            }
-        });
-        return resultIntervals;
-    }
-
-    private Period getMeetingDuration(Integer meetingDuration, String durationUnit) {
-        switch (durationUnit.toLowerCase()) {
-            case "minutes":
-            case "minute":
-            case "min":
-                return new Period().withMinutes(meetingDuration);
-            case "hours":
-            case "hour":
-            case "h":
-                return new Period().withHours(meetingDuration);
-            default:
-                throw new IllegalArgumentException("meetingDuration not specified correctly");
+                        return new CalendarEvent(event.getSummary(), event.getDescription(), event.getLocation(),
+                                calendarId, eventInterval, attendees);
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            LOG.error("Error while getting events for user {}", userId, e);
+            throw new CalendarException("Unable to get events for user " + userId, e);
         }
     }
 
-    private List<TimePeriod> getBusyTimes(String userId, NewEventEntity eventEntity, Calendar calendar) throws IOException, CalendarException {
+    @Override
+    public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
+        Credential credential;
+        try {
+            credential = flow.loadCredential(userId);
+        } catch (IOException e) {
+            LOG.error("Error while getting credential for user {}", userId, e);
+            throw new CalendarException("Unable to get credential for user " + userId, e);
+        }
+        Calendar calendar = getCalendar(credential);
+        try {
+            calendar.events().insert(calendarEvent.getCalendarId(),
+                    new Event()
+                            .setSummary(calendarEvent.getSubject())
+                            .setDescription(calendarEvent.getDescription())
+                            .setLocation(calendarEvent.getRoom())
+                            .setStart(getEventDateTime(calendarEvent.getStartDateTime()))
+                            .setEnd(getEventDateTime(calendarEvent.getEndDateTime()))
+                            .setAttendees(getEventAttendees(calendarEvent.getAttendees()))
+            ).execute();
+            return true;
+        } catch (IOException e) {
+            LOG.error("Error while adding event {} for user {}", calendarEvent, userId);
+            throw new CalendarException("Unable to add event for user {}" + userId, e);
+        }
+    }
+
+    private List<EventAttendee> getEventAttendees(List<CalendarEvent.Attendee> attendees) {
+        return attendees.parallelStream()
+                .map(attendee -> new EventAttendee().setDisplayName(attendee.getName()).setEmail(attendee.getMail()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Interval> getBusyTimes(String userId, NewEventEntity eventEntity) throws CalendarException {
+        Credential credential;
+        try {
+            credential = flow.loadCredential(userId.replace("@", "%40"));
+        } catch (IOException e) {
+            throw new CalendarException("Unable to get credential for user " + userId, e);
+        }
+        //get active calendars for user
         try {
             DateTime timeMin = new DateTime(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()).toDate());
             DateTime timeMax = new DateTime(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()).toDate());
             LOG.debug("Creating response");
-            FreeBusyResponse response = calendar.freebusy().query(
+            FreeBusyResponse response = getCalendar(credential).freebusy().query(
                     new FreeBusyRequest()
                             .setTimeMin(timeMin)
                             .setTimeMax(timeMax)
@@ -286,68 +272,13 @@ public class GoogleProviderService implements CalendarProvider {
             LOG.debug("List created... Filling list");
             response.getCalendars().forEach((s, freeBusyCalendar) -> result.addAll(freeBusyCalendar.getBusy()));
             LOG.debug("List was filled. finished getBusyTimes");
-            return result;
+            return result.parallelStream()
+                    .map(timePeriod -> new Interval(timePeriod.getStart().getValue(), timePeriod.getEnd().getValue()))
+                    .collect(Collectors.toList());
         } catch (IOException | CalendarException e) {
             LOG.error("Unable to get free/busy request items for {}", userId, e);
-            throw e;
+            throw new CalendarException("Unable to get busyTimes for " + userId, e);
         }
     }
 
-    private List<FreeBusyRequestItem> getFreeBusyRequestItems(String userId) throws IOException, CalendarException {
-        try {
-            LOG.debug("Getting freeBusyRequest items...");
-            LOG.debug("Getting all active calendars for {}", userId);
-            List<CalendarEntity> allActiveCalendars = getAllActiveCalendars(userId);
-            LOG.debug("Got all calendars, size: " + allActiveCalendars.size());
-            if (allActiveCalendars.size() == 0)
-                throw new IOException("Active calendars is empty");
-            LOG.debug("Creating freeBusyRequestItems now...t");
-            return allActiveCalendars.parallelStream()
-                    .map(calendarEntity -> new FreeBusyRequestItem().setId(calendarEntity.getCalendarID()))
-                    .collect(Collectors.toList());
-        } catch (IOException | CalendarException e) {
-            LOG.error("Unable to get calendars for user {}", userId);
-            throw e;
-        }
-    }
-
-    public void createEvent(String user_id, String calendarId, NewEventEntity newEventEntity) throws IOException, CredentialException {
-        Credential credential = flow.loadCredential(user_id.replace("@", "%40"));
-        try {
-            validateCredential(credential);
-            Calendar calendar = getCalendar(credential);
-            String room = "";
-            if (newEventEntity.isAutoRoom()) {
-                throw new NotImplementedException("AutoRoom was not implemented, yet");
-            } else {
-                room = roomService.getRoomById(newEventEntity.getRoomId());
-            }
-            List<EventAttendee> attendeeList = newEventEntity.getAttendees().parallelStream()
-                    .map(userService::getAppUser)
-                    .filter(Objects::nonNull)
-                    .map(appUserEntity -> new EventAttendee()
-                            .setDisplayName(appUserEntity.getName())
-                            .setEmail(appUserEntity.getMail()))
-                    .collect(Collectors.toList());
-            LOG.info("Using calendar: " + calendarId);
-            DateTime dateTimeStart = new DateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(format("{0} {1}", newEventEntity.getManTimeDateStart(), newEventEntity.getManTimeTimeStart())));
-            DateTime dateTimeEnd = new DateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(format("{0} {1}", newEventEntity.getManTimeDateEnd(), newEventEntity.getManTimeTimeEnd())));
-            LOG.info("" + dateTimeStart);
-            LOG.info("" + dateTimeEnd);
-            Event event = new Event()
-                    .setSummary(newEventEntity.getSubject())
-                    .setDescription(newEventEntity.getDescription())
-                    .setStart(new EventDateTime().setDateTime(dateTimeStart))
-                    .setEnd(new EventDateTime().setDateTime(dateTimeEnd))
-                    .setAttendees(attendeeList)
-                    .setLocation(room);
-            //.setEtag("test");
-            calendar.events().insert(calendarId, event).setSendUpdates("all").execute();
-        } catch (CredentialException e) {
-            LOG.error("Credential exception: ", e);
-            throw e;
-        } catch (ParseException e) {
-            LOG.error("parsing-error", e);
-        }
-    }
 }

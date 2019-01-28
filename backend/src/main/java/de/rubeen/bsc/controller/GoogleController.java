@@ -1,6 +1,5 @@
 package de.rubeen.bsc.controller;
 
-import com.google.api.services.calendar.model.FreeBusyResponse;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.security.auth.login.CredentialException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,7 +43,7 @@ public class GoogleController {
 
     @RequestMapping(value = "/auth-google", method = RequestMethod.GET)
     public RedirectView googleConnectionStatus() throws GeneralSecurityException, IOException {
-        return new RedirectView(googleProviderService.authorize());
+        return new RedirectView(googleProviderService.createAuthRequestUrl());
     }
 
     @RequestMapping(value = "/auth-google", method = RequestMethod.GET, params = "code")
@@ -91,7 +89,7 @@ public class GoogleController {
             return googleProviderService.getAllCalendars(user_id);
         } catch (CalendarProvider.CalendarException e) {
             response.setStatus(401);
-            response.setHeader("auth-url", googleProviderService.authorize());
+            response.setHeader("auth-url", googleProviderService.createAuthRequestUrl());
             return null;
         }
     }
@@ -103,7 +101,7 @@ public class GoogleController {
             return googleProviderService.getAllActiveCalendars(user_id);
         } catch (CalendarProvider.CalendarException e) {
             response.setStatus(401);
-            response.setHeader("auth-url", googleProviderService.authorize());
+            response.setHeader("auth-url", googleProviderService.createAuthRequestUrl());
             return null;
         }
     }

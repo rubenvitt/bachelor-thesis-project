@@ -4,6 +4,7 @@ import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.EventService;
+import de.rubeen.bsc.service.provider.CalendarProvider;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +57,10 @@ public class CalendarController {
             LOG.info("got event entity: " + newEventEntity);
             checkNewEvent(newEventEntity);
             eventService.addEvent(newEventEntity, userId.replace("@", "%40"), calendarId);
-        } catch (IllegalArgumentException | NullPointerException ex) {
+        } catch (IllegalArgumentException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.toString());
+        } catch (CalendarProvider.CalendarException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event was not created - contact administrator.");
         }
     }
 

@@ -55,12 +55,11 @@ public class CalendarService extends LoggableService {
                 .and(CALENDAR.USER_ID.eq(loginService.getUserID(userMail.replace("%40", "@")))).executeAsync();
     }
 
-    public Collection<Interval> getFreeTimes(Stream<TimePeriod> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end) {
+    public Collection<Interval> getFreeTimes(Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end) {
         LOG.debug("Searching for available meeting suggestions with busyTimes & workingHours between {} and {}",
                 start.toLocalDate(), end.toLocalDate());
         final Interval initInterval = new Interval(start, end);
-        final List<Interval> busyInvervals = busyTimePeriods
-                .map(timePeriod -> new Interval(timePeriod.getStart().getValue(), timePeriod.getEnd().getValue()))
+        final List<Interval> busyIntervals = busyTimePeriods
                 .collect(Collectors.toList());
         final Stream<Interval> workingIntervals = workingHours
                 .map(loginHoursEntity -> {
@@ -81,7 +80,7 @@ public class CalendarService extends LoggableService {
                 }).flatMap(List::stream);
         LOG.info("Working-Hours mapped to dateTimes");
 
-        Collection<Interval> intervals = calculateFreeTimeWith(workingIntervals, busyInvervals);
+        Collection<Interval> intervals = calculateFreeTimeWith(workingIntervals, busyIntervals);
         LOG.info("got {} freeTimes in following intervals:", intervals.size());
         intervals.forEach(interval -> LOG.info("{} ({}) - {} ({})",
                 interval.getStart().toLocalDate(), interval.getStart().toLocalTime(),

@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class AuthHelper {
     private static final String authority = "https://login.microsoftonline.com";
-    private static final String authorizeUrl = authority + "/common/oauth2/v2.0/authorize";
+    private static final String authorizeUrl = authority + "/common/oauth2/v2.0/createAuthRequestUrl";
 
     private static String[] scopes = {
             "openid",

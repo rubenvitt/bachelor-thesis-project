@@ -101,10 +101,13 @@ public class RoomService extends LoggableService {
 
     public String getRoomById(Integer roomId) {
         checkNotNull(roomId);
-        return databaseService.getContext()
+        LOG.debug("Search for room {} in database", roomId);
+        String roomName = databaseService.getContext()
                 .select(ROOM.ROOM_NAME)
                 .from(ROOM)
                 .where(ROOM.ROOM_ID.eq(roomId))
                 .fetchOne().value1();
+        LOG.debug("Got room-name {} for roomId {}", roomName, roomId);
+        return roomName;
     }
 }

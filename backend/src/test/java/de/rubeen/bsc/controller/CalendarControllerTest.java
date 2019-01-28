@@ -4,6 +4,7 @@ import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.EventService;
+import de.rubeen.bsc.service.provider.CalendarProvider;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,7 +75,7 @@ class CalendarControllerTest {
                           List<String> roomValues, Integer roomId, List<Integer> attendees
      */
     @Test
-    void createNewEvent() throws IOException {
+    void createNewEvent() throws IOException, CalendarProvider.CalendarException {
         doNothing().when(eventService).addEvent(any(), anyString(), anyString());
         MockHttpServletResponse response = new MockHttpServletResponse();
         NewEventEntity eventEntity = new NewEventEntity(
