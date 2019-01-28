@@ -3,6 +3,7 @@ package de.rubeen.bsc.service;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
+import de.rubeen.bsc.service.provider.OfficeProviderService;
 import org.springframework.stereotype.Service;
 
 import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
@@ -12,10 +13,12 @@ public class ProviderService extends LoggableService {
 
     private final DatabaseService databaseService;
     private final GoogleProviderService googleProviderService;
+    private final OfficeProviderService officeProviderService;
 
-    public ProviderService(DatabaseService databaseService, GoogleProviderService googleProviderService) {
+    public ProviderService(DatabaseService databaseService, GoogleProviderService googleProviderService, OfficeProviderService officeProviderService) {
         this.databaseService = databaseService;
         this.googleProviderService = googleProviderService;
+        this.officeProviderService = officeProviderService;
     }
 
     CalendarProvider getCalendarProvider(String calendarId) {
@@ -25,6 +28,6 @@ public class ProviderService extends LoggableService {
                 .where(CALENDAR.CALENDARID.eq(calendarId))
                 .fetchOneInto(Calprovider.class);
         LOG.info("got calProvider: {}", calprovider);
-        return googleProviderService;
+        return calprovider.equals(Calprovider.google) ? googleProviderService : officeProviderService;
     }
 }

@@ -1,7 +1,5 @@
 package de.rubeen.bsc.service;
 
-import com.google.api.services.calendar.model.TimePeriod;
-import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
@@ -61,27 +59,24 @@ public class EventService extends LoggableService {
         final DateTime startTime = new DateTime(startMillis),
                 endTime = new DateTime(endMillis);
         final Integer userID = loginService.getUserID(userMail);
-        final List<String> googleCalendars = databaseService.getContext()
+        final List<String> calendars = databaseService.getContext()
                 .select(CALENDAR.CALENDARID)
                 .from(CALENDAR)
                 .innerJoin(APPUSER).onKey()
                 .where(APPUSER.ID.eq(userID))
-                .and(CALENDAR.PROVIDER.eq(Calprovider.google))
                 .and(CALENDAR.ACTIVATED.eq(true)).fetch(CALENDAR.CALENDARID);
-        LOG.info("Found following active calendars: ");
-        googleCalendars.parallelStream().forEach(LOG::info);
-
-        final List<CalendarEvent> calendarEvents = googleCalendars.parallelStream()
-                .map(calendar -> {
+        final List<CalendarEvent> calendarEvents = calendars.parallelStream()
+                .map(calendarId -> {
                     try {
-                        return googleProviderService.getEventsBetween(new Interval(startMillis, endMillis), userMail, calendar);
+                        return providerService.getCalendarProvider(calendarId).getEventsBetween(new Interval(startMillis, endMillis), userMail, calendarId);
                     } catch (CalendarProvider.CalendarException e) {
-                        LOG.error("Can't get events for user: {} - calendar: {}", userMail, calendar, e);
+                        LOG.error("Can't get events for user: {} - calendar: {}", userMail, calendarId, e);
                         return null;
                     }
                 }).filter(Objects::nonNull)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
+
         List<EventEntity> eventEntities = calendarEvents.parallelStream()
                 .map(calendarEvent -> new EventEntity(calendarEvent.getSubject(), calendarEvent.getStartDateTime(), calendarEvent.getEndDateTime()))
                 .collect(Collectors.toList());

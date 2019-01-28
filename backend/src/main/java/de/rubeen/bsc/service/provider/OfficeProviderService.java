@@ -21,7 +21,6 @@ import org.joda.time.Interval;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,7 +80,6 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
 
     private List<Calendar> getCalendarFromOffice(String user_id) throws IOException {
         TokenResponse token = getToken(user_id);
-        LOG.info("Token is valid until...: {}", new DateTime(token.getExpirationTime()));
         validateToken(token);
         OutlookService outlookService = OutlookServiceBuilder.getOutlookService(token.getAccessToken(), user_id);
         Integer maxResults = 20; //nobody should have more than 20 active calendars...
@@ -90,7 +88,55 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
 
     @Override
     public List<CalendarEvent> getEventsBetween(Interval interval, String userId, String calendarId) throws CalendarException {
-        throw new NotImplementedException("Can't get events, because it wasn't implemented, yet");
+        try {
+            TokenResponse token = getToken(userId);
+            validateToken(token);
+            OutlookService outlookService = OutlookServiceBuilder.getOutlookService(token.getAccessToken(), userId);
+            Integer maxResults = 20;
+            String sort = "start/dateTime DESC";
+            String properties = "organizer,subject,start,end";
+            LOG.info("got following data: {}", outlookService.getEvents(sort, properties, maxResults, interval.getStart().toDate(), interval.getEnd().toDate())
+                    .execute().body().getValue());
+            return null;
+        } catch (IOException e) {
+            throw new CalendarException("Unable to get token for user " + userId, e);
+        }
+
+        //throw new NotImplementedException("Can't get events, because it wasn't implemented, yet");
+        /*
+        HttpSession session = request.getSession();
+        TokenResponse tokens = (TokenResponse) session.getAttribute("tokens");
+        if (tokens == null) {
+            LOG.error("User has to log in!");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "please log in");
+        }
+
+        String tenantId = (String) session.getAttribute("userTenantId");
+
+        tokens = AuthHelper.ensureTokens(tokens, tenantId);
+
+        String email = (String) session.getAttribute("userPrincipal");
+
+        OutlookService outlookService = OutlookServiceBuilder.getOutlookService(tokens.getAccessToken(), email);
+
+        // Sort by start time in descending order
+        String sort = "start/dateTime DESC";
+        // Only return the properties we care about
+        String properties = "organizer,subject,start,end";
+        // Return at most 10 events
+        Integer maxResults = 10;
+
+        try {
+            PagedResult<Event> events = outlookService.getEvents(
+                    sort, properties, maxResults)
+                    .execute().body();
+            return events.getValue();
+        } catch (IOException e) {
+            LOG.error("error: ", e);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.toString());
+        }
+        return null;
+         */
     }
 
     @Override
