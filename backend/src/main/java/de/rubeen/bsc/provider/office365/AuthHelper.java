@@ -1,7 +1,11 @@
 package de.rubeen.bsc.provider.office365;
 
+import de.rubeen.bsc.service.LoggableService;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -10,12 +14,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
 
 public class AuthHelper {
     private static final String authority = "https://login.microsoftonline.com";
     private static final String authorizeUrl = authority + "/common/oauth2/v2.0/authorize";
+    private static final Logger LOG = LoggerFactory.getLogger(AuthHelper.class);
 
     private static String[] scopes = {
             "openid",
@@ -121,8 +127,10 @@ public class AuthHelper {
         TokenService tokenService = retrofit.create(TokenService.class);
 
         try {
-            return tokenService.getAccessTokenFromAuthCode(tenantId, getAppId(), getAppPassword(),
+            TokenResponse authorization_code = tokenService.getAccessTokenFromAuthCode(tenantId, getAppId(), getAppPassword(),
                     "authorization_code", authCode, getRedirectUrl()).execute().body();
+            authorization_code.setCreationTime(new Date());
+            return authorization_code;
         } catch (IOException e) {
             TokenResponse error = new TokenResponse();
             error.setError("IOException");
@@ -135,10 +143,12 @@ public class AuthHelper {
         // Are tokens still valid?
         Calendar now = Calendar.getInstance();
         if (now.getTime().before(tokens.getExpirationTime())) {
+            LOG.info("Token is valid. (expiration: {})", tokens.getExpirationTime());
             // Still valid, return them as-is
             return tokens;
         }
         else {
+            LOG.info("Token is expired... Refreshing");
             // Expired, refresh the tokens
             // Create a logging interceptor to log request and responses
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
@@ -158,8 +168,10 @@ public class AuthHelper {
             TokenService tokenService = retrofit.create(TokenService.class);
 
             try {
-                return tokenService.getAccessTokenFromRefreshToken(tenantId, getAppId(), getAppPassword(),
+                TokenResponse refresh_token = tokenService.getAccessTokenFromRefreshToken(tenantId, getAppId(), getAppPassword(),
                         "refresh_token", tokens.getRefreshToken(), getRedirectUrl()).execute().body();
+                refresh_token.setCreationTime(now.getTime());
+                return refresh_token;
             } catch (IOException e) {
                 TokenResponse error = new TokenResponse();
                 error.setError("IOException");
@@ -169,94 +181,3 @@ public class AuthHelper {
         }
     }
 }
-
-
-/*
-
-    private static String[] scopes = {
-            "openid",
-            "offline_access",
-            "profile",
-            "User.Read",
-            "Mail.Read"
-    };
-
-    private static String appId = null;
-    private static String appPassword = null;
-    private static String redirectUrl = null;
-
-    private static String getAppId() {
-        if (appId == null) {
-            try {
-                loadConfig();
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return appId;
-    }
-    private static String getAppPassword() {
-        if (appPassword == null) {
-            try {
-                loadConfig();
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return appPassword;
-    }
-
-    private static String getRedirectUrl() {
-        if (redirectUrl == null) {
-            try {
-                loadConfig();
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return redirectUrl;
-    }
-
-    private static String getScopes() {
-        StringBuilder sb = new StringBuilder();
-        for (String scope: scopes) {
-            sb.append(scope + " ");
-        }
-        return sb.toString().trim();
-    }
-
-    private static void loadConfig() throws IOException {
-        String authConfigFile = "auth.properties";
-        InputStream authConfigStream = AuthHelper.class.getClassLoader().getResourceAsStream(authConfigFile);
-
-        if (authConfigStream != null) {
-            Properties authProps = new Properties();
-            try {
-                authProps.load(authConfigStream);
-                appId = authProps.getProperty("appId");
-                appPassword = authProps.getProperty("appPassword");
-                redirectUrl = authProps.getProperty("redirectUrl");
-            } finally {
-                authConfigStream.close();
-            }
-        }
-        else {
-            throw new FileNotFoundException("Property file '" + authConfigFile + "' not found in the classpath.");
-        }
-    }
-
-    public static String getLoginUrl(UUID state, UUID nonce) {
-
-        UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromHttpUrl(authorizeUrl);
-        urlBuilder.queryParam("client_id", getAppId());
-        urlBuilder.queryParam("redirect_uri", getRedirectUrl());
-        urlBuilder.queryParam("response_type", "code id_token");
-        urlBuilder.queryParam("scope", getScopes());
-        urlBuilder.queryParam("state", state);
-        urlBuilder.queryParam("nonce", nonce);
-        urlBuilder.queryParam("response_mode", "form_post");
-
-        return urlBuilder.toUriString();
-    }
-}
- */

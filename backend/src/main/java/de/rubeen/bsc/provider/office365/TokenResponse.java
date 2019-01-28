@@ -2,6 +2,7 @@ package de.rubeen.bsc.provider.office365;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.joda.time.DateTime;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -24,8 +25,7 @@ public class TokenResponse {
     private String errorDescription;
     @JsonProperty("error_codes")
     private int[] errorCodes;
-    private Date expirationTime;
-
+    private Date creationTime;
     private String tokenTendantId;
 
 
@@ -51,9 +51,6 @@ public class TokenResponse {
 
     public void setExpiresIn(int expiresIn) {
         this.expiresIn = expiresIn;
-        Calendar now = Calendar.getInstance();
-        now.add(Calendar.SECOND, expiresIn);
-        this.expirationTime = now.getTime();
     }
 
     public String getAccessToken() {
@@ -105,7 +102,7 @@ public class TokenResponse {
     }
 
     public Date getExpirationTime() {
-        return expirationTime;
+        return new DateTime(creationTime).plusSeconds(expiresIn).toDate();
     }
 
     public String getTokenTendantId() {
@@ -114,5 +111,13 @@ public class TokenResponse {
 
     public void setTokenTendantId(String tokenTendantId) {
         this.tokenTendantId = tokenTendantId;
+    }
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
     }
 }

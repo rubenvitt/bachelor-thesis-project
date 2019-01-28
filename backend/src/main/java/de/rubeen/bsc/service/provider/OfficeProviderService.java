@@ -16,11 +16,12 @@ import de.rubeen.bsc.service.DatabaseService;
 import de.rubeen.bsc.service.LoggableService;
 import de.rubeen.bsc.service.LoginService;
 import org.apache.commons.lang3.NotImplementedException;
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,29 +49,43 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
     @Override
     public List<CalendarEntity> getAllCalendars(String user_id) throws CalendarException {
         try {
-            TokenResponse token = getToken(user_id);
-            validateToken(token);
-            OutlookService outlookService = OutlookServiceBuilder.getOutlookService(token.getAccessToken(), user_id);
-            Integer maxResults = 20; //nobody should have more than 20 active calendars...
-            List<Calendar> calendarList = outlookService.getCalendars(maxResults).execute().body().getValue();
+            final List<Calendar> calendarList = getCalendarFromOffice(user_id);
             calendarList.parallelStream().forEach(calendar -> calendarService.addCalendarToDatabase(calendar.getId(), user_id, Calprovider.office));
-
             return calendarList.parallelStream()
                     .map(calendar -> new CalendarEntity(calendar.getName(), calendar.getId(), calendarService.isCalendarActivated(calendar.getId())))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             LOG.error("Error while getting calendars");
-            return Collections.emptyList();
+            throw new CalendarException("Unable to get all calendars", e);
         }
     }
 
     private void validateToken(TokenResponse token) {
+        LOG.info("Validating token...: {}", token.getAccessToken());
         AuthHelper.ensureTokens(token, token.getTokenTendantId());
     }
 
     @Override
     public List<CalendarEntity> getAllActiveCalendars(String user_id) throws CalendarException {
-        throw new NotImplementedException("all active calendar was not implemented, yet");
+        try {
+            final List<Calendar> calendarList = getCalendarFromOffice(user_id);
+            return calendarList.parallelStream()
+                    .filter(calendar -> calendarService.isCalendarActivated(calendar.getId()))
+                    .map(calendar -> new CalendarEntity(calendar.getName(), calendar.getId(), calendarService.isCalendarActivated(calendar.getId())))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            LOG.error("Error while getting calendars");
+            throw new CalendarException("Unable to get all active calendars", e);
+        }
+    }
+
+    private List<Calendar> getCalendarFromOffice(String user_id) throws IOException {
+        TokenResponse token = getToken(user_id);
+        LOG.info("Token is valid until...: {}", new DateTime(token.getExpirationTime()));
+        validateToken(token);
+        OutlookService outlookService = OutlookServiceBuilder.getOutlookService(token.getAccessToken(), user_id);
+        Integer maxResults = 20; //nobody should have more than 20 active calendars...
+        return outlookService.getCalendars(maxResults).execute().body().getValue();
     }
 
     @Override

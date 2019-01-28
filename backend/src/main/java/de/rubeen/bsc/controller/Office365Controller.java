@@ -106,20 +106,6 @@ public class Office365Controller {
         return AuthHelper.getLoginUrl(state, nonce);
     }
 
-    @RequestMapping("/office/calendar/active")
-    public List<CalendarEntity> getActiveCalendar(@RequestParam("user_id") String user_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
-        LOG.info("Getting a list of all activated calendars");
-        try {
-            return officeProviderService.getAllActiveCalendars(user_id);
-        } catch (CalendarProvider.CalendarException e) {
-            response.setStatus(401);
-            return null;
-        }
-    }
-
-
-///////// TESTS /////////////
-
     @RequestMapping("/office/events")
     public List<Event> events(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
@@ -164,7 +150,19 @@ public class Office365Controller {
         } catch (CalendarProvider.CalendarException e) {
             LOG.error("Calendar-Exception");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return null;
         }
-        return null;
+    }
+
+    @RequestMapping("/office/calendar/active")
+    public List<CalendarEntity> getActiveCalendar(@RequestParam("user_id") String user_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
+        LOG.info("Getting a list of all activated calendars");
+        try {
+            return officeProviderService.getAllActiveCalendars(user_id);
+        } catch (CalendarProvider.CalendarException e) {
+            LOG.error("Calendar-Exception");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return null;
+        }
     }
 }
