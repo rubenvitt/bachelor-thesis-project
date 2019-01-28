@@ -106,42 +106,6 @@ public class Office365Controller {
         return AuthHelper.getLoginUrl(state, nonce);
     }
 
-    @RequestMapping("/office/events")
-    public List<Event> events(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession();
-        TokenResponse tokens = (TokenResponse) session.getAttribute("tokens");
-        if (tokens == null) {
-            LOG.error("User has to log in!");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "please log in");
-        }
-
-        String tenantId = (String) session.getAttribute("userTenantId");
-
-        tokens = AuthHelper.ensureTokens(tokens, tenantId);
-
-        String email = (String) session.getAttribute("userPrincipal");
-
-        OutlookService outlookService = OutlookServiceBuilder.getOutlookService(tokens.getAccessToken(), email);
-
-        // Sort by start time in descending order
-        String sort = "start/dateTime DESC";
-        // Only return the properties we care about
-        String properties = "organizer,subject,start,end";
-        // Return at most 10 events
-        Integer maxResults = 10;
-
-        try {
-            PagedResult<Event> events = outlookService.getEvents(
-                    sort, properties, maxResults)
-                    .execute().body();
-            return events.getValue();
-        } catch (IOException e) {
-            LOG.error("error: ", e);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.toString());
-        }
-        return null;
-    }
-
     @RequestMapping("/office/calendar")
     public List<CalendarEntity> calendars(Model model, HttpServletRequest request, HttpServletResponse response,
                                           @RequestParam("user_id") String userId) throws IOException {
