@@ -4,7 +4,6 @@ import de.rubeen.bsc.entities.db.tables.Appuser;
 import de.rubeen.bsc.entities.web.LoginUser;
 import org.jooq.Record;
 import org.jooq.Result;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -17,6 +16,10 @@ public class LoginService extends LoggableService {
 
     public LoginService(DatabaseService databaseService) throws SQLException {
         this.databaseService = databaseService;
+    }
+
+    private static String normalizeMail(final String mail) {
+        return mail.replace("%40", "@");
     }
 
     public Boolean login(final String user, final String password) {
@@ -41,13 +44,8 @@ public class LoginService extends LoggableService {
         return result.size() == 1;
     }
 
-    Integer getUserID(String email) {
+    public Integer getUserID(String email) {
         LOG.info("Looking for user with mail: " + email);
         return databaseService.getContext().select(APPUSER.ID).from(APPUSER).where(APPUSER.MAIL.eq(normalizeMail(email))).fetchOne(0, int.class);
-    }
-
-
-    private static String normalizeMail(final String mail) {
-        return mail.replace("%40", "@");
     }
 }

@@ -51,7 +51,7 @@ public class Indexes {
     private static class Indexes0 {
         public static Index APPUSER_PKEY = Internal.createIndex("appuser_pkey", Appuser.APPUSER, new OrderField[] { Appuser.APPUSER.ID }, true);
         public static Index CALENDAR_PKEY = Internal.createIndex("calendar_pkey", Calendar.CALENDAR, new OrderField[] { Calendar.CALENDAR.ID }, true);
-        public static Index CREDENTIAL_PKEY = Internal.createIndex("credential_pkey", Credential.CREDENTIAL, new OrderField[] { Credential.CREDENTIAL.ID }, true);
+        public static Index CREDENTIAL_PKEY = Internal.createIndex("credential_pkey", Credential.CREDENTIAL, new OrderField[] { Credential.CREDENTIAL.USER_ID }, true);
         public static Index ROOM_PKEY = Internal.createIndex("room_pkey", Room.ROOM, new OrderField[] { Room.ROOM.ROOM_ID }, true);
         public static Index ROOM_EQUIPMENT_PKEY = Internal.createIndex("room_equipment_pkey", RoomEquipment.ROOM_EQUIPMENT, new OrderField[] { RoomEquipment.ROOM_EQUIPMENT.EQUIP_ID }, true);
         public static Index ROOM_ROOM_EQUIPMENT_PKEY = Internal.createIndex("room_room_equipment_pkey", RoomRoomEquipment.ROOM_ROOM_EQUIPMENT, new OrderField[] { RoomRoomEquipment.ROOM_ROOM_EQUIPMENT.ROOM_ID, RoomRoomEquipment.ROOM_ROOM_EQUIPMENT.ROOM_EQUIPMENT_ID }, true);

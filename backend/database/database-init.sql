@@ -27,9 +27,11 @@ create table workingHours
 
 create table credential
 (
-  id         serial primary key ,
-  credential varchar(1000)   not null,
-  users_id   int             not null references appUser (id) on delete cascade
+  user_id   int            not null references appUser (id) on delete cascade,
+  credential text          not null,
+  provider   calprovider   not null,
+
+  PRIMARY KEY (user_id)
 );
 
 create table calendar

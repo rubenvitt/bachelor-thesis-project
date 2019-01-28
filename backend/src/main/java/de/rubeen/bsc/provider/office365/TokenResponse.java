@@ -1,4 +1,4 @@
-package de.rubeen.bsc.office365tests.auth.microsoft;
+package de.rubeen.bsc.provider.office365;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,6 +25,9 @@ public class TokenResponse {
     @JsonProperty("error_codes")
     private int[] errorCodes;
     private Date expirationTime;
+
+    private String tokenTendantId;
+
 
     public String getTokenType() {
         return tokenType;
@@ -103,5 +106,13 @@ public class TokenResponse {
 
     public Date getExpirationTime() {
         return expirationTime;
+    }
+
+    public String getTokenTendantId() {
+        return tokenTendantId;
+    }
+
+    public void setTokenTendantId(String tokenTendantId) {
+        this.tokenTendantId = tokenTendantId;
     }
 }

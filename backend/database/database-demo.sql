@@ -6,11 +6,6 @@ values ('123', 'Marcel Kastner', 'marcel@rubeen.me', 'Consultant', 'https://rand
        ('222', 'Annett Schneider', 'annett@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/81.jpg'),
        ('333', 'Ruben Vitt', 'r.vitt@fme.de', 'Student', 'https://gitlab.rubeen.me/uploads/-/system/user/avatar/2/avatar.png');
 
-insert into credential (credential, users_id)
-values ('google-0001', 1),
-       ('outlook-0001', 1),
-       ('google-0002', 2);
-
 insert into room (room_name, room_size)
 values ('Room 1', 5),
        ('Room 2', 6),

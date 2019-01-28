@@ -7,6 +7,7 @@ package de.rubeen.bsc.entities.db.tables;
 import de.rubeen.bsc.entities.db.Indexes;
 import de.rubeen.bsc.entities.db.Keys;
 import de.rubeen.bsc.entities.db.Public;
+import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.records.CredentialRecord;
 
 import java.util.Arrays;
@@ -16,7 +17,6 @@ import javax.annotation.Generated;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Identity;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Credential extends TableImpl<CredentialRecord> {
 
-    private static final long serialVersionUID = -2088980528;
+    private static final long serialVersionUID = -1106799810;
 
     /**
      * The reference instance of <code>public.credential</code>
@@ -57,19 +57,19 @@ public class Credential extends TableImpl<CredentialRecord> {
     }
 
     /**
-     * The column <code>public.credential.id</code>.
+     * The column <code>public.credential.user_id</code>.
      */
-    public final TableField<CredentialRecord, Integer> ID = createField("id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('credential_id_seq'::regclass)", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+    public final TableField<CredentialRecord, Integer> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>public.credential.credential</code>.
      */
-    public final TableField<CredentialRecord, String> CREDENTIAL_ = createField("credential", org.jooq.impl.SQLDataType.VARCHAR(1000).nullable(false), this, "");
+    public final TableField<CredentialRecord, String> CREDENTIAL_ = createField("credential", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.credential.users_id</code>.
+     * The column <code>public.credential.provider</code>.
      */
-    public final TableField<CredentialRecord, Integer> USERS_ID = createField("users_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<CredentialRecord, Calprovider> PROVIDER = createField("provider", org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(de.rubeen.bsc.entities.db.enums.Calprovider.class), this, "");
 
     /**
      * Create a <code>public.credential</code> table reference
@@ -124,14 +124,6 @@ public class Credential extends TableImpl<CredentialRecord> {
      * {@inheritDoc}
      */
     @Override
-    public Identity<CredentialRecord, Integer> getIdentity() {
-        return Keys.IDENTITY_CREDENTIAL;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public UniqueKey<CredentialRecord> getPrimaryKey() {
         return Keys.CREDENTIAL_PKEY;
     }
@@ -149,11 +141,11 @@ public class Credential extends TableImpl<CredentialRecord> {
      */
     @Override
     public List<ForeignKey<CredentialRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<CredentialRecord, ?>>asList(Keys.CREDENTIAL__CREDENTIAL_USERS_ID_FKEY);
+        return Arrays.<ForeignKey<CredentialRecord, ?>>asList(Keys.CREDENTIAL__CREDENTIAL_USER_ID_FKEY);
     }
 
     public Appuser appuser() {
-        return new Appuser(this, Keys.CREDENTIAL__CREDENTIAL_USERS_ID_FKEY);
+        return new Appuser(this, Keys.CREDENTIAL__CREDENTIAL_USER_ID_FKEY);
     }
 
     /**

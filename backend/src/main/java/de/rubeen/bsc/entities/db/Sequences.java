@@ -34,11 +34,6 @@ public class Sequences {
     public static final Sequence<Integer> CALENDAR_ID_SEQ = new SequenceImpl<Integer>("calendar_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.INTEGER.nullable(false));
 
     /**
-     * The sequence <code>public.credential_id_seq</code>
-     */
-    public static final Sequence<Integer> CREDENTIAL_ID_SEQ = new SequenceImpl<Integer>("credential_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.INTEGER.nullable(false));
-
-    /**
      * The sequence <code>public.room_equipment_equip_id_seq</code>
      */
     public static final Sequence<Integer> ROOM_EQUIPMENT_EQUIP_ID_SEQ = new SequenceImpl<Integer>("room_equipment_equip_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.INTEGER.nullable(false));

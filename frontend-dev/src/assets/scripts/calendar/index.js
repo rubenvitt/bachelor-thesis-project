@@ -31,18 +31,19 @@ function getAllCalendars(provider, handler) {
                     user_id: cookie.getUserID()
                 }
             }).done(function (content) {
-                handler(mapCalendarEntities(content));
+                handler($('#settings-list-group-google-cal-list'), mapCalendarEntities(content));
             });
             break;
         case 'office':
-            //some demo data:
-            const entities = [
-                {name: "Microsoft Nummer 1", id: 1, activated: false},
-                {name: "Microsoft Nummer 2", id: 2, activated: false},
-                {name: "Microsoft Nummer 3", id: 3, activated: false},
-                {name: "Microsoft Nummer 4", id: 4, activated: false}
-            ];
-            handler(entities);
+            $.ajax({
+                url: `${url.apiUrl}/office/calendar`,
+                data: {
+                    user_id: cookie.getUserID()
+                }
+            }).done(function (content) {
+                console.log(content);
+                handler($('#settings-list-group-office-cal-list'), mapCalendarEntities(content));
+            });
             break;
     }
 }

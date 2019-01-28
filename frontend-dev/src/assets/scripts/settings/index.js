@@ -79,8 +79,8 @@ if (document.getElementById("settings-workingHours")) {
         addModalListener("google-access-key");
         $("#are-you-sure-modal").modal();
     });
-    calendar.getAllCalendars('office', showOfficeCalendars);
-    calendar.getAllCalendars('google', showGoogleCalendars);
+    calendar.getAllCalendars('office', showCalendars);
+    calendar.getAllCalendars('google', showCalendars);
 
     workingHours.getWorkingHours(fillWorkingHours);
 
@@ -115,7 +115,6 @@ function addModalListener(cookie) {
  * @param {calendarEntity[]} calendars
  */
 function showOfficeCalendars(calendars) {
-    const list = $('#settings-list-group-office-cal-list');
     list.html(getHtmlFromCalendarEntities(calendars));
     const inputList = list.children().children('input');
     checkboxController.initCheckboxList(inputList, undefined);
@@ -125,8 +124,7 @@ function showOfficeCalendars(calendars) {
  * handler for google calendars
  * @param {calendarEntity[]} calendars
  */
-function showGoogleCalendars(calendars) {
-    const list = $('#settings-list-group-google-cal-list');
+function showCalendars(list, calendars) {
     list.html(getHtmlFromCalendarEntities(calendars));
     const inputList = list.children().children('input');
     checkboxController.initCheckboxList(inputList, function (checked, id) {
@@ -137,11 +135,6 @@ function showGoogleCalendars(calendars) {
                 "activated": checked
             })}`,
             method: 'post'
-            // data: {
-            //     calendar_id: id,
-            //     user_id: cookie.getUserID(),
-            //     activated: checked
-            // }
         }).done(function () {
 
         })
