@@ -22,7 +22,7 @@ public class OutlookServiceBuilder {
             public Response intercept(Interceptor.Chain chain) throws IOException {
                 Request original = chain.request();
                 Builder builder = original.newBuilder()
-                        .header("User-Agent", "java-tutorial")
+                        .header("User-Agent", "my-business-day")
                         .header("client-request-id", UUID.randomUUID().toString())
                         .header("return-client-request-id", "true")
                         .header("Authorization", String.format("Bearer %s", accessToken))

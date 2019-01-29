@@ -6,6 +6,7 @@ import de.rubeen.bsc.provider.office365.entities.OutlookUser;
 import de.rubeen.bsc.provider.office365.entities.PagedResult;
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 import java.util.Date;
@@ -21,13 +22,23 @@ public interface OutlookService {
             @Query("$top") Integer maxResults
     );
 
-    @GET("/v1.0/me/events")
+    @GET("/v1.0/me/calendarview")
     Call<PagedResult<Event>> getEvents(
             @Query("$orderby") String orderBy,
             @Query("$select") String select,
             @Query("$top") Integer maxResults,
-            @Query("startdatetime") Date startDateTime,
-            @Query("enddatetime") Date endDateTime
+            @Query("startdatetime") String startDateTime,
+            @Query("enddatetime") String endDateTime
+    );
+
+    @GET("/v1.0/me/calendars/{id}/calendarView")
+    Call<PagedResult<Event>> getEvents(
+            @Path("id") String calendarId,
+            @Query("$orderby") String orderBy,
+            @Query("$select") String select,
+            @Query("$top") Integer maxResults,
+            @Query("startdatetime") String startDateTime,
+            @Query("enddatetime") String endDateTime
     );
 
     @GET("/v1.0/me/calendars")

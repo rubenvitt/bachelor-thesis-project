@@ -11,6 +11,7 @@ import de.rubeen.bsc.provider.office365.OutlookService;
 import de.rubeen.bsc.provider.office365.OutlookServiceBuilder;
 import de.rubeen.bsc.provider.office365.TokenResponse;
 import de.rubeen.bsc.provider.office365.entities.Calendar;
+import de.rubeen.bsc.provider.office365.entities.Event;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.DatabaseService;
 import de.rubeen.bsc.service.LoggableService;
@@ -21,6 +22,7 @@ import org.joda.time.Interval;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +40,10 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
         this.databaseService = databaseService;
         this.loginService = loginService;
         this.calendarService = calendarService;
+    }
+
+    public static String convertDateToString(DateTime toConvert) {
+        return toConvert.toString("YYYY-MM-dd'T'HH:mm:ss.SSS'Z'");
     }
 
     @Override
@@ -59,9 +65,9 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
         }
     }
 
-    private void validateToken(TokenResponse token) {
+    private TokenResponse validateToken(TokenResponse token) {
         LOG.info("Validating token...: {}", token.getAccessToken());
-        AuthHelper.ensureTokens(token, token.getTokenTendantId());
+        return AuthHelper.ensureTokens(token, token.getTokenTendantId());
     }
 
     @Override
@@ -80,7 +86,6 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
 
     private List<Calendar> getCalendarFromOffice(String user_id) throws IOException {
         TokenResponse token = getToken(user_id);
-        validateToken(token);
         OutlookService outlookService = OutlookServiceBuilder.getOutlookService(token.getAccessToken(), user_id);
         Integer maxResults = 20; //nobody should have more than 20 active calendars...
         return outlookService.getCalendars(maxResults).execute().body().getValue();
@@ -90,53 +95,31 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
     public List<CalendarEvent> getEventsBetween(Interval interval, String userId, String calendarId) throws CalendarException {
         try {
             TokenResponse token = getToken(userId);
-            validateToken(token);
             OutlookService outlookService = OutlookServiceBuilder.getOutlookService(token.getAccessToken(), userId);
             Integer maxResults = 20;
             String sort = "start/dateTime DESC";
             String properties = "organizer,subject,start,end";
-            LOG.info("got following data: {}", outlookService.getEvents(sort, properties, maxResults, interval.getStart().toDate(), interval.getEnd().toDate())
-                    .execute().body().getValue());
-            return null;
+            final List<Event> outlookEvents = outlookService
+                    .getEvents(calendarId, sort, properties, maxResults, convertDateToString(interval.getStart()), convertDateToString(interval.getEnd()))
+                    .execute().body().getValue();
+            return outlookEvents.parallelStream()
+                    .map(event -> {
+                        /*
+                        public CalendarEvent(String subject,
+                     String description,
+                     String room,
+                     String calendarId,
+                     @NotNull Interval meetingInterval,
+                     List<CalendarEvent.Attendee> attendees)
+                         */
+                        return new CalendarEvent(event.getSubject(), "empty description", "empty room",
+                                calendarId, new Interval(event.getStart().getDateTime().toInstant().toEpochMilli(),
+                                event.getEnd().getDateTime().toInstant().toEpochMilli()
+                        ), Collections.emptyList());
+                    }).collect(Collectors.toList());
         } catch (IOException e) {
             throw new CalendarException("Unable to get token for user " + userId, e);
         }
-
-        //throw new NotImplementedException("Can't get events, because it wasn't implemented, yet");
-        /*
-        HttpSession session = request.getSession();
-        TokenResponse tokens = (TokenResponse) session.getAttribute("tokens");
-        if (tokens == null) {
-            LOG.error("User has to log in!");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "please log in");
-        }
-
-        String tenantId = (String) session.getAttribute("userTenantId");
-
-        tokens = AuthHelper.ensureTokens(tokens, tenantId);
-
-        String email = (String) session.getAttribute("userPrincipal");
-
-        OutlookService outlookService = OutlookServiceBuilder.getOutlookService(tokens.getAccessToken(), email);
-
-        // Sort by start time in descending order
-        String sort = "start/dateTime DESC";
-        // Only return the properties we care about
-        String properties = "organizer,subject,start,end";
-        // Return at most 10 events
-        Integer maxResults = 10;
-
-        try {
-            PagedResult<Event> events = outlookService.getEvents(
-                    sort, properties, maxResults)
-                    .execute().body();
-            return events.getValue();
-        } catch (IOException e) {
-            LOG.error("error: ", e);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.toString());
-        }
-        return null;
-         */
     }
 
     @Override
@@ -162,6 +145,7 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
                 .where(CREDENTIAL.USER_ID.eq(loginService.getUserID(userMail)))
                 .fetchSingleInto(String.class);
         LOG.debug("Got JSON from database: {}", json);
-        return objectMapper.readValue(json, TokenResponse.class);
+        final TokenResponse tokenResponse = objectMapper.readValue(json, TokenResponse.class);
+        return validateToken(tokenResponse);
     }
 }
