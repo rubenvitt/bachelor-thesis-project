@@ -1,6 +1,7 @@
 package de.rubeen.bsc.provider.office365.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import de.rubeen.bsc.entities.provider.CalendarEvent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
@@ -9,6 +10,22 @@ public class Event {
     private Recipient organizer;
     private DateTimeTimeZone start;
     private DateTimeTimeZone end;
+
+    public Event() {
+    }
+
+    public Event(String subject, Recipient organizer, DateTimeTimeZone start, DateTimeTimeZone end) {
+        this.subject = subject;
+        this.organizer = organizer;
+        this.start = start;
+        this.end = end;
+    }
+
+    public Event(CalendarEvent calendarEvent) {
+        this.subject = calendarEvent.getSubject();
+        this.start = new DateTimeTimeZone(calendarEvent.getStartDateTime());
+        this.end = new DateTimeTimeZone(calendarEvent.getEndDateTime());
+    }
 
     public String getId() {
         return id;

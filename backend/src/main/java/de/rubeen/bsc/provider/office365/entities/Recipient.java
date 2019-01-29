@@ -10,7 +10,8 @@ public class Recipient {
         return emailAddress;
     }
 
-    public void setEmailAddress(EmailAddress emailAddress) {
+    public Recipient setEmailAddress(EmailAddress emailAddress) {
         this.emailAddress = emailAddress;
+        return this;
     }
 }

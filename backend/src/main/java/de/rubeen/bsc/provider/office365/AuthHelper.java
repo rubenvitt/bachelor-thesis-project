@@ -28,7 +28,7 @@ public class AuthHelper {
             "offline_access",
             "profile",
             "User.Read",
-            "Calendars.Read"
+            "Calendars.ReadWrite",
     };
 
     private static String appId = null;

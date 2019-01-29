@@ -16,14 +16,15 @@ import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.DatabaseService;
 import de.rubeen.bsc.service.LoggableService;
 import de.rubeen.bsc.service.LoginService;
-import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.tables.Credential.CREDENTIAL;
@@ -48,7 +49,14 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
 
     @Override
     public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
-        return false;
+        try {
+            TokenResponse tokenResponse = getToken(userId);
+            OutlookService outlookService = OutlookServiceBuilder.getOutlookService(tokenResponse.getAccessToken(), userId);
+            return outlookService.createEvent(calendarEvent.getCalendarId(), new Event(calendarEvent)).execute().isSuccessful();
+        } catch (IOException e) {
+            LOG.error("Unable to get token for {}", userId, e);
+            throw new CalendarException("Unable to get token for {}" + userId, e);
+        }
     }
 
     @Override
@@ -113,8 +121,8 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
                      List<CalendarEvent.Attendee> attendees)
                          */
                         return new CalendarEvent(event.getSubject(), "empty description", "empty room",
-                                calendarId, new Interval(event.getStart().getDateTime().toInstant().toEpochMilli(),
-                                event.getEnd().getDateTime().toInstant().toEpochMilli()
+                                calendarId, new Interval(event.getStart().getDateDateTime().toInstant().toEpochMilli(),
+                                event.getEnd().getDateDateTime().toInstant().toEpochMilli()
                         ), Collections.emptyList());
                     }).collect(Collectors.toList());
         } catch (IOException e) {
@@ -124,7 +132,72 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
 
     @Override
     public List<Interval> getBusyTimes(String userId, NewEventEntity eventEntity) throws CalendarException {
-        throw new NotImplementedException("Can't get busyTimes, because it wasn't implemented, yet");
+        try {
+            TokenResponse tokenResponse = getToken(userId);
+            DateTime timeMin = DateTime.parse(eventEntity.getAutoTimeDateStart());
+            DateTime timeMax = DateTime.parse(eventEntity.getAutoTimeDateEnd());
+            //get all events between this dates, which are marked as busy...
+            String filter = "showAs eq 'busy'";
+            Integer maxResults = 200; //set hardly to 200...
+
+            List<Interval> allBusyTimes = new LinkedList<>();
+
+            OutlookService outlookService = OutlookServiceBuilder.getOutlookService(tokenResponse.getAccessToken(), userId);
+            getAllCalendars(userId).parallelStream()
+                    .map(calendarEntity -> {
+                        try {
+                            return outlookService.getEvents(calendarEntity.getCalendarID(), filter, maxResults,
+                                    convertDateToString(timeMin), convertDateToString(timeMax)).execute().body().getValue();
+                        } catch (IOException e) {
+                            LOG.error("Unable to get events for {} in calendar: {}", userId, calendarEntity.getCalendarID());
+                            return null;
+                        }
+                    }).filter(Objects::nonNull)
+                    .flatMap(List::parallelStream)
+                    .map(event -> new Interval(event.getStart().getDateDateTime().toInstant().toEpochMilli(),
+                            event.getEnd().getDateDateTime().toInstant().toEpochMilli()))
+                    .forEach(allBusyTimes::add);
+
+            LOG.info("Got {} busy-times for {}", allBusyTimes.size(), userId);
+            allBusyTimes.forEach(interval -> LOG.info("From {} until {}", interval.getStart(), interval.getEnd()));
+            return allBusyTimes;
+
+            /*
+            @GET("/v1.0/me/calendars/{id}/calendarView")
+    Call<PagedResult<Event>> getEvents(
+            @Path("id") String calendarId,
+            @Query("$filter") String filter,
+            @Query("$top") Integer maxResults,
+            @Query("startdatetime") String startDateTime,
+            @Query("enddatetime") String endDateTime
+             */
+        } catch (IOException e) {
+            throw new CalendarException("Unable to get token for user " + userId, e);
+        }
+
+
+        /*
+        //get active calendars for user
+        try {
+            FreeBusyResponse response = getCalendar(credential).freebusy().query(
+                    new FreeBusyRequest()
+                            .setTimeMin(timeMin)
+                            .setTimeMax(timeMax)
+                            .setItems(getFreeBusyRequestItems(userId))
+            ).execute();
+            LOG.debug("Executed request");
+            List<TimePeriod> result = new LinkedList<>();
+            LOG.debug("List created... Filling list");
+            response.getCalendars().forEach((s, freeBusyCalendar) -> result.addAll(freeBusyCalendar.getBusy()));
+            LOG.debug("List was filled. finished getBusyTimes");
+            return result.parallelStream()
+                    .map(timePeriod -> new Interval(timePeriod.getStart().getValue(), timePeriod.getEnd().getValue()))
+                    .collect(Collectors.toList());
+        } catch (IOException | CalendarException e) {
+            LOG.error("Unable to get free/busy request items for {}", userId, e);
+            throw new CalendarException("Unable to get busyTimes for " + userId, e);
+        }
+         */
     }
 
     public void saveToken(String userMail, TokenResponse tokenResponse) throws JsonProcessingException {

@@ -1,13 +1,9 @@
 package de.rubeen.bsc.provider.office365;
 
-import de.rubeen.bsc.provider.office365.entities.Calendar;
-import de.rubeen.bsc.provider.office365.entities.Event;
-import de.rubeen.bsc.provider.office365.entities.OutlookUser;
-import de.rubeen.bsc.provider.office365.entities.PagedResult;
+import de.rubeen.bsc.provider.office365.entities.*;
+import org.joda.time.field.StrictDateTimeField;
 import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
+import retrofit2.http.*;
 
 import java.util.Date;
 
@@ -22,8 +18,9 @@ public interface OutlookService {
             @Query("$top") Integer maxResults
     );
 
-    @GET("/v1.0/me/calendarview")
+    @GET("/v1.0/me/calendars/{id}/calendarView")
     Call<PagedResult<Event>> getEvents(
+            @Path("id") String calendarId,
             @Query("$orderby") String orderBy,
             @Query("$select") String select,
             @Query("$top") Integer maxResults,
@@ -34,11 +31,16 @@ public interface OutlookService {
     @GET("/v1.0/me/calendars/{id}/calendarView")
     Call<PagedResult<Event>> getEvents(
             @Path("id") String calendarId,
-            @Query("$orderby") String orderBy,
-            @Query("$select") String select,
+            @Query("$filter") String filter,
             @Query("$top") Integer maxResults,
             @Query("startdatetime") String startDateTime,
             @Query("enddatetime") String endDateTime
+    );
+
+    @POST("/v1.0/me/calendars/{id}/events")
+    Call<Event> createEvent(
+            @Path("id") String calendarId,
+            @Body Event event
     );
 
     @GET("/v1.0/me/calendars")
