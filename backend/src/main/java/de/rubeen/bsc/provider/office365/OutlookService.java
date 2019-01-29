@@ -1,11 +1,11 @@
 package de.rubeen.bsc.provider.office365;
 
-import de.rubeen.bsc.provider.office365.entities.*;
-import org.joda.time.field.StrictDateTimeField;
+import de.rubeen.bsc.provider.office365.entities.Calendar;
+import de.rubeen.bsc.provider.office365.entities.Event;
+import de.rubeen.bsc.provider.office365.entities.OutlookUser;
+import de.rubeen.bsc.provider.office365.entities.PagedResult;
 import retrofit2.Call;
 import retrofit2.http.*;
-
-import java.util.Date;
 
 public interface OutlookService {
     @GET("/v1.0/me")
@@ -46,5 +46,10 @@ public interface OutlookService {
     @GET("/v1.0/me/calendars")
     Call<PagedResult<Calendar>> getCalendars(
             @Query("$top") Integer maxResults
+    );
+
+    @GET("/v1.0/me/calendars/{id}")
+    Call<Calendar> getCalendar(
+            @Path("id") String calendarId
     );
 }

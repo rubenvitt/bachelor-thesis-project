@@ -281,4 +281,19 @@ public class GoogleProviderService implements CalendarProvider {
         }
     }
 
+    @Override
+    public CalendarEntity getCalendar(String calendarId, String userId, boolean isActivated) {
+        try {
+            Credential credential = flow.loadCredential(userId);
+            validateCredential(credential);
+            Calendar calendar = getCalendar(credential);
+            CalendarListEntry calendarListEntry = calendar.calendarList().get(calendarId).execute();
+            return new CalendarEntity(calendarListEntry, isActivated);
+        } catch (IOException | CredentialException e) {
+            LOG.error("Unable to handle credential for {}", userId);
+            return null;
+        }
+
+    }
+
 }

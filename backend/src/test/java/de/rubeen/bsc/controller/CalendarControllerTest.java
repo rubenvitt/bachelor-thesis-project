@@ -4,6 +4,7 @@ import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.EventService;
+import de.rubeen.bsc.service.ProviderService;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,12 +26,15 @@ class CalendarControllerTest {
     static CalendarService calendarService;
     @Mock
     EventService eventService;
+
+    @Mock
+    ProviderService providerService;
     private CalendarController calendarController;
 
     @BeforeEach
     void setup() {
         initMocks(this);
-        calendarController = new CalendarController(calendarService, eventService);
+        calendarController = new CalendarController(calendarService, eventService, providerService);
     }
 
     @Test

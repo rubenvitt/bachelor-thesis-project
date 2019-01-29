@@ -65,7 +65,7 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
             final List<Calendar> calendarList = getCalendarFromOffice(user_id);
             calendarList.parallelStream().forEach(calendar -> calendarService.addCalendarToDatabase(calendar.getId(), user_id, Calprovider.office));
             return calendarList.parallelStream()
-                    .map(calendar -> new CalendarEntity(calendar.getName(), calendar.getId(), calendarService.isCalendarActivated(calendar.getId())))
+                    .map(calendar -> new CalendarEntity(calendar, calendarService.isCalendarActivated(calendar.getId())))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             LOG.error("Error while getting calendars");
@@ -84,7 +84,7 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
             final List<Calendar> calendarList = getCalendarFromOffice(user_id);
             return calendarList.parallelStream()
                     .filter(calendar -> calendarService.isCalendarActivated(calendar.getId()))
-                    .map(calendar -> new CalendarEntity(calendar.getName(), calendar.getId(), calendarService.isCalendarActivated(calendar.getId())))
+                    .map(calendar -> new CalendarEntity(calendar, calendarService.isCalendarActivated(calendar.getId())))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             LOG.error("Error while getting calendars");
@@ -97,6 +97,12 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
         OutlookService outlookService = OutlookServiceBuilder.getOutlookService(token.getAccessToken(), user_id);
         Integer maxResults = 20; //nobody should have more than 20 active calendars...
         return outlookService.getCalendars(maxResults).execute().body().getValue();
+    }
+
+    private Calendar getSingleCalendarFromOffice(String userId, String calendarId) throws IOException {
+        TokenResponse tokenResponse = getToken(userId);
+        OutlookService outlookService = OutlookServiceBuilder.getOutlookService(tokenResponse.getAccessToken(), userId);
+        return outlookService.getCalendar(calendarId).execute().body();
     }
 
     @Override
@@ -198,6 +204,18 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
             throw new CalendarException("Unable to get busyTimes for " + userId, e);
         }
          */
+    }
+
+    @Override
+    public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated) {
+        try {
+            Calendar calendar = getSingleCalendarFromOffice(userMail, calendarId);
+            LOG.debug("Got calendar: {} with name {}", calendar.getId(), calendar.getName());
+            return new CalendarEntity(calendar, isActivated);
+        } catch (IOException e) {
+            LOG.error("Unable to get calendar {} for {}", calendarId, userMail);
+            return null;
+        }
     }
 
     public void saveToken(String userMail, TokenResponse tokenResponse) throws JsonProcessingException {

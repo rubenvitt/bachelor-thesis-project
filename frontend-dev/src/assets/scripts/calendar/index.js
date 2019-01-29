@@ -53,26 +53,15 @@ function getAllCalendars(provider, handler) {
  * @param {string} provider
  * @param {function} handler function to call after downloading, accepting calendarEntity[]
  */
-function getAllActiveCalendars(provider, handler) {
-    switch (provider) {
-        case 'google':
-            $.ajax({
-                url: `${url.apiUrl}/google/calendar/active`,
-                data: {
-                    user_id: cookie.getUserID()
-                }
-            }).done(function (content) {
-                handler(mapCalendarEntities(content));
-            });
-            break;
-        case 'office':
-            //some demo data:
-            const entities = [
-                {name: "Dummy-Calendar", id: 1, activated: true},
-            ];
-            handler(entities);
-            break;
-    }
+function getAllActiveCalendars(handler) {
+    $.ajax({
+        url: `${url.apiUrl}/calendar/active`,
+        data: {
+            user_id: cookie.getUserID()
+        }
+    }).done(function (content) {
+        handler(mapCalendarEntities(content));
+    });
 }
 
 /**
@@ -81,13 +70,15 @@ function getAllActiveCalendars(provider, handler) {
  * @param content[].calendarID id of calendar
  * @param content[].calendarName name of calendar
  * @param content[].activated activated-state of calendar
+ * @param content[].provider cal-provider
  */
 function mapCalendarEntities(content) {
     console.log(content);
     return content.map(item => ({
         name: item.calendarName,
         id: item.calendarID,
-        activated: item.activated
+        activated: item.activated,
+        provider: item.provider
     }));
 }
 

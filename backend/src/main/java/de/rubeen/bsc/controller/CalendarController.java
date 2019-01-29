@@ -1,11 +1,12 @@
 package de.rubeen.bsc.controller;
 
+import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
 import de.rubeen.bsc.service.EventService;
+import de.rubeen.bsc.service.ProviderService;
 import de.rubeen.bsc.service.provider.CalendarProvider;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,12 @@ public class CalendarController {
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
     private final CalendarService calendarService;
     private final EventService eventService;
+    private final ProviderService providerService;
 
-    public CalendarController(CalendarService calendarService, EventService eventService) {
+    public CalendarController(CalendarService calendarService, EventService eventService, ProviderService providerService) {
         this.calendarService = calendarService;
         this.eventService = eventService;
+        this.providerService = providerService;
     }
 
     @RequestMapping(value = "/activate", method = RequestMethod.POST)
@@ -62,6 +65,11 @@ public class CalendarController {
         } catch (CalendarProvider.CalendarException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event was not created - contact administrator.");
         }
+    }
+
+    @RequestMapping(value = "/active", method = RequestMethod.GET)
+    public List<CalendarEntity> getActiveCalendars(@RequestParam("user_id") String user_id, HttpServletResponse response) {
+        return providerService.getAllCalendarEntities(user_id);
     }
 
     private void checkNewEvent(NewEventEntity newEventEntity) {

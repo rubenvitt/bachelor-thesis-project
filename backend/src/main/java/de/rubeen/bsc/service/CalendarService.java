@@ -1,15 +1,14 @@
 package de.rubeen.bsc.service;
 
-import com.google.api.services.calendar.model.TimePeriod;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
+import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
-import de.rubeen.bsc.service.provider.CalendarProvider;
-import de.rubeen.bsc.service.provider.GoogleProviderService;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalTime;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;

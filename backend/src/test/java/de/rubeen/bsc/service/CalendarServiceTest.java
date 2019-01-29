@@ -1,6 +1,5 @@
 package de.rubeen.bsc.service;
 
-import de.rubeen.bsc.service.provider.GoogleProviderService;
 import org.assertj.core.api.Condition;
 import org.joda.time.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +28,7 @@ class CalendarServiceTest {
     DatabaseService databaseService;
 
     @Mock
-    GoogleProviderService googleProviderService;
+    ProviderService providerService;
 
     @BeforeEach
     void setup() throws SQLException {

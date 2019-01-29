@@ -139,6 +139,11 @@ class EventServiceTest {
             public List<Interval> getBusyTimes(String userId, NewEventEntity eventEntity) throws CalendarException {
                 return List.of(new Interval(0, 1));
             }
+
+            @Override
+            public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated) {
+                return null;
+            }
         });
 
         NewEventEntity newEventEntity = new NewEventEntity(subject, description, autoTime, autoRoom, autoTimeDateStart,

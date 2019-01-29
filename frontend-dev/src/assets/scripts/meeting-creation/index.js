@@ -8,18 +8,36 @@ import * as appUser from '../appuser'
 import * as clockPicker from '../clockpicker';
 
 function displayActiveCalendarsInModal(calendars) {
-    function getListItemFor(id, name) {
+    function getIconForProvider(provider) {
+        switch (provider) {
+            case 'google':
+                return 'fab fa-google';
+            case 'office':
+                return 'fab fa-microsoft';
+        }
+    }
+
+    function getListItemFor(id, name, provider) {
         return `
 <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+    <i class="${getIconForProvider(provider)} c-black"></i>
     <input data-content="${id}" type="checkbox" class="form-check-input">
     ${name}
     <i class="fa fa-check badge badge-primary badge-pill"></i>
 </label>`;
     }
 
+    /**
+     * get listItems from calendarEntities
+     * @param calendars[] list of calendars
+     * @param calendars[].id id of calendar
+     * @param calendars[].name id of calendar
+     * @param calendars[].provider cal-provider for calender
+     * @returns {string} html to insert
+     */
     function getHtmlFromCalendarEntities(calendars) {
-        let html = '';
-        calendars.forEach(item => html += getListItemFor(item.id, item.name));
+        let html = ``;
+        calendars.forEach(item => html += getListItemFor(item.id, item.name, item.provider));
         return html;
     }
 
@@ -27,11 +45,11 @@ function displayActiveCalendarsInModal(calendars) {
         return list.children().children('input:checked').attr('data-content');
     }
 
-    const list = $('#meeting-creation-dialog-list-group-google-cal-list');
+    const list = $('#meeting-creation-dialog-list-group-cal-list');
     list.html(getHtmlFromCalendarEntities(calendars));
+
     const inputList = list.children().children('input');
     checkboxController.initRadioList(inputList, function (checked, id) {
-        console.log("DEBUG: " + checked + " --- " + id);
     });
 
     $('#calendar-select-modal-yes').click(function () {
@@ -86,7 +104,7 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
 
     $('#meeting-creation-submitButton').click(function () {
         $("#calendar-select-modal").modal();
-        calendar.getAllActiveCalendars('google', displayActiveCalendarsInModal);
+        calendar.getAllActiveCalendars(displayActiveCalendarsInModal);
         //form.sendForm();
     });
 
