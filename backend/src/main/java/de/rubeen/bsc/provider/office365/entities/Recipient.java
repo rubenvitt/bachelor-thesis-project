@@ -6,6 +6,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Recipient {
     private EmailAddress emailAddress;
 
+    public Recipient() {}
+    public Recipient(String name, String mail) {
+        this.emailAddress = new EmailAddress(name, mail);
+    }
+
     public EmailAddress getEmailAddress() {
         return emailAddress;
     }

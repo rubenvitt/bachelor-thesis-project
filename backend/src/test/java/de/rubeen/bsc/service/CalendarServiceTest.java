@@ -1,5 +1,6 @@
 package de.rubeen.bsc.service;
 
+import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import org.assertj.core.api.Condition;
 import org.joda.time.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,9 +27,6 @@ class CalendarServiceTest {
 
     @Mock
     DatabaseService databaseService;
-
-    @Mock
-    ProviderService providerService;
 
     @BeforeEach
     void setup() throws SQLException {
@@ -174,6 +172,66 @@ class CalendarServiceTest {
                 .size().isEqualTo(1);
         assertThat(result2.iterator().next().getStart())
                 .isNotEqualTo(workingHourStart);
+    }
+
+    @Test
+    void calculateFreeTimesWithTest() {
+        /*
+        3 busy-times:
+        #1: 4.2. 6:45 - 4.2. 13:00
+        #2: 4.2. 12:00 - 8.2. 13:00
+        #3: 4.2. 13:00 - 4.2. 14:00
+         */
+        List<Interval> busyTimes = List.of(
+                Interval.parse("2019-02-04T06:45:00.000+01:00/2019-02-04T13:00:00.000+01:00"),
+                Interval.parse("2019-02-04T12:00:00.000+01:00/2019-02-08T13:00:00.000+01:00"),
+                Interval.parse("2019-02-04T13:00:00.000+01:00/2019-02-04T14:00:00.000+01:00")
+        );
+        Interval searchBetween = new Interval(
+                new DateTime().withYear(2019).withMonthOfYear(2).withDayOfMonth(3).withHourOfDay(0),
+                new DateTime().withYear(2019).withMonthOfYear(2).withDayOfMonth(9).withHourOfDay(23));
+        //Working-hours:
+        //monday & thursday 8:00 - 16:00
+        List<LoginHoursEntity> workingHours = List.of(new LoginHoursEntity(null, "08:00", "16:00",
+                true, false, false,
+                true, false, false, false));
+        List<Interval> workingIntervals = List.of(
+                Interval.parse("2019-02-04T08:00:00.000+01:00/2019-02-04T16:00:00.000+01:00"),
+                Interval.parse("2019-02-07T08:00:00.000+01:00/2019-02-07T16:00:00.000+01:00")
+        );
+
+        final Collection<Interval> intervals = calendarService.calculateFreeTimeWith(workingIntervals.stream(), busyTimes);
+
+        System.out.println(intervals);
+
+        assertThat(intervals)
+                .hasSize(0);
+
+        /*
+: Working-Hours mapped to dateTimes
+: [Mon Thr  08:00:00.000 - 16:00:00.000] has 2 occurrences in 2019-02-03T00:00:00.000+01:00/2019-02-09T00:00:00.000+01:00
+: #2: 2019-02-04T12:00:00.000+01:00/2019-02-08T13:00:00.000+01:00 starts in and ends after 2019-02-04T08:00:00.000+01:00/2019-02-04T16:00:00.000+01:00
+: #1: 2019-02-04T08:00:00.000+01:00/2019-02-04T16:00:00.000+01:00 contains 2019-02-04T13:00:00.000+01:00/2019-02-04T14:00:00.000+01:00
+: #3: 2019-02-04T06:45:00.000+01:00/2019-02-04T13:00:00.000+01:00 starts before and ends in 2019-02-04T08:00:00.000+01:00/2019-02-04T16:00:00.000+01:00
+: #4: Working times 2019-02-07T08:00:00.000+01:00/2019-02-07T16:00:00.000+01:00 were illuminated by busyTimes: 2019-02-04T12:00:00.000+01:00/2019-02-08T13:00:00.000+01:00
+: got 4 freeTimes in following intervals:
+: 2019-02-04 (08:00:00.000) - 2019-02-04 (12:00:00.000)
+: 2019-02-04 (08:00:00.000) - 2019-02-04 (13:00:00.000)
+: 2019-02-04 (14:00:00.000) - 2019-02-04 (16:00:00.000)
+: 2019-02-04 (13:00:00.000) - 2019-02-04 (16:00:00.000)
+: got freeTimes [2019-02-04T08:00:00.000+01:00/2019-02-04T12:00:00.000+01:00, 2019-02-04T08:00:00.000+01:00/2019-02-04T13:00:00.000+01:00, 2019-02-04T14:00:00.000+01:00/2019-02-04T16:00:00.000+01:00, 2019-02-04T13:00:00.000+01:00/2019-02-04T16:00:00.000+01:00] for r.vitt%40fme.de
+: Looking for time-slots for (subject: Hasi ist süß!, description: Ja, mein Hasi ist süß. <3, autoTime: true, manTimeDateStart: , manTimeDateEnd: , manTimeTimeStart: 00:00, manTimeTimeEnd: 00:00) in [2019-02-04T08:00:00.000+01:00/2019-02-04T12:00:00.000+01:00, 2019-02-04T08:00:00.000+01:00/2019-02-04T13:00:00.000+01:00, 2019-02-04T14:00:00.000+01:00/2019-02-04T16:00:00.000+01:00, 2019-02-04T13:00:00.000+01:00/2019-02-04T16:00:00.000+01:00]
+: found timeSlot: 2019-02-04 (08:00:00.000) - 2019-02-04 (12:00:00.000)
+: found timeSlot: 2019-02-04 (08:00:00.000) - 2019-02-04 (13:00:00.000)
+: found timeSlot: 2019-02-04 (14:00:00.000) - 2019-02-04 (16:00:00.000)
+: found timeSlot: 2019-02-04 (13:00:00.000) - 2019-02-04 (16:00:00.000)
+: Selecting first interval from [2019-02-04T08:00:00.000+01:00/2019-02-04T12:00:00.000+01:00, 2019-02-04T08:00:00.000+01:00/2019-02-04T13:00:00.000+01:00, 2019-02-04T14:00:00.000+01:00/2019-02-04T16:00:00.000+01:00, 2019-02-04T13:00:00.000+01:00/2019-02-04T16:00:00.000+01:00] for (subject: Hasi ist süß!, description: Ja, mein Hasi ist süß. <3, autoTime: true, manTimeDateStart: , manTimeDateEnd: , manTimeTimeStart: 00:00, manTimeTimeEnd: 00:00)
+: Trimming interval 2019-02-04T08:00:00.000+01:00/2019-02-04T12:00:00.000+01:00 for period of meeting: PT60M
+: got timeSlot 2019-02-04T08:00:00.000+01:00/2019-02-04T09:00:00.000+01:00 for r.vitt%40fme.de - (subject: Hasi ist süß!, description: Ja, mein Hasi ist süß. <3, autoTime: true, manTimeDateStart: , manTimeDateEnd: , manTimeTimeStart: 00:00, manTimeTimeEnd: 00:00)
+: #4/4: create auto-time-manual-room event for r.vitt%40fme.de
+
+         */
+
     }
 
     private LocalTime getTime(final String time) {

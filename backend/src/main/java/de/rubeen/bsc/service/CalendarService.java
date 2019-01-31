@@ -3,12 +3,10 @@ package de.rubeen.bsc.service;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
-import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalTime;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -16,6 +14,7 @@ import java.time.DayOfWeek;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -90,48 +89,67 @@ public class CalendarService extends LoggableService {
 
     Collection<Interval> calculateFreeTimeWith(final Stream<Interval> workingIntervals,
                                                final Collection<Interval> busyIntervals) {
-        List<Interval> resultIntervals = new LinkedList<>();
-        workingIntervals.forEach(workingInterval -> {
-            AtomicBoolean meetingAtThisDay = new AtomicBoolean(false);
-            busyIntervals.parallelStream().forEach(busyInterval -> {
-                //for each busyInterval:
-                //#1:
-                if (workingInterval.contains(busyInterval)) {
-                    //meeting is in workingTime
-                    LOG.info("#1: {} contains {}", workingInterval, busyInterval);
-                    if (!workingInterval.getStart().equals(busyInterval.getStart()))
-                        resultIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
-                    if (!workingInterval.getEnd().equals(busyInterval.getEnd()))
-                        resultIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
-                    meetingAtThisDay.set(true);
-                }
-                //#2:
-                if (workingInterval.contains(busyInterval.getStart())
-                        && busyInterval.getEnd().isAfter(workingInterval.getEnd())) {
-                    //meeting begins in workingTime & ends after workingTime
-                    LOG.info("#2: {} starts in and ends after {}", busyInterval, workingInterval);
-                    resultIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
-                    meetingAtThisDay.set(true);
-                }
-                //#3:
-                if (busyInterval.getStart().isBefore(workingInterval.getStart())
-                        && workingInterval.contains(busyInterval.getEnd())) {
-                    //meeting begins before workingTime & ends in workingTime
-                    LOG.info("#3: {} starts before and ends in {}", busyInterval, workingInterval);
-                    resultIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
-                    meetingAtThisDay.set(true);
-                }
-                //#4:
-                if (busyInterval.contains(workingInterval)) {
-                    //workingHours are in meetingTime
-                    LOG.info("#4: Working times {} were illuminated by busyTimes: {}", workingInterval, busyInterval);
-                    meetingAtThisDay.set(true);
-                }
-            });
-            if (!meetingAtThisDay.get())
-                resultIntervals.add(workingInterval);
-        });
-        return resultIntervals;
+        //List<Interval> resultIntervals = new LinkedList<>();
+        //FIXME method not working
+        return workingIntervals
+                .map(workingInterval -> {
+                    List<Interval> workingDayIntervals = new LinkedList<>();
+                    AtomicBoolean meetingAtThisDay = new AtomicBoolean(false);
+
+                    LOG.info("Checking workingInterval: {}", workingInterval);
+                    //#4:
+                    final Optional<Interval> anyOverlapping = busyIntervals.parallelStream()
+                            .filter(busyInterval -> busyInterval.contains(workingInterval))
+                            .findAny();
+
+                    if (anyOverlapping.isPresent()) {
+                        LOG.info("#4: Working times {} were illuminated by busyTime", workingInterval);
+                        return new LinkedList<Interval>();
+                    }
+
+                    //#1:
+                    busyIntervals.parallelStream()
+                            .filter(workingInterval::contains)
+                            .forEach(busyInterval -> {
+                                //meeting is in workingTime
+                                LOG.info("#1: {} contains {}", workingInterval, busyInterval);
+                                if (!workingInterval.getStart().equals(busyInterval.getStart()))
+                                    workingDayIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
+                                if (!workingInterval.getEnd().equals(busyInterval.getEnd()))
+                                    workingDayIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
+                                meetingAtThisDay.set(true);
+                            });
+                    //#2:
+                    busyIntervals.parallelStream()
+                            .filter(busyInterval -> workingInterval.contains(busyInterval.getStart()))
+                            .filter(busyInterval -> busyInterval.getEnd().isAfter(workingInterval.getEnd()))
+                            .forEach(busyInterval -> {
+                                //meeting begins in workingTime & ends after workingTime
+                                LOG.info("#2: {} starts in and ends after {}", busyInterval, workingInterval);
+                                workingDayIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
+                                meetingAtThisDay.set(true);
+                            });
+                    //#3:
+                    busyIntervals.parallelStream()
+                            .filter(busyInterval -> workingInterval.contains(busyInterval.getEnd()))
+                            .filter(busyInterval -> busyInterval.getStart().isBefore(workingInterval.getStart()))
+                            .forEach(busyInterval -> {
+                                //meeting begins before workingTime & ends in workingTime
+                                LOG.info("#3: {} starts before and ends in {}", busyInterval, workingInterval);
+                                workingDayIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
+                                meetingAtThisDay.set(true);
+                            });
+
+                    if (!meetingAtThisDay.get())
+                        workingDayIntervals.add(workingInterval);
+
+                    return workingDayIntervals;
+                }).filter(intervals -> {
+                    LOG.info("Got intervals: {}", intervals);
+                    return true;
+                })
+                .flatMap(List::parallelStream)
+                .collect(Collectors.toList());
     }
 
     @SuppressWarnings("Duplicates")

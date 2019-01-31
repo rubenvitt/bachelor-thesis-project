@@ -3,6 +3,9 @@ package de.rubeen.bsc.provider.office365.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
     private String id;
@@ -10,6 +13,10 @@ public class Event {
     private Recipient organizer;
     private DateTimeTimeZone start;
     private DateTimeTimeZone end;
+    private Collection<Recipient> attendees;
+    private Body body;
+    private Location location;
+    private String onlineMeetingUrl;
 
     public Event() {
     }
@@ -25,6 +32,11 @@ public class Event {
         this.subject = calendarEvent.getSubject();
         this.start = new DateTimeTimeZone(calendarEvent.getStartDateTime());
         this.end = new DateTimeTimeZone(calendarEvent.getEndDateTime());
+        this.body = new Body(calendarEvent.getDescription());
+        this.location = new Location(calendarEvent.getRoom());
+        this.attendees = calendarEvent.getAttendees().parallelStream()
+                .map(attendee -> new Recipient(attendee.getName(), attendee.getMail()))
+                .collect(Collectors.toList());
     }
 
     public String getId() {
@@ -65,5 +77,37 @@ public class Event {
 
     public void setEnd(DateTimeTimeZone end) {
         this.end = end;
+    }
+
+    public Collection<Recipient> getAttendees() {
+        return attendees;
+    }
+
+    public void setAttendees(Collection<Recipient> attendees) {
+        this.attendees = attendees;
+    }
+
+    public Body getBody() {
+        return body;
+    }
+
+    public void setBody(Body body) {
+        this.body = body;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public String getOnlineMeetingUrl() {
+        return onlineMeetingUrl;
+    }
+
+    public void setOnlineMeetingUrl(String onlineMeetingUrl) {
+        this.onlineMeetingUrl = onlineMeetingUrl;
     }
 }

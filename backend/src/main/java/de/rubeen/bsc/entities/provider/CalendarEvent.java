@@ -3,6 +3,7 @@ package de.rubeen.bsc.entities.provider;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
+import java.util.Collections;
 import java.util.List;
 
 import static java.text.MessageFormat.format;
@@ -70,7 +71,7 @@ public class CalendarEvent {
     }
 
     public List<Attendee> getAttendees() {
-        return attendees;
+        return attendees == null ? Collections.emptyList() : attendees;
     }
 
     public void setAttendees(List<Attendee> attendees) {
