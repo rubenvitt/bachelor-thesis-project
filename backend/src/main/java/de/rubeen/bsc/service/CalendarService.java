@@ -16,11 +16,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
 import static java.time.DayOfWeek.*;
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class CalendarService extends LoggableService {
@@ -58,7 +58,7 @@ public class CalendarService extends LoggableService {
                 start.toLocalDate(), end.toLocalDate());
         final Interval initInterval = new Interval(start, end);
         final List<Interval> busyIntervals = busyTimePeriods
-                .collect(Collectors.toList());
+                .collect(toList());
         final Stream<Interval> workingIntervals = workingHours
                 .map(loginHoursEntity -> {
                     List<Interval> intervals = new LinkedList<>();
@@ -66,9 +66,9 @@ public class CalendarService extends LoggableService {
                             loginHoursEntity.isWednesday(), loginHoursEntity.isThursday(), loginHoursEntity.isFriday(),
                             loginHoursEntity.isSaturday(), loginHoursEntity.isSunday());
                     final List<DateTime> startDateTimes = days.stream()
-                            .map(dateTime -> dateTime.withTime(LocalTime.parse(loginHoursEntity.getStartTime()))).collect(Collectors.toList());
+                            .map(dateTime -> dateTime.withTime(LocalTime.parse(loginHoursEntity.getStartTime()))).collect(toList());
                     final List<DateTime> endDateTimes = days.stream()
-                            .map(dateTime -> dateTime.withTime(LocalTime.parse(loginHoursEntity.getEndTime()))).collect(Collectors.toList());
+                            .map(dateTime -> dateTime.withTime(LocalTime.parse(loginHoursEntity.getEndTime()))).collect(toList());
                     assert startDateTimes.size() == endDateTimes.size();
                     for (int i = 0; i < startDateTimes.size(); i++) {
                         intervals.add(new Interval(startDateTimes.get(i), endDateTimes.get(i)));
@@ -91,7 +91,7 @@ public class CalendarService extends LoggableService {
                                                final Collection<Interval> busyIntervals) {
         //List<Interval> resultIntervals = new LinkedList<>();
         //FIXME method not working
-        return workingIntervals
+        final List<Interval> freeTimes = workingIntervals
                 .map(workingInterval -> {
                     List<Interval> workingDayIntervals = new LinkedList<>();
                     AtomicBoolean meetingAtThisDay = new AtomicBoolean(false);
@@ -149,7 +149,72 @@ public class CalendarService extends LoggableService {
                     return true;
                 })
                 .flatMap(List::parallelStream)
-                .collect(Collectors.toList());
+                .collect(toList());
+
+        return busyIntervals.parallelStream()
+                .map(busyInterval -> {
+                    AtomicBoolean interacted = new AtomicBoolean(false);
+
+                    List<Interval> intervalList = new LinkedList<>();
+                    //#1: contains
+                    intervalList.addAll(
+                            freeTimes.parallelStream()
+                                    .filter(freeInterval -> freeInterval.contains(busyInterval))
+                                    .filter(freeInterval -> !freeInterval.getStart().equals(busyInterval.getStart()))
+                                    .filter(freeInterval -> !freeInterval.getEnd().equals(busyInterval.getEnd()))
+                                    .map(freeInterval -> {
+                                        interacted.set(true);
+                                        LOG.info("#1: Creating 2 intervals from {} until {} and {} until {}", freeInterval.getStart(), busyInterval.getStart(), busyInterval.getEnd(), freeInterval.getEnd());
+                                        return List.of(new Interval(freeInterval.getStart(), busyInterval.getStart()),
+                                                new Interval(busyInterval.getEnd(), freeInterval.getEnd()));
+                                    })
+                                    .flatMap(List::stream)
+                                    .collect(toList())
+                    );
+
+                    //#2: start before, end in
+                    intervalList.addAll(
+                            freeTimes.parallelStream()
+                                    .filter(freeInterval -> busyInterval.getStart().isBefore(freeInterval.getStart())
+                                            && freeInterval.contains(busyInterval.getEnd()))
+                                    .map(freeInterval -> {
+                                        interacted.set(true);
+                                        LOG.info("#2: Creating interval from {} until {}", busyInterval.getEnd(), freeInterval.getEnd());
+                                        return new Interval(busyInterval.getEnd(), freeInterval.getEnd());
+                                    })
+                                    .collect(toList())
+                    );
+
+                    //#3: start in, end after
+                    intervalList.addAll(
+                            freeTimes.parallelStream()
+                                    .filter(freeInterval -> freeInterval.contains(busyInterval.getStart())
+                                            && busyInterval.getEnd().isAfter(busyInterval.getEnd()))
+                                    .map(freeInterval -> {
+                                        interacted.set(true);
+                                        LOG.info("#3: Creating interval from {} until {}", freeInterval.getStart(), busyInterval.getStart());
+                                        return new Interval(freeInterval.getStart(), busyInterval.getStart());
+                                    })
+                                    .collect(toList())
+                    );
+
+                    //#4: smaller than
+                    if (!interacted.get()) {
+                        LOG.info("No interaction detected for {}", busyInterval);
+                        final long smallerFreeIntervals = freeTimes.parallelStream()
+                                .filter(freeInterval -> !busyInterval.contains(freeInterval))
+                                .count();
+                        LOG.info("#4: {} bigger as freeInterval? {}", busyInterval, smallerFreeIntervals);
+                        if (smallerFreeIntervals == 0) {
+                            LOG.info("adding {} to intervals", busyInterval);
+                            intervalList.add(busyInterval);
+                        }
+                    }
+
+                    return intervalList;
+                })
+                .flatMap(List::stream)
+                .collect(toList());
     }
 
     @SuppressWarnings("Duplicates")

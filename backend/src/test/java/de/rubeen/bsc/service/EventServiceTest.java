@@ -7,6 +7,7 @@ import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
+import de.rubeen.bsc.service.provider.TestProviderImplementation;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalTime;
@@ -153,5 +154,26 @@ class EventServiceTest {
 
         assertThat(eventsCreated[0])
                 .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Event-times should be calculated successfully with calendarService")
+    void addEventWithRealCalendarService() throws SQLException {
+        eventService = new EventService(googleProviderService, providerService, loginService, roomService, databaseService, userService,
+                new CalendarService(loginService, databaseService));
+        when(providerService.getCalendarProvider(anyString())).thenReturn(new TestProviderImplementation());
+
+        /*
+        public NewEventEntity(String subject,
+                      String description,
+                      boolean autoTime,
+                      boolean autoRoom,
+                      String autoTimeDateStart,
+                      String autoTimeDateEnd,
+                      Integer meetingDuration,
+                      String durationUnit,
+                      List<Integer> attendees)
+         */
+
     }
 }

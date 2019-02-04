@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-class CalendarServiceTest {
+class CalendarServiceTest extends LoggableService {
 
     private CalendarService calendarService;
 
@@ -184,7 +184,7 @@ class CalendarServiceTest {
          */
         List<Interval> busyTimes = List.of(
                 Interval.parse("2019-02-04T06:45:00.000+01:00/2019-02-04T13:00:00.000+01:00"),
-                Interval.parse("2019-02-04T12:00:00.000+01:00/2019-02-08T13:00:00.000+01:00"),
+                //Interval.parse("2019-02-04T12:00:00.000+01:00/2019-02-08T13:00:00.000+01:00"),
                 Interval.parse("2019-02-04T13:00:00.000+01:00/2019-02-04T14:00:00.000+01:00")
         );
         Interval searchBetween = new Interval(
@@ -202,7 +202,10 @@ class CalendarServiceTest {
 
         final Collection<Interval> intervals = calendarService.calculateFreeTimeWith(workingIntervals.stream(), busyTimes);
 
-        System.out.println(intervals);
+        LOG.info("got {} freeTimes in following intervals:", intervals.size());
+        intervals.forEach(interval -> LOG.info("{} ({}) - {} ({})",
+                interval.getStart().toLocalDate(), interval.getStart().toLocalTime(),
+                interval.getEnd().toLocalDate(), interval.getEnd().toLocalTime()));
 
         assertThat(intervals)
                 .hasSize(0);
@@ -229,7 +232,19 @@ class CalendarServiceTest {
 : Trimming interval 2019-02-04T08:00:00.000+01:00/2019-02-04T12:00:00.000+01:00 for period of meeting: PT60M
 : got timeSlot 2019-02-04T08:00:00.000+01:00/2019-02-04T09:00:00.000+01:00 for r.vitt%40fme.de - (subject: Hasi ist süß!, description: Ja, mein Hasi ist süß. <3, autoTime: true, manTimeDateStart: , manTimeDateEnd: , manTimeTimeStart: 00:00, manTimeTimeEnd: 00:00)
 : #4/4: create auto-time-manual-room event for r.vitt%40fme.de
+         */
 
+
+        /*
+        10:41:37.825 [main] INFO de.rubeen.bsc.service.CalendarService - Checking workingInterval: 2019-02-04T08:00:00.000+01:00/2019-02-04T16:00:00.000+01:00
+10:41:37.850 [ForkJoinPool.commonPool-worker-3] INFO de.rubeen.bsc.service.CalendarService - #1: 2019-02-04T08:00:00.000+01:00/2019-02-04T16:00:00.000+01:00 contains 2019-02-04T13:00:00.000+01:00/2019-02-04T14:00:00.000+01:00
+10:41:37.854 [main] INFO de.rubeen.bsc.service.CalendarService - #2: 2019-02-04T12:00:00.000+01:00/2019-02-08T13:00:00.000+01:00 starts in and ends after 2019-02-04T08:00:00.000+01:00/2019-02-04T16:00:00.000+01:00
+10:41:37.863 [ForkJoinPool.commonPool-worker-3] INFO de.rubeen.bsc.service.CalendarService - #3: 2019-02-04T06:45:00.000+01:00/2019-02-04T13:00:00.000+01:00 starts before and ends in 2019-02-04T08:00:00.000+01:00/2019-02-04T16:00:00.000+01:00
+10:41:37.863 [main] INFO de.rubeen.bsc.service.CalendarService - Got intervals: [2019-02-04T08:00:00.000+01:00/2019-02-04T13:00:00.000+01:00, 2019-02-04T14:00:00.000+01:00/2019-02-04T16:00:00.000+01:00, 2019-02-04T08:00:00.000+01:00/2019-02-04T12:00:00.000+01:00, 2019-02-04T13:00:00.000+01:00/2019-02-04T16:00:00.000+01:00]
+10:41:37.864 [main] INFO de.rubeen.bsc.service.CalendarService - Checking workingInterval: 2019-02-07T08:00:00.000+01:00/2019-02-07T16:00:00.000+01:00
+10:41:37.865 [main] INFO de.rubeen.bsc.service.CalendarService - #4: Working times 2019-02-07T08:00:00.000+01:00/2019-02-07T16:00:00.000+01:00 were illuminated by busyTime
+10:41:37.866 [main] INFO de.rubeen.bsc.service.CalendarService - Got intervals: []
+[2019-02-04T08:00:00.000+01:00/2019-02-04T13:00:00.000+01:00, 2019-02-04T14:00:00.000+01:00/2019-02-04T16:00:00.000+01:00, 2019-02-04T08:00:00.000+01:00/2019-02-04T12:00:00.000+01:00, 2019-02-04T13:00:00.000+01:00/2019-02-04T16:00:00.000+01:00]
          */
 
     }
