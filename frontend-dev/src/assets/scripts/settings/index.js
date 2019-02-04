@@ -68,17 +68,6 @@ if (document.getElementById("settings-workingHours")) {
         clockPicker.createClockPicker($('.clockpicker input'), undefined);
     });
 
-    $("#account-settings-remove-microsoft-access-token-btn").click(function () {
-        $("#removal-name").text("Office 365");
-        addModalListener("microsoft-access-key");
-        $("#are-you-sure-modal").modal();
-    });
-
-    $("#account-settings-remove-google-access-token-btn").click(function () {
-        $("#removal-name").text("Google");
-        addModalListener("google-access-key");
-        $("#are-you-sure-modal").modal();
-    });
     calendar.getAllCalendars('office', showCalendars);
     calendar.getAllCalendars('google', showCalendars);
 
