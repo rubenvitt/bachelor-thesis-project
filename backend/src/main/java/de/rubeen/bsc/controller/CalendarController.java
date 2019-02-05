@@ -80,4 +80,13 @@ public class CalendarController {
                 || newEventEntity.getManTimeTimeEnd().isBlank() || newEventEntity.getManTimeTimeStart().isBlank())));
         checkArgument(/* auto-room // man-room */ !newEventEntity.isAutoRoom() || newEventEntity.getRoomId() != null);
     }
+
+    @RequestMapping(value = "/events/user_quality", method = RequestMethod.GET)
+    public int getUserQualityValueForEvent(@RequestParam(value = "user_id") String userId,
+                                           @RequestParam(value = "start_date") String startDate,
+                                           @RequestParam(value = "start_time") String startTime,
+                                           @RequestParam(value = "end_date") String endDate,
+                                           @RequestParam(value = "end_time") String endTime) {
+        return eventService.getUserQualityValue(userId, startDate, startTime, endDate, endTime);
+    }
 }

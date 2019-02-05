@@ -1,5 +1,6 @@
 import * as URLS from "../constants/urls";
 import * as cookie from "../cookie";
+import {getUserID} from "../cookie";
 import * as calendar from '../calendar';
 import * as checkboxController from "../checkbox-in-list-with-badge";
 import * as formSender from './form-sending-handler';
@@ -64,17 +65,18 @@ function getAppUsers(filter) {
          */
         function (appUserList) {
             //fill attendee-list
+            const itemsToChangeDirection = 7;
             let html = "";
             appUserList.forEach(user => {
                 html += `
                 <a itemid="${user.id}" href="javascript:void {}"
-                   class="list-group-item list-group-item-action container">
+                   class="bds-n list-group-item ${appUserList.length >= itemsToChangeDirection ? 'col-lg-6' : ''} list-group-item-action container">
                     <div class="row">
                         <div class="col-3">
                             <img class="w-100p rounded-circle"
                                  src="${user.avatar}">
                         </div>
-                        <div class="col-9">
+                        <div class="col-6">
                             <div class="container">
                                 <div class="row">
                                     <h6 class="mb-0">${user.name}</h6>
@@ -84,14 +86,60 @@ function getAppUsers(filter) {
                                 </div>
                             </div>
                         </div>
+                        <div class="spinner col-2 ta-c m-a m-0 vis-h"></div>
                     </div>
                 </a>`;
             });
             const attendeeList = $('#newMeeting-attendee-list');
             attendeeList.html(html);
+            if (appUserList.length <= itemsToChangeDirection) {
+                attendeeList.removeClass('row');
+            } else {
+                attendeeList.addClass('row');
+            }
             const attendeesLinks = attendeeList.find("a");
             attendeesLinks.click(function () {
-                $(this).toggleClass("active");
+                //$(this).toggleClass('active');
+                const attendee = $(this);
+                if (attendee.hasClass('active') || attendee.find('.spinner').hasClass('vis-v')) {
+                    attendee.removeClass('bg-danger');
+                    attendee.removeClass('bg-warning');
+                    attendee.removeClass('bg-success');
+                    attendee.removeClass('active');
+                } else {
+                    attendee.find('.spinner').removeClass('vis-h');
+                    attendee.find('.spinner').addClass('vis-v');
+                    $.ajax({
+                        url: URLS.apiUrl + "/calendar/events/user_quality",
+                        data: {
+                            user_id: getUserID(),
+                            start_date: '',
+                            start_time: '',
+                            end_date: '',
+                            end_time: ''
+                        }
+                    }).done(function (content) {
+                        if (attendee.find('.spinner').hasClass('vis-v')) {
+                            attendee.addClass('active');
+                            console.log(`content: ${content}`);
+                            switch (true) {
+                                case (content <= 10):
+                                    attendee.addClass('bg-danger');
+                                    break;
+                                case (content < 50):
+                                    attendee.addClass('bg-warning');
+                                    break;
+                                case (content >= 50):
+                                    attendee.addClass('bg-success');
+                                    break;
+                                default:
+                                    console.error("got wrong content");
+                            }
+                        }
+                        attendee.find('.spinner').addClass('vis-h');
+                        attendee.find('.spinner').removeClass('vis-v');
+                    });
+                }
             });
         });
 }
@@ -216,10 +264,6 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
         }
     });
 
-    const attendeeSelectedLinks = $("#newMeeting-attendee-selected-list").find("a");
-    attendeeSelectedLinks.click(function () {
-        $(this).remove();
-    });
     /*attendeesLinks.click((evt) => {
         console.log("A");
        $(evt.target).toggleClass("active");

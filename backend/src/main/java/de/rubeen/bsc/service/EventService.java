@@ -12,13 +12,11 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.Tables.APPUSER;
@@ -236,5 +234,15 @@ public class EventService extends LoggableService {
 
     private DateTime getEndOfDay(DateTime day) {
         return day.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999);
+    }
+
+    public int getUserQualityValue(String userId, String startDate, String startTime, String endDate, String endTime) {
+        // TODO: 2019-02-05 implementation: 100: user completely free || 0: user has NO time between
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return new Random().nextInt(101);
     }
 }
