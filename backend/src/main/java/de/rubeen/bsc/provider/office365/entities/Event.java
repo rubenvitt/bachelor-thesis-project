@@ -3,8 +3,11 @@ package de.rubeen.bsc.provider.office365.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.stream.Collectors;
+
+import static java.text.MessageFormat.format;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Event {
@@ -109,5 +112,11 @@ public class Event {
 
     public void setOnlineMeetingUrl(String onlineMeetingUrl) {
         this.onlineMeetingUrl = onlineMeetingUrl;
+    }
+
+    @Override
+    public String toString() {
+        return format("Office-Event: [id: {0}, subject: {1}, organizer: {2}, start: {3}, end: {4}, attendees: {5}, body: {6}, location: {7}, onlineMeetingUrl: {8}]",
+                id, subject, organizer, start.getDateDateTime(), end.getDateDateTime(), attendees, body, location, onlineMeetingUrl);
     }
 }

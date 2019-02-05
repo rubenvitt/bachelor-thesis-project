@@ -11,16 +11,32 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.time.DayOfWeek;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
 import static java.time.DayOfWeek.*;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
+
+enum BusyBlockingState {
+    INNER, OUTER, START_BEFORE, END_AFTER, BLOCKING;
+
+    static boolean isBlockingState(Interval workingInterval, Interval busyInterval) {
+        return busyInterval.contains(workingInterval);
+    }
+
+    static BusyBlockingState getBlockingState(Interval workingInterval, Interval busyInterval) {
+        return
+                busyInterval.contains(workingInterval) ? BusyBlockingState.BLOCKING
+                        : workingInterval.contains(busyInterval) ? BusyBlockingState.INNER
+                        : workingInterval.contains(busyInterval.getStart()) ? BusyBlockingState.END_AFTER
+                        : workingInterval.contains(busyInterval.getEnd()) ? BusyBlockingState.START_BEFORE
+                        : BusyBlockingState.OUTER;
+    }
+}
 
 @Service
 public class CalendarService extends LoggableService {
@@ -89,132 +105,164 @@ public class CalendarService extends LoggableService {
 
     Collection<Interval> calculateFreeTimeWith(final Stream<Interval> workingIntervals,
                                                final Collection<Interval> busyIntervals) {
-        //List<Interval> resultIntervals = new LinkedList<>();
-        //FIXME method not working
-        final List<Interval> freeTimes = workingIntervals
-                .map(workingInterval -> {
-                    List<Interval> workingDayIntervals = new LinkedList<>();
-                    AtomicBoolean meetingAtThisDay = new AtomicBoolean(false);
+        return workingIntervals
+                .map(workingInterval -> calculateFreeTime(workingInterval, busyIntervals))
+                .flatMap(Collection::stream)
+                .collect(toCollection(HashSet::new));
+    }
 
-                    LOG.info("Checking workingInterval: {}", workingInterval);
-                    //#4:
-                    final Optional<Interval> anyOverlapping = busyIntervals.parallelStream()
-                            .filter(busyInterval -> busyInterval.contains(workingInterval))
-                            .findAny();
-
-                    if (anyOverlapping.isPresent()) {
-                        LOG.info("#4: Working times {} were illuminated by busyTime", workingInterval);
-                        return new LinkedList<Interval>();
-                    }
-
-                    //#1:
-                    busyIntervals.parallelStream()
-                            .filter(workingInterval::contains)
-                            .forEach(busyInterval -> {
-                                //meeting is in workingTime
-                                LOG.info("#1: {} contains {}", workingInterval, busyInterval);
-                                if (!workingInterval.getStart().equals(busyInterval.getStart()))
-                                    workingDayIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
-                                if (!workingInterval.getEnd().equals(busyInterval.getEnd()))
-                                    workingDayIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
-                                meetingAtThisDay.set(true);
-                            });
-                    //#2:
-                    busyIntervals.parallelStream()
-                            .filter(busyInterval -> workingInterval.contains(busyInterval.getStart()))
-                            .filter(busyInterval -> busyInterval.getEnd().isAfter(workingInterval.getEnd()))
-                            .forEach(busyInterval -> {
-                                //meeting begins in workingTime & ends after workingTime
-                                LOG.info("#2: {} starts in and ends after {}", busyInterval, workingInterval);
-                                workingDayIntervals.add(new Interval(workingInterval.getStart(), busyInterval.getStart()));
-                                meetingAtThisDay.set(true);
-                            });
-                    //#3:
-                    busyIntervals.parallelStream()
-                            .filter(busyInterval -> workingInterval.contains(busyInterval.getEnd()))
-                            .filter(busyInterval -> busyInterval.getStart().isBefore(workingInterval.getStart()))
-                            .forEach(busyInterval -> {
-                                //meeting begins before workingTime & ends in workingTime
-                                LOG.info("#3: {} starts before and ends in {}", busyInterval, workingInterval);
-                                workingDayIntervals.add(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
-                                meetingAtThisDay.set(true);
-                            });
-
-                    if (!meetingAtThisDay.get())
-                        workingDayIntervals.add(workingInterval);
-
-                    return workingDayIntervals;
-                }).filter(intervals -> {
-                    LOG.info("Got intervals: {}", intervals);
-                    return true;
-                })
-                .flatMap(List::parallelStream)
+    private Collection<Interval> calculateFreeTime(Interval workingInterval, Collection<Interval> busyIntervals) {
+        if (busyIntervals.parallelStream().anyMatch(interval -> BusyBlockingState.isBlockingState(workingInterval, interval)))
+            return Collections.emptySet();
+        final List<List<Interval>> freeIntervalsPerBusyTime = busyIntervals.parallelStream()
+                .map(busyInterval -> calculateForInterval(workingInterval, busyInterval))
                 .collect(toList());
+        LOG.debug("Calculate union of: {}", freeIntervalsPerBusyTime);
+        return getUnionOfTimeIntervals(freeIntervalsPerBusyTime);
+    }
 
-        return busyIntervals.parallelStream()
-                .map(busyInterval -> {
-                    AtomicBoolean interacted = new AtomicBoolean(false);
+    private Collection<Interval> getUnionOfTimeIntervals(List<List<Interval>> freeIntervalsPerBusyTime) {
+        if (freeIntervalsPerBusyTime.isEmpty())
+            return List.of();
 
-                    List<Interval> intervalList = new LinkedList<>();
-                    //#1: contains
-                    intervalList.addAll(
-                            freeTimes.parallelStream()
-                                    .filter(freeInterval -> freeInterval.contains(busyInterval))
-                                    .filter(freeInterval -> !freeInterval.getStart().equals(busyInterval.getStart()))
-                                    .filter(freeInterval -> !freeInterval.getEnd().equals(busyInterval.getEnd()))
-                                    .map(freeInterval -> {
-                                        interacted.set(true);
-                                        LOG.info("#1: Creating 2 intervals from {} until {} and {} until {}", freeInterval.getStart(), busyInterval.getStart(), busyInterval.getEnd(), freeInterval.getEnd());
-                                        return List.of(new Interval(freeInterval.getStart(), busyInterval.getStart()),
-                                                new Interval(busyInterval.getEnd(), freeInterval.getEnd()));
-                                    })
-                                    .flatMap(List::stream)
-                                    .collect(toList())
-                    );
-
-                    //#2: start before, end in
-                    intervalList.addAll(
-                            freeTimes.parallelStream()
-                                    .filter(freeInterval -> busyInterval.getStart().isBefore(freeInterval.getStart())
-                                            && freeInterval.contains(busyInterval.getEnd()))
-                                    .map(freeInterval -> {
-                                        interacted.set(true);
-                                        LOG.info("#2: Creating interval from {} until {}", busyInterval.getEnd(), freeInterval.getEnd());
-                                        return new Interval(busyInterval.getEnd(), freeInterval.getEnd());
-                                    })
-                                    .collect(toList())
-                    );
-
-                    //#3: start in, end after
-                    intervalList.addAll(
-                            freeTimes.parallelStream()
-                                    .filter(freeInterval -> freeInterval.contains(busyInterval.getStart())
-                                            && busyInterval.getEnd().isAfter(busyInterval.getEnd()))
-                                    .map(freeInterval -> {
-                                        interacted.set(true);
-                                        LOG.info("#3: Creating interval from {} until {}", freeInterval.getStart(), busyInterval.getStart());
-                                        return new Interval(freeInterval.getStart(), busyInterval.getStart());
-                                    })
-                                    .collect(toList())
-                    );
-
-                    //#4: smaller than
-                    if (!interacted.get()) {
-                        LOG.info("No interaction detected for {}", busyInterval);
-                        final long smallerFreeIntervals = freeTimes.parallelStream()
-                                .filter(freeInterval -> !busyInterval.contains(freeInterval))
-                                .count();
-                        LOG.info("#4: {} bigger as freeInterval? {}", busyInterval, smallerFreeIntervals);
-                        if (smallerFreeIntervals == 0) {
-                            LOG.info("adding {} to intervals", busyInterval);
-                            intervalList.add(busyInterval);
-                        }
-                    }
-
-                    return intervalList;
-                })
+        final List<Interval> firstIntervals = freeIntervalsPerBusyTime.stream()
+                .map(intervals -> {
+                    if (intervals.size() == 1)
+                        return intervals;
+                    else if (intervals.size() == 2)
+                        return List.of(intervals.get(0));
+                    return null;
+                }).filter(Objects::nonNull)
                 .flatMap(List::stream)
                 .collect(toList());
+
+        Map<DateTime, Interval> freePerDayFirst = freeIntervalsPerBusyTime.stream()
+                .map(intervals -> {
+                    if (intervals.size() == 1)
+                        return intervals;
+                    else if (intervals.size() == 2)
+                        return List.of(intervals.get(0));
+                    return null;
+                }).filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(interval -> new DateTime().withDate(1, 1, 1), interval -> interval, (o, o2) -> o));
+        //.collect(Collectors.toMap(interval -> new DateTime().withDate(interval.getStart().toLocalDate()), interval -> interval, (o, o2) -> o));
+
+        Map<DateTime, Interval> freePerDaySecond = freeIntervalsPerBusyTime.stream()
+                .map(intervals -> {
+                    if (intervals.size() == 1)
+                        return intervals;
+                    else if (intervals.size() == 2)
+                        return List.of(intervals.get(1));
+                    return null;
+                }).filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(interval -> new DateTime().withDate(1, 1, 1), interval -> interval, (o, o2) -> o));
+        //.collect(Collectors.toMap(interval -> new DateTime().withDate(interval.getStart().toLocalDate()), interval -> interval, (o, o2) -> o));
+
+        final List<Interval> secondIntervals = freeIntervalsPerBusyTime.stream()
+                .map(intervals -> {
+                    if (intervals.size() == 1)
+                        return intervals;
+                    else if (intervals.size() == 2)
+                        return List.of(intervals.get(1));
+                    return null;
+                }).filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .collect(toList());
+
+        List<Interval> resultList = new LinkedList<>();
+
+        if (firstIntervals.size() > 0) {
+            //if (freePerDayFirst.size() > 0) {
+            AtomicReference<DateTime> start = new AtomicReference<>();
+            AtomicReference<DateTime> end = new AtomicReference<>();
+            firstIntervals.forEach(interval -> {
+
+                //freePerDayFirst.forEach(
+                //(mapDateTime, interval) -> {
+                start.getAndUpdate(dateTime ->
+                        dateTime == null || dateTime.isBefore(interval.getStart())
+                                ? interval.getStart()
+                                : dateTime);
+                end.getAndUpdate(dateTime ->
+                        dateTime == null || dateTime.isAfter(interval.getEnd())
+                                ? interval.getEnd()
+                                : dateTime);
+            });
+            if (start.get().isBefore(end.get()))
+                resultList.add(new Interval(start.get(), end.get()));
+
+            LOG.info("Start of first list: {}", start.get());
+            LOG.info("end of first list: {}", end.get());
+        }
+        if (secondIntervals.size() > 0) {
+            //if (freePerDayFirst.size() > 0) {
+            AtomicReference<DateTime> start = new AtomicReference<>();
+            AtomicReference<DateTime> end = new AtomicReference<>();
+
+            secondIntervals.forEach(interval -> {
+                //freePerDaySecond.forEach(
+                //        (mapDateTime, interval) -> {
+                start.getAndUpdate(dateTime ->
+                        dateTime == null || dateTime.isBefore(interval.getStart())
+                                ? interval.getStart()
+                                : dateTime);
+                end.getAndUpdate(dateTime ->
+                        dateTime == null || dateTime.isAfter(interval.getEnd())
+                                ? interval.getEnd()
+                                : dateTime);
+            });
+            if (start.get().isBefore(end.get()))
+                resultList.add(new Interval(start.get(), end.get()));
+
+            LOG.info("Start of second list: {}", start.get());
+            LOG.info("end of second list: {}", end.get());
+        }
+        if (resultList.size() == 2) {
+            if (resultList.get(0).getEnd().equals(resultList.get(1).getEnd())) {
+                if (resultList.get(0).getStart().equals(resultList.get(1).getStart())
+                        || resultList.get(1).getStart().isBefore(resultList.get(0).getStart())) {
+                    resultList.remove(1);
+                } else if (resultList.get(0).getStart().isBefore(resultList.get(1).getStart()))
+                    resultList.remove(0);
+            }
+            else if (resultList.get(0).getStart().equals(resultList.get(1).getStart())) {
+                if (resultList.get(0).getEnd().equals(resultList.get(1).getEnd())
+                        || resultList.get(1).getEnd().isAfter(resultList.get(0).getEnd())) {
+                    resultList.remove(1);
+                } else if (resultList.get(0).getEnd().isAfter(resultList.get(1).getEnd()))
+                    resultList.remove(0);
+            }
+        }
+        return resultList;
+    }
+
+    private List<Interval> calculateForInterval(Interval workingInterval, Interval busyInterval) {
+        BusyBlockingState blockingState = BusyBlockingState.getBlockingState(workingInterval, busyInterval);
+        LOG.debug("BlockingState for {} in {} is: {}", busyInterval, workingInterval, blockingState);
+        switch (blockingState) {
+            case INNER:
+                LOG.debug("{} is in {}", busyInterval, workingInterval);
+                return List.of(new Interval(workingInterval.getStart(), busyInterval.getStart()),
+                        new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
+            case START_BEFORE:
+                LOG.debug("{} starts before and ends in {}", busyInterval, workingInterval);
+                return List.of(new Interval(busyInterval.getEnd(), workingInterval.getEnd()));
+            case END_AFTER:
+                LOG.debug("{} starts in and ends after {}", busyInterval, workingInterval);
+                return List.of(new Interval(workingInterval.getStart(), busyInterval.getStart()));
+            case BLOCKING:
+                LOG.debug("{} starts before and ends after {}", busyInterval, workingInterval);
+                return Collections.emptyList();
+            case OUTER:
+                LOG.debug("{} is not in {}", busyInterval, workingInterval);
+                return List.of(workingInterval);
+            default:
+                Error error = new AssertionError("This switch should not have a default-way!");
+                LOG.error("should not happen!", error);
+                throw error;
+        }
     }
 
     @SuppressWarnings("Duplicates")

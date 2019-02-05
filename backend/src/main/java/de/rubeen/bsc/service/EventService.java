@@ -56,8 +56,6 @@ public class EventService extends LoggableService {
     }
 
     public List<EventEntity> getAllEventsForUser(String userMail, Long startMillis, Long endMillis) {
-        final DateTime startTime = new DateTime(startMillis),
-                endTime = new DateTime(endMillis);
         final Integer userID = loginService.getUserID(userMail);
         final List<String> calendars = databaseService.getContext()
                 .select(CALENDAR.CALENDARID)

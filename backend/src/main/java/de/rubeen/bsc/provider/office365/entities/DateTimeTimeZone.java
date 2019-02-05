@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.rubeen.bsc.service.provider.OfficeProviderService;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import java.util.Date;
 
@@ -17,7 +20,7 @@ public class DateTimeTimeZone {
     }
 
     public DateTimeTimeZone(DateTime startDateTime) {
-        this.dateTime = startDateTime.toDate();
+        this.dateTime = convertToDate(startDateTime);
         this.timeZone = startDateTime.getZone().getID();
     }
 
@@ -41,5 +44,9 @@ public class DateTimeTimeZone {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public static Date convertToDate(DateTime dateTime) {
+        return dateTime.withZone(DateTimeZone.UTC).toLocalDateTime().toDate();
     }
 }

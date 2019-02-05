@@ -126,6 +126,7 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
                      @NotNull Interval meetingInterval,
                      List<CalendarEvent.Attendee> attendees)
                          */
+                        LOG.info("Got outlook-event: {}", event);
                         return new CalendarEvent(event.getSubject(), "empty description", "empty room",
                                 calendarId, new Interval(event.getStart().getDateDateTime().toInstant().toEpochMilli(),
                                 event.getEnd().getDateDateTime().toInstant().toEpochMilli()
