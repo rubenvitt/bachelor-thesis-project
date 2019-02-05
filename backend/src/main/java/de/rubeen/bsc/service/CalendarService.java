@@ -43,7 +43,7 @@ public class CalendarService extends LoggableService {
     private final LoginService loginService;
     private final DatabaseService databaseService;
 
-    public CalendarService(LoginService loginService, DatabaseService databaseService) throws SQLException {
+    public CalendarService(LoginService loginService, DatabaseService databaseService) {
         this.loginService = loginService;
         this.databaseService = databaseService;
     }
@@ -69,7 +69,7 @@ public class CalendarService extends LoggableService {
                 .and(CALENDAR.USER_ID.eq(loginService.getUserID(userMail.replace("%40", "@")))).executeAsync();
     }
 
-    public Collection<Interval> getFreeTimes(Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end) {
+    Collection<Interval> getFreeTimes(Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end) {
         LOG.debug("Searching for available meeting suggestions with busyTimes & workingHours between {} and {}",
                 start.toLocalDate(), end.toLocalDate());
         final Interval initInterval = new Interval(start, end);
@@ -105,6 +105,8 @@ public class CalendarService extends LoggableService {
 
     Collection<Interval> calculateFreeTimeWith(final Stream<Interval> workingIntervals,
                                                final Collection<Interval> busyIntervals) {
+        if (busyIntervals.isEmpty())
+            return workingIntervals.collect(Collectors.toList());
         return workingIntervals
                 .map(workingInterval -> calculateFreeTime(workingInterval, busyIntervals))
                 .flatMap(Collection::stream)
