@@ -114,13 +114,8 @@ public class EventService extends LoggableService {
             List<LoginHoursEntity> workingHours = userService.getWorkingHours(userMail);
             LOG.debug("Got workingHours {} for user {}", workingHours, userMail);
             List<Interval> busyTimes;
-            try {
-                busyTimes = calendarProvider.getBusyTimes(userMail, newEventEntity);
-                LOG.debug("Got busyTimes {} for user {}", busyTimes, userMail);
-            } catch (CalendarProvider.CalendarException e) {
-                LOG.error("Unable to fetch busyTimes for {}", userMail, e);
-                throw e;
-            }
+            busyTimes = (getAllBusyTimes(userMail, newEventEntity));
+            LOG.debug("Got busyTimes {} for user {}", busyTimes, userMail);
             //3: calculate free-times
             LOG.info("#3/4: calculate time-slot for meeting");
             Collection<Interval> freeTimes =
@@ -140,6 +135,21 @@ public class EventService extends LoggableService {
             LOG.debug("Creating event: {}", calendarEvent);
             calendarProvider.createEvent(calendarEvent, userMail);
         }
+    }
+
+    private List<Interval> getAllBusyTimes(String userMail, NewEventEntity newEventEntity) {
+        return providerService.getAllCalendarEntities(userMail).parallelStream()
+                .map(calendarEntity -> {
+                    try {
+                        return providerService.getCalendarProvider(calendarEntity.getCalendarID()).getBusyTimes(userMail, newEventEntity);
+                    } catch (CalendarProvider.CalendarException e) {
+                        LOG.error("Unable to get busy-Times for {}", userMail, e);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::parallelStream)
+                .collect(Collectors.toList());
     }
 
     private List<CalendarEvent.Attendee> getEventAttendees(Collection<Integer> attendees) {
