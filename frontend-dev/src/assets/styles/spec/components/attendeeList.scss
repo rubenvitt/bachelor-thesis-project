@@ -3,17 +3,25 @@
     transition: 0.25s;
   }
 
-  :hover {
-    small {
-      text-decoration: underline;
-    }
-
-    img {
-      border-radius: 2px !important;
-    }
-  }
+  /* {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }*/
 }
 
 .attendee-item:hover {
-  background-color: rgba(218, 224, 229, 0.9) !important;
+  background-color: rgba(244, 244, 244, 0.9) !important;
+
+  small {
+    text-decoration: underline;
+  }
+
+  img {
+    border-radius: 20% !important;
+  }
+}
+
+#newMeeting-attendee-list {
+  padding-bottom: 15px;
 }

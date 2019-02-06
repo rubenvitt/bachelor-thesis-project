@@ -2,7 +2,8 @@ import * as urls from '../constants/urls';
 import {getUserID} from "../cookie";
 import {getRoomId} from '../localStorage';
 
-function sendForm(calenderID) {
+function sendForm(calenderID, button) {
+    button.text('Creating event...');
     //manual time settings:
     $.ajax({
             url: `${urls.webappUrl}/api/calendar/events/create?user_id=${getUserID()}&calendar_id=${calenderID}`,
@@ -14,6 +15,12 @@ function sendForm(calenderID) {
     ).done(function () {
         console.log("Done creating new appointment");
         window.location = '/finished';
+        button.text("Finished!");
+        button.addClass('btn-success');
+    }).fail(function (message) {
+        console.error(message);
+        button.text("Error");
+        button.addClass('btn-danger');
     });
 }
 

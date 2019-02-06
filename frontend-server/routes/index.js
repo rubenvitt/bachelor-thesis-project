@@ -25,6 +25,28 @@ router.get("/create-meeting", function (req, res) {
     }
 });
 
+router.get("/rooms", function (req, res) {
+    if (!showLoginIfNecessary(req)) {
+        debug("I know you!");
+        debug("TEEEST");
+        res.render('rooms');
+    } else {
+        debug("You are new! Redirecting to login...");
+        res.redirect("/login");
+    }
+});
+
+router.get("/calendar", function (req, res) {
+    if (!showLoginIfNecessary(req)) {
+        debug("I know you!");
+        debug("TEEEST");
+        res.render('calendar');
+    } else {
+        debug("You are new! Redirecting to login...");
+        res.redirect("/login");
+    }
+});
+
 router.get('/finished', function (req, res, next) {
     if (!showLoginIfNecessary(req)) {
         debug("I know you!");

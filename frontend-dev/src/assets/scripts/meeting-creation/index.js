@@ -52,8 +52,15 @@ function displayActiveCalendarsInModal(calendars) {
     checkboxController.initRadioList(inputList, function (checked, id) {
     });
 
-    $('#calendar-select-modal-yes').click(function () {
-        formSender.sendForm(getSelectedItem());
+    const yesButton = $('#calendar-select-modal-yes');
+    yesButton.removeAttr('disabled');
+    yesButton.removeClass('btn-danger btn-success');
+    yesButton.text('Choose calendar');
+
+    yesButton.click(function () {
+        yesButton.attr('disabled', 'true');
+        formSender.sendForm(getSelectedItem(), $(this));
+        return false;
     });
 }
 
@@ -115,8 +122,6 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
 
     //attendees
     getAppUsers(undefined);
-
-
 
     filter.change(() => refreshAppUsers(filter));
     autoDateStart.change(() => refreshAppUsers(filter));
