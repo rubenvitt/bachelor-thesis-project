@@ -65,7 +65,7 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
             final List<Calendar> calendarList = getCalendarFromOffice(user_id);
             calendarList.parallelStream().forEach(calendar -> calendarService.addCalendarToDatabase(calendar.getId(), user_id, Calprovider.office));
             return calendarList.parallelStream()
-                    .map(calendar -> new CalendarEntity(calendar, calendarService.isCalendarActivated(calendar.getId())))
+                    .map(calendar -> new CalendarEntity(calendar, calendarService.isCalendarActivated(calendar.getId(), user_id)))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             LOG.error("Error while getting calendars");
@@ -83,8 +83,8 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
         try {
             final List<Calendar> calendarList = getCalendarFromOffice(user_id);
             return calendarList.parallelStream()
-                    .filter(calendar -> calendarService.isCalendarActivated(calendar.getId()))
-                    .map(calendar -> new CalendarEntity(calendar, calendarService.isCalendarActivated(calendar.getId())))
+                    .filter(calendar -> calendarService.isCalendarActivated(calendar.getId(), user_id))
+                    .map(calendar -> new CalendarEntity(calendar, true))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             LOG.error("Error while getting calendars");

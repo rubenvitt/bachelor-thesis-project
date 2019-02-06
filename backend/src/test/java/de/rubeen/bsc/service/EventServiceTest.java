@@ -114,7 +114,7 @@ class EventServiceTest {
                         new Interval(DateTime.parse("2019-01-04").withTime(LocalTime.parse("15:00")), DateTime.parse("2019-01-08").withTime(LocalTime.parse("23:59")))
                 )
         );
-        when(providerService.getCalendarProvider(anyString())).thenReturn(new CalendarProvider() {
+        when(providerService.getCalendarProvider(anyString(), anyString())).thenReturn(new CalendarProvider() {
             @Override
             public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
                 eventsCreated[0]++;
@@ -161,7 +161,7 @@ class EventServiceTest {
     void addEventWithRealCalendarService() throws SQLException {
         eventService = new EventService(googleProviderService, providerService, loginService, roomService, databaseService, userService,
                 new CalendarService(loginService, databaseService));
-        when(providerService.getCalendarProvider(anyString())).thenReturn(new TestProviderImplementation());
+        when(providerService.getCalendarProvider(anyString(), anyString())).thenReturn(new TestProviderImplementation());
 
         /*
         public NewEventEntity(String subject,

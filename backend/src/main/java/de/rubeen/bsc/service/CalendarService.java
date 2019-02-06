@@ -1,7 +1,6 @@
 package de.rubeen.bsc.service;
 
 import de.rubeen.bsc.entities.db.enums.Calprovider;
-import de.rubeen.bsc.entities.db.tables.Calendar;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import org.joda.time.DateTime;
@@ -9,7 +8,6 @@ import org.joda.time.Interval;
 import org.joda.time.LocalTime;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,16 +47,26 @@ public class CalendarService extends LoggableService {
     }
 
     public void addCalendarToDatabase(String calendarID, String user, Calprovider provider) {
-        Integer integer = databaseService.getContext().selectCount().from(CALENDAR).where(Calendar.CALENDAR.CALENDARID.eq(calendarID)).fetchOne(0, int.class);
+        Integer userID = loginService.getUserID(user);
+
+        Integer integer = databaseService.getContext()
+                .selectCount().from(CALENDAR)
+                .where(CALENDAR.CALENDARID.eq(calendarID))
+                .and(CALENDAR.USER_ID.eq(userID))
+                .fetchOne(0, int.class);
         LOG.info("Found: " + integer);
         if (integer < 1) {
             databaseService.getContext().insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED, CALENDAR.PROVIDER)
-                    .values(calendarID, loginService.getUserID(user), true, provider).execute();
+                    .values(calendarID, userID, true, provider).execute();
         }
     }
 
-    public boolean isCalendarActivated(String id) {
-        CalendarRecord calendar = databaseService.getContext().selectFrom(CALENDAR).where(CALENDAR.CALENDARID.eq(id)).fetchOne();
+    public boolean isCalendarActivated(String id, String user) {
+        CalendarRecord calendar = databaseService.getContext()
+                .selectFrom(CALENDAR)
+                .where(CALENDAR.CALENDARID.eq(id))
+                .and(CALENDAR.USER_ID.eq(loginService.getUserID(user)))
+                .fetchOne();
         return calendar.getActivated();
     }
 
@@ -228,8 +236,7 @@ public class CalendarService extends LoggableService {
                     resultList.remove(1);
                 } else if (resultList.get(0).getStart().isBefore(resultList.get(1).getStart()))
                     resultList.remove(0);
-            }
-            else if (resultList.get(0).getStart().equals(resultList.get(1).getStart())) {
+            } else if (resultList.get(0).getStart().equals(resultList.get(1).getStart())) {
                 if (resultList.get(0).getEnd().equals(resultList.get(1).getEnd())
                         || resultList.get(1).getEnd().isAfter(resultList.get(0).getEnd())) {
                     resultList.remove(1);

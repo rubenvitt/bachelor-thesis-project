@@ -11,7 +11,9 @@
     img {
       border-radius: 2px !important;
     }
-
-    background-color: rgba(218, 224, 229, 0.1) !important;
   }
+}
+
+.attendee-item:hover {
+  background-color: rgba(218, 224, 229, 0.9) !important;
 }

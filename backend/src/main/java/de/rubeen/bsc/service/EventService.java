@@ -69,7 +69,7 @@ public class EventService extends LoggableService {
         final List<CalendarEvent> calendarEvents = calendars.parallelStream()
                 .map(calendarId -> {
                     try {
-                        return providerService.getCalendarProvider(calendarId).getEventsBetween(searchInterval, userMail, calendarId);
+                        return providerService.getCalendarProvider(calendarId, userMail).getEventsBetween(searchInterval, userMail, calendarId);
                     } catch (CalendarProvider.CalendarException e) {
                         LOG.error("Can't get events for user: {} - calendar: {}", userMail, calendarId, e);
                         return null;
@@ -86,11 +86,40 @@ public class EventService extends LoggableService {
     }
 
     public void addEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws CalendarProvider.CalendarException {
-        CalendarProvider calendarProvider = providerService.getCalendarProvider(calendarId);
+        CalendarProvider calendarProvider = providerService.getCalendarProvider(calendarId, userMail);
         if (newEventEntity.isAutoTime())
             createAutoEvent(newEventEntity, userMail, calendarId, calendarProvider);
         else
-            throw new NotImplementedException("Manual events are not implemented yet");
+            createManualEvent(newEventEntity, userMail, calendarId, calendarProvider);
+    }
+
+    private void createManualEvent(final NewEventEntity newEventEntity, final String userMail, final String calendarId,
+                                   final CalendarProvider calendarProvider) throws CalendarProvider.CalendarException {
+        LOG.info("using calendarProvider: {} to create an event for {} - calendarId: {} - event: {}",
+                calendarService, userMail, calendarId, newEventEntity);
+
+        //manual event:
+        // check room Auto-Mode
+        // create event for all attendees
+        List<CalendarEvent.Attendee> attendees = getEventAttendees(newEventEntity.getAttendees());
+
+        if (newEventEntity.isAutoRoom()) {
+            throw new NotImplementedException("AutoRoom was not implemented, yet");
+        } else {
+            LOG.info("#1/2: Getting room...");
+            // TODO: 2019-01-28 getRoom-CalendarID & provider to get freeTimes
+            String room = roomService.getRoomById(newEventEntity.getRoomId());
+            LOG.debug("Got room {} for event {}", room, newEventEntity);
+
+            LOG.info("#2/2: create manual-time-manual-room event for {}", userMail);
+            DateTime startDateTime = DateTime.parse(newEventEntity.getManTimeDateStart() + "T" + newEventEntity.getManTimeTimeStart());
+            DateTime endDateTime = DateTime.parse(newEventEntity.getManTimeDateEnd() + "T" + newEventEntity.getManTimeTimeEnd());
+
+            CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
+                    room, calendarId, startDateTime, endDateTime, attendees);
+            LOG.debug("Creating event: {}", calendarEvent);
+            calendarProvider.createEvent(calendarEvent, userMail);
+        }
     }
 
     private void createAutoEvent(final NewEventEntity newEventEntity, final String userMail, final String calendarId,
@@ -144,7 +173,7 @@ public class EventService extends LoggableService {
         return providerService.getAllCalendarEntities(userMail).parallelStream()
                 .map(calendarEntity -> {
                     try {
-                        return providerService.getCalendarProvider(calendarEntity.getCalendarID()).getBusyTimes(userMail, newEventEntity);
+                        return providerService.getCalendarProvider(calendarEntity.getCalendarID(), userMail).getBusyTimes(userMail, newEventEntity);
                     } catch (CalendarProvider.CalendarException e) {
                         LOG.error("Unable to get busy-Times for {}", userMail, e);
                     }
@@ -246,6 +275,8 @@ public class EventService extends LoggableService {
         final DateTime startDateTime = DateTime.parse(startDate + "T" + startTime);
         final DateTime endDateTime = DateTime.parse(endDate + "T" + endTime);
         final String userMail = userService.getAppUser(userId).getMail();
+
+        LOG.info("Getting quality-times for {} between {} and {}", userMail, startDateTime, endDateTime);
 
         // TODO: 2019-02-05 better calculations
         final List<EventEntity> allEventsForUser = getAllEventsForUser(userMail, startDateTime.getMillis(), endDateTime.getMillis());

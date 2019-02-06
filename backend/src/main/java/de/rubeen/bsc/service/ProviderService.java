@@ -30,11 +30,12 @@ public class ProviderService extends LoggableService {
         this.officeProviderService = officeProviderService;
     }
 
-    CalendarProvider getCalendarProvider(String calendarId) {
+    CalendarProvider getCalendarProvider(String calendarId, String user) {
         Calprovider calprovider = databaseService.getContext()
                 .select(CALENDAR.PROVIDER)
                 .from(CALENDAR)
                 .where(CALENDAR.CALENDARID.eq(calendarId))
+                .and(CALENDAR.USER_ID.eq(loginService.getUserID(user)))
                 .fetchOneInto(Calprovider.class);
         LOG.info("got calProvider: {}", calprovider);
         return calprovider.equals(Calprovider.google) ? googleProviderService : officeProviderService;
@@ -50,7 +51,7 @@ public class ProviderService extends LoggableService {
                 .fetch()
                 .map(record -> modelMapper.map(record, CalendarRecord.class))
                 .parallelStream()
-                .map(calendarRecord -> getCalendarProvider(calendarRecord.getCalendarid())
+                .map(calendarRecord -> getCalendarProvider(calendarRecord.getCalendarid(), userMail)
                         .getCalendar(calendarRecord.getCalendarid(), userMail, calendarRecord.getActivated()))
                 .collect(Collectors.toList());
     }

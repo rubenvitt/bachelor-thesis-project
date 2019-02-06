@@ -141,7 +141,7 @@ public class GoogleProviderService implements CalendarProvider {
             CalendarList calendarList = calendar.calendarList().list().execute();
             calendarList.getItems().parallelStream().forEach(calendarListEntry -> calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id, Calprovider.google));
             return calendarList.getItems().parallelStream()
-                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId())))
+                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId(), user_id)))
                     .collect(Collectors.toList());
         } catch (CredentialException | IOException e) {
             LOG.error("Credential exception: ", e);
@@ -157,8 +157,8 @@ public class GoogleProviderService implements CalendarProvider {
             Calendar calendar = getCalendar(credential);
             CalendarList calendarList = calendar.calendarList().list().execute();
             return calendarList.getItems().parallelStream()
-                    .filter(calendarListEntry -> calendarService.isCalendarActivated(calendarListEntry.getId()))
-                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId())))
+                    .filter(calendarListEntry -> calendarService.isCalendarActivated(calendarListEntry.getId(), user_id))
+                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, true))
                     .collect(Collectors.toList());
         } catch (CredentialException | IOException e) {
             LOG.error("Credential exception: ", e);
