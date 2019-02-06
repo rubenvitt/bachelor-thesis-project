@@ -9,6 +9,7 @@ import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
 import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -249,7 +250,14 @@ public class EventService extends LoggableService {
         // TODO: 2019-02-05 better calculations
         final List<EventEntity> allEventsForUser = getAllEventsForUser(userMail, startDateTime.getMillis(), endDateTime.getMillis());
         double duration = allEventsForUser.parallelStream()
-                .mapToLong(eventEntity -> eventEntity.getEndTime().getMillis() - eventEntity.getStartTime().getMillis())
+                .mapToDouble(eventEntity -> {
+                    final double dur = eventEntity.getEndTime().getMillis() - eventEntity.getStartTime().getMillis();
+                    LOG.info("{} has a duration of {} --- start: {} || end: {}", eventEntity.getSubject(),
+                            new Duration(eventEntity.getStartTime().getMillis(), eventEntity.getEndTime().getMillis()),
+                            eventEntity.getStartTime(), eventEntity.getEndTime());
+                    LOG.info("calculating duration of {} ({})", eventEntity, dur);
+                    return dur;
+                })
                 .sum();
         LOG.info("calculating with {} and {} - result: {}", duration, (endDateTime.getMillis() - startDateTime.getMillis()), 100 - (duration / (endDateTime.getMillis() - startDateTime.getMillis()) * 100));
         return (long) Math.max(0, 100 - (duration / (endDateTime.getMillis() - startDateTime.getMillis()) * 100));

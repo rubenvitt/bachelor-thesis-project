@@ -170,7 +170,7 @@ public class GoogleProviderService implements CalendarProvider {
     public List<CalendarEvent> getEventsBetween(Interval interval, String userId, String calendarId) throws CalendarException {
         Credential credential;
         try {
-            credential = flow.loadCredential(userId);
+            credential = flow.loadCredential(getCredentialUserId(userId));
             validateCredential(credential);
         } catch (IOException | CredentialException e) {
             LOG.error("Error while getting credential for user {}", userId, e);
@@ -294,6 +294,10 @@ public class GoogleProviderService implements CalendarProvider {
             return null;
         }
 
+    }
+
+    private String getCredentialUserId(String mail) {
+        return mail.replace("@", "%40");
     }
 
 }

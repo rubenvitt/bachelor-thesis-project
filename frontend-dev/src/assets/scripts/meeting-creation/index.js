@@ -1,6 +1,5 @@
 import * as URLS from "../constants/urls";
 import * as cookie from "../cookie";
-import {getUserID} from "../cookie";
 import * as calendar from '../calendar';
 import * as checkboxController from "../checkbox-in-list-with-badge";
 import * as formSender from './form-sending-handler';
@@ -108,14 +107,19 @@ function getAppUsers(filter) {
                 } else {
                     attendee.find('.spinner').removeClass('vis-h');
                     attendee.find('.spinner').addClass('vis-v');
+                    const isAuto = $('#meeting-creation-time-intelligent-btn').hasClass('active');
+                    const dateStart = isAuto ? $('#meeting-creation-auto-date-start').val() : $('#meeting-creation-manual-date-start').val(),
+                        dateEnd = isAuto ? $('#meeting-creation-auto-date-end').val() : $('#meeting-creation-manual-date-end').val(),
+                        timeStart = isAuto ? '00:00' : $('#meeting-creation-manual-time-start').val(),
+                        timeEnd = isAuto ? '23:59' : $('#meeting-creation-manual-time-end').val();
                     $.ajax({
                         url: URLS.apiUrl + "/calendar/events/user_quality",
                         data: {
                             user_id: attendee.attr('itemid'),
-                            start_date: '2019-01-05',
-                            start_time: '00:00',
-                            end_date: '2019-01-06',
-                            end_time: '00:00'
+                            start_date: dateStart,
+                            start_time: timeStart,
+                            end_date: dateEnd,
+                            end_time: timeEnd
                         }
                     }).done(function (content) {
                         if (attendee.find('.spinner').hasClass('vis-v')) {
