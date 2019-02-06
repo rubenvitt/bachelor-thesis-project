@@ -39,12 +39,25 @@ if (listGroup.length === 1) {
                     `${(event.endTime.hourOfDay).pad()}:${(event.endTime.minuteOfHour).pad()}`,
                     state);
             });
+            if (content.length === 0)
+                items += generateListItem();
             listGroup.html(items);
+        })
+        .fail(function () {
+            listGroup.html(generateListItem('error'));
         });
 }
 
 
 function generateListItem(subject, from, until, state) {
+    if (subject === 'error' && from === undefined)
+        return `<button class="btn btn-danger list-group-item list-group-item-action" disabled type="button">
+Failed to get meetings for today.
+</button>`;
+    if (subject === undefined)
+        return `<button class="btn btn-outline-success list-group-item list-group-item-action" disabled type="button">
+No meeting today - have a nice day!
+</button>`;
     return `<button class="btn btn-outline-primary list-group-item list-group-item-action ${state}" type="button">
 ${from} - ${until}<br>${subject}
 </button>`;
