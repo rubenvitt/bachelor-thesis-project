@@ -1,0 +1,17 @@
+.attendee-item {
+  img {
+    transition: 0.25s;
+  }
+
+  :hover {
+    small {
+      text-decoration: underline;
+    }
+
+    img {
+      border-radius: 2px !important;
+    }
+
+    background-color: rgba(218, 224, 229, 0.1) !important;
+  }
+}

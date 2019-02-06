@@ -4,7 +4,7 @@ values ('123', 'Marcel Kastner', 'marcel@rubeen.me', 'Consultant', 'https://rand
        ('222', 'Laurenz Bergmann', 'laurenz@rubeen.me', 'Consultant', 'https://randomuser.me/api/portraits/men/33.jpg'),
        ('222', 'David Faber', 'david@rubeen.me', 'Management Consultant', 'https://randomuser.me/api/portraits/men/37.jpg'),
        ('222', 'Annett Schneider', 'annett@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/81.jpg'),
-       ('333', 'Ruben Vitt', 'r.vitt@fme.de', 'Student', 'https://gitlab.rubeen.me/uploads/-/system/user/avatar/2/avatar.png');
+       ('333', 'Ruben Vitt', 'r.vitt@fme.de', 'Student', 'https://www.xing.com/image/3_d_b_8160fa37a_24954449_5/ruben-vitt-foto.256x256.jpg');
 
 insert into room (room_name, room_size)
 values ('Room 1', 5),

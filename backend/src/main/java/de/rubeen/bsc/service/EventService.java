@@ -12,11 +12,13 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.Tables.APPUSER;
@@ -54,6 +56,8 @@ public class EventService extends LoggableService {
     }
 
     public List<EventEntity> getAllEventsForUser(String userMail, Long startMillis, Long endMillis) {
+        final Interval searchInterval = new Interval(startMillis, endMillis);
+        LOG.debug("Getting events for {} between {}", userMail, searchInterval);
         final Integer userID = loginService.getUserID(userMail);
         final List<String> calendars = databaseService.getContext()
                 .select(CALENDAR.CALENDARID)
@@ -64,7 +68,7 @@ public class EventService extends LoggableService {
         final List<CalendarEvent> calendarEvents = calendars.parallelStream()
                 .map(calendarId -> {
                     try {
-                        return providerService.getCalendarProvider(calendarId).getEventsBetween(new Interval(startMillis, endMillis), userMail, calendarId);
+                        return providerService.getCalendarProvider(calendarId).getEventsBetween(searchInterval, userMail, calendarId);
                     } catch (CalendarProvider.CalendarException e) {
                         LOG.error("Can't get events for user: {} - calendar: {}", userMail, calendarId, e);
                         return null;
@@ -236,13 +240,18 @@ public class EventService extends LoggableService {
         return day.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999);
     }
 
-    public int getUserQualityValue(String userId, String startDate, String startTime, String endDate, String endTime) {
+    public long getUserQualityValue(int userId, String startDate, String startTime, String endDate, String endTime) {
         // TODO: 2019-02-05 implementation: 100: user completely free || 0: user has NO time between
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return new Random().nextInt(101);
+        final DateTime startDateTime = DateTime.parse(startDate + "T" + startTime);
+        final DateTime endDateTime = DateTime.parse(endDate + "T" + endTime);
+        final String userMail = userService.getAppUser(userId).getMail();
+
+        // TODO: 2019-02-05 better calculations
+        final List<EventEntity> allEventsForUser = getAllEventsForUser(userMail, startDateTime.getMillis(), endDateTime.getMillis());
+        double duration = allEventsForUser.parallelStream()
+                .mapToLong(eventEntity -> eventEntity.getEndTime().getMillis() - eventEntity.getStartTime().getMillis())
+                .sum();
+        LOG.info("calculating with {} and {} - result: {}", duration, (endDateTime.getMillis() - startDateTime.getMillis()), 100 - (duration / (endDateTime.getMillis() - startDateTime.getMillis()) * 100));
+        return (long) Math.max(0, 100 - (duration / (endDateTime.getMillis() - startDateTime.getMillis()) * 100));
     }
 }

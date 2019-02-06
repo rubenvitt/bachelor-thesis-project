@@ -70,7 +70,7 @@ function getAppUsers(filter) {
             appUserList.forEach(user => {
                 html += `
                 <a itemid="${user.id}" href="javascript:void {}"
-                   class="bds-n list-group-item ${appUserList.length >= itemsToChangeDirection ? 'col-lg-6' : ''} list-group-item-action container">
+                   class="attendee-item bds-n list-group-item ${appUserList.length >= itemsToChangeDirection ? 'col-lg-6' : ''} list-group-item-action container">
                     <div class="row">
                         <div class="col-3">
                             <img class="w-100p rounded-circle"
@@ -99,7 +99,6 @@ function getAppUsers(filter) {
             }
             const attendeesLinks = attendeeList.find("a");
             attendeesLinks.click(function () {
-                //$(this).toggleClass('active');
                 const attendee = $(this);
                 if (attendee.hasClass('active') || attendee.find('.spinner').hasClass('vis-v')) {
                     attendee.removeClass('bg-danger');
@@ -112,11 +111,11 @@ function getAppUsers(filter) {
                     $.ajax({
                         url: URLS.apiUrl + "/calendar/events/user_quality",
                         data: {
-                            user_id: getUserID(),
-                            start_date: '',
-                            start_time: '',
-                            end_date: '',
-                            end_time: ''
+                            user_id: attendee.attr('itemid'),
+                            start_date: '2019-01-05',
+                            start_time: '00:00',
+                            end_date: '2019-01-06',
+                            end_time: '00:00'
                         }
                     }).done(function (content) {
                         if (attendee.find('.spinner').hasClass('vis-v')) {

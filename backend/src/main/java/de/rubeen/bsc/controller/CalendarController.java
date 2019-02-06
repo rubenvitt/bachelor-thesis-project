@@ -82,7 +82,7 @@ public class CalendarController {
     }
 
     @RequestMapping(value = "/events/user_quality", method = RequestMethod.GET)
-    public int getUserQualityValueForEvent(@RequestParam(value = "user_id") String userId,
+    public long getUserQualityValueForEvent(@RequestParam(value = "user_id") int userId,
                                            @RequestParam(value = "start_date") String startDate,
                                            @RequestParam(value = "start_time") String startTime,
                                            @RequestParam(value = "end_date") String endDate,
