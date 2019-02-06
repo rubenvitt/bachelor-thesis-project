@@ -14,6 +14,11 @@ function getActualAppUser(handler) {
     }).done(handler);
 }
 
+function showSpinner(element) {
+    element.find('.spinner').removeClass('vis-h');
+    element.find('.spinner').addClass('vis-v');
+}
+
 
 /**
  * @typedef appUser
@@ -79,7 +84,7 @@ function insertAppUsers(filter, attendeeList) {
                                 </div>
                             </div>
                         </div>
-                        <div class="spinner col-2 ta-c m-a m-0 vis-h"></div>
+                        <div class="spinner col-2 ta-c m-a m-0 vis-v"></div>
                     </div>
                 </a>`;
             });
@@ -113,8 +118,7 @@ function insertAppUsers(filter, attendeeList) {
         //if new state is activated, get information about user-quality at this date...
         if (userActivated) {
             //make spinner visible
-            attendee.find('.spinner').removeClass('vis-h');
-            attendee.find('.spinner').addClass('vis-v');
+            showSpinner(attendee);
 
             const isAuto = $('#meeting-creation-time-intelligent-btn').hasClass('active');
             const dateStart = isAuto ? $('#meeting-creation-auto-date-start').val() : $('#meeting-creation-manual-date-start').val(),

@@ -290,7 +290,8 @@ public class EventService extends LoggableService {
                     return dur;
                 })
                 .sum();
-        LOG.info("calculating with {} and {} - result: {}", duration, (endDateTime.getMillis() - startDateTime.getMillis()), 100 - (duration / (endDateTime.getMillis() - startDateTime.getMillis()) * 100));
-        return (long) Math.max(0, 100 - (duration / (endDateTime.getMillis() - startDateTime.getMillis()) * 100));
+        final long result = (long) Math.max(0, 100 - (duration / (endDateTime.getMillis() - startDateTime.getMillis()) * 100));
+        LOG.info("calculating with {} and {} - result: {}", duration, (endDateTime.getMillis() - startDateTime.getMillis()), result);
+        return result;
     }
 }

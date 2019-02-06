@@ -61,7 +61,20 @@ function getAppUsers(filter) {
     appUser.insertAppUsers(filter, $('#newMeeting-attendee-list'));
 }
 
+function refreshAppUsers(filter) {
+    getAppUsers(filter.val());
+}
+
 if (document.getElementById("newMeeting-chooseMeetingType")) {
+    const autoDateBtn = $('#meeting-creation-time-intelligent-btn'),
+        autoDateStart = $('#meeting-creation-auto-date-start'),
+        autoDateEnd = $('#meeting-creation-auto-date-end'),
+        manualDateStart = $('#meeting-creation-manual-date-start'),
+        manualDateEnd = $('#meeting-creation-manual-date-end'),
+        manualTimeStart = $('#meeting-creation-manual-time-start'),
+        manualTimeEnd = $('#meeting-creation-manual-time-end'),
+        filter = $('#attendee-filter');
+
     $('#meeting-creation-intelligent-duration-time').find('a').click((evt) => {
         const targetLink = $(evt.target);
         $('#meeting-creation-intelligent-duration-btn').text(targetLink.text())
@@ -76,10 +89,10 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
     $('#meeting-creation-time-manual-btn').click(function () {
         $('#meeting-creation-automatic-box').addClass("d-none");
         $('#meeting-creation-manual-box').removeClass("d-none");
-        $('#meeting-creation-time-intelligent-btn').removeClass("active");
+        autoDateBtn.removeClass("active");
         $(this).addClass("active");
     });
-    $('#meeting-creation-time-intelligent-btn').click(function () {
+    autoDateBtn.click(function () {
         $('#meeting-creation-manual-box').addClass("d-none");
         $('#meeting-creation-automatic-box').removeClass("d-none");
         $('#meeting-creation-time-manual-btn').removeClass("active");
@@ -102,13 +115,17 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
 
     //attendees
     getAppUsers(undefined);
-    const filter = $('#attendee-filter');
-    filter.change(function () {
-        getAppUsers($(this).val());
-    });
-    /*filter.keyup(function () {
-        getAppUsers($(this).val());
-    });*/
+
+
+
+    filter.change(() => refreshAppUsers(filter));
+    autoDateStart.change(() => refreshAppUsers(filter));
+    autoDateEnd.change(() => refreshAppUsers(filter));
+    manualDateStart.change(() => refreshAppUsers(filter));
+    manualDateEnd.change(() => refreshAppUsers(filter));
+    manualTimeStart.change(() => refreshAppUsers(filter));
+    manualTimeEnd.change(() => refreshAppUsers(filter));
+
     $.ajax({
         url: `${URLS.apiUrl}/rooms/equipments`,
         data: {
@@ -204,9 +221,9 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
     });
 
     //clock-picker
-    clockPicker.createClockPicker($('#meeting-creation-manual-time-start'), function (value) {
-        clockPicker.fillInputWithTime($('#meeting-creation-manual-time-end'), value, 15);
+    clockPicker.createClockPicker(manualTimeStart, function (value) {
+        clockPicker.fillInputWithTime(manualTimeEnd, value, 15);
     });
-    clockPicker.createClockPicker($('#meeting-creation-manual-time-end'), function () {
+    clockPicker.createClockPicker(manualTimeEnd, function () {
     });
 }
