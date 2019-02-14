@@ -4,6 +4,7 @@ import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.*;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
+import de.rubeen.bsc.service.provider.PrototypeRoomProviderService;
 import de.rubeen.bsc.service.provider.TestProviderImplementation;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,8 +86,7 @@ class EventServiceTest {
     @DisplayName("Auto-Time / man-room event should be created successfully")
     void addEvent() throws CalendarProvider.CalendarException {
         final String subject = "test-subject", description = "test-description", autoTimeDateStart = "2019-01-01", autoTimeDateEnd = "2019-01-08", durationUnit = "hours";
-        final Boolean autoTime = true, autoRoom = false;
-        final Integer meetingDuration = 2;
+        final Integer meetingDuration = 2, roomId = 123;
         final List<Integer> attendeeIds = List.of(1, 2, 3, 4, 5);
 
         final Integer workingHour_Id = 1;
@@ -104,7 +105,7 @@ class EventServiceTest {
                                 workingHour_friday, workingHour_saturday, workingHour_sunday)
                 )
         );
-        when(roomService.getRoomById(anyInt())).thenReturn(new RoomEntity());
+        when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, "test-room-name", 2, Collections.emptyList()));
         when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
                 List.of(
                         new Interval(DateTime.parse("2019-01-01"), DateTime.parse("2019-01-04").withTime(LocalTime.parse("09:00"))),
@@ -144,13 +145,22 @@ class EventServiceTest {
             }
         });
 
-        NewEventEntity newEventEntity = new NewEventEntity(subject, description, autoTime, autoRoom, autoTimeDateStart,
+        when(providerService.getRoomCalendarProvider(roomId)).thenReturn(new PrototypeRoomProviderService(databaseService));
+
+        NewEventEntity newEventEntity = new NewEventEntity(subject, description, true, false, autoTimeDateStart,
                 autoTimeDateEnd, meetingDuration, durationUnit, attendeeIds);
+        newEventEntity.setRoomId(roomId);
 
         eventService.addEvent(newEventEntity, "user@mail", "cal-id");
 
         assertThat(eventsCreated[0])
                 .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Add event for some attendees")
+    void addEventWithSomeAttendees() {
+
     }
 
     @Test

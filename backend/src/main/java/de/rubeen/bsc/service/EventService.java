@@ -134,45 +134,49 @@ public class EventService extends LoggableService {
         List<CalendarEvent.Attendee> attendees = getEventAttendees(newEventEntity.getAttendees());
         LOG.debug("Got {} attendees: {}", attendees.size(), attendees);
 
+        final RoomEntity room;
         if (newEventEntity.isAutoRoom()) {
-            final RoomEntity room = roomService.getBestRoomFor(newEventEntity.getRoomValues(), newEventEntity.getAttendees().size() + 1);
+            room = roomService.getBestRoomFor(newEventEntity.getRoomValues(), newEventEntity.getAttendees().size() + 1);
             LOG.info("Got best room: {}", room);
 
-            throw new NotImplementedException("Auto room was not implemented, yet");
+//            throw new NotImplementedException("Auto room was not implemented, yet");
         } else {
             //#1: get room from provider
             LOG.info("Manual room -> use fix room!");
             LOG.info("#1/4: Getting room...");
             // TODO: 2019-01-28 getRoom-CalendarID & provider to get freeTimes
-            RoomEntity room = roomService.getRoomById(newEventEntity.getRoomId());
+            room = roomService.getRoomById(newEventEntity.getRoomId());
             LOG.debug("Got room {} for event {}", room, newEventEntity);
-            //2: get workingHours & busyTimes
-            LOG.info("#2/4: Get workingHours and busyTimes");
-            List<LoginHoursEntity> workingHours = userService.getWorkingHours(userMail);
-            LOG.debug("Got workingHours {} for user {}", workingHours, userMail);
-            List<Interval> busyTimes;
-            busyTimes = (getAllBusyTimes(userMail, newEventEntity));
-            LOG.debug("Got busyTimes {} for user {}", busyTimes, userMail);
-            //3: calculate free-times
-            LOG.info("#3/4: calculate time-slot for meeting");
-            Collection<Interval> freeTimes =
-                    calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
-                            DateTime.parse(newEventEntity.getAutoTimeDateStart()),
-                            DateTime.parse(newEventEntity.getAutoTimeDateEnd()));
-            LOG.debug("got freeTimes {} for {}", freeTimes, userMail);
-            Interval timeSlot = searchTimeSlot(freeTimes, newEventEntity);
-            if (timeSlot == null) {
-                LOG.error("No timeSlot found for {} - {}", userMail, newEventEntity);
-                throw new CalendarProvider.CalendarException("Unable to find timeSlot for event.", null);
-            } else
-                LOG.debug("got timeSlot {} for {} - {}", timeSlot, userMail, newEventEntity);
-            LOG.info("#4/4: create auto-time-manual-room event for {}", userMail);
-            CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
-                    room.getName(), calendarId, timeSlot, attendees);
-            LOG.debug("Creating event: {}", calendarEvent);
-            calendarProvider.createEvent(calendarEvent, userMail);
-            providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
         }
+
+
+        //2: get workingHours & busyTimes
+        LOG.info("#2/4: Get workingHours and busyTimes");
+        List<LoginHoursEntity> workingHours = userService.getWorkingHours(userMail);
+        LOG.debug("Got workingHours {} for user {}", workingHours, userMail);
+        List<Interval> busyTimes;
+        busyTimes = (getAllBusyTimes(userMail, newEventEntity));
+        LOG.debug("Got busyTimes {} for user {}", busyTimes, userMail);
+        //3: calculate free-times
+        LOG.info("#3/4: calculate time-slot for meeting");
+        Collection<Interval> freeTimes =
+                calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
+                        DateTime.parse(newEventEntity.getAutoTimeDateStart()),
+                        DateTime.parse(newEventEntity.getAutoTimeDateEnd()));
+        LOG.debug("got freeTimes {} for {}", freeTimes, userMail);
+        Interval timeSlot = searchTimeSlot(freeTimes, newEventEntity);
+        if (timeSlot == null) {
+            LOG.error("No timeSlot found for {} - {}", userMail, newEventEntity);
+            throw new CalendarProvider.CalendarException("Unable to find timeSlot for event.", null);
+        } else
+            LOG.debug("got timeSlot {} for {} - {}", timeSlot, userMail, newEventEntity);
+        LOG.info("#4/4: create auto-time-manual-room event for {}", userMail);
+        CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
+                room.getName(), calendarId, timeSlot, attendees);
+        LOG.debug("Creating event: {}", calendarEvent);
+        calendarProvider.createEvent(calendarEvent, userMail);
+        LOG.info("{} -- {}", providerService, room);
+        providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
     }
 
     private List<Interval> getAllBusyTimes(String userMail, NewEventEntity newEventEntity) {
