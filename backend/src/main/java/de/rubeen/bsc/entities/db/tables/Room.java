@@ -7,6 +7,7 @@ package de.rubeen.bsc.entities.db.tables;
 import de.rubeen.bsc.entities.db.Indexes;
 import de.rubeen.bsc.entities.db.Keys;
 import de.rubeen.bsc.entities.db.Public;
+import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.records.RoomRecord;
 
 import java.util.Arrays;
@@ -41,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Room extends TableImpl<RoomRecord> {
 
-    private static final long serialVersionUID = 185870304;
+    private static final long serialVersionUID = 549937756;
 
     /**
      * The reference instance of <code>public.room</code>
@@ -70,6 +71,16 @@ public class Room extends TableImpl<RoomRecord> {
      * The column <code>public.room.room_size</code>.
      */
     public final TableField<RoomRecord, Integer> ROOM_SIZE = createField("room_size", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
+     * The column <code>public.room.provider</code>.
+     */
+    public final TableField<RoomRecord, Calprovider> PROVIDER = createField("provider", org.jooq.impl.SQLDataType.VARCHAR.nullable(false).asEnumDataType(de.rubeen.bsc.entities.db.enums.Calprovider.class), this, "");
+
+    /**
+     * The column <code>public.room.calendarid</code>.
+     */
+    public final TableField<RoomRecord, String> CALENDARID = createField("calendarid", org.jooq.impl.SQLDataType.VARCHAR(1000).nullable(false), this, "");
 
     /**
      * Create a <code>public.room</code> table reference

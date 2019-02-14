@@ -4,6 +4,7 @@ import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
+import de.rubeen.bsc.entities.web.RoomEntity;
 import de.rubeen.bsc.helper.EventComparatorFactory;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
@@ -108,7 +109,7 @@ public class EventService extends LoggableService {
         } else {
             LOG.info("#1/2: Getting room...");
             // TODO: 2019-01-28 getRoom-CalendarID & provider to get freeTimes
-            String room = roomService.getRoomById(newEventEntity.getRoomId());
+            RoomEntity room = roomService.getRoomById(newEventEntity.getRoomId());
             LOG.debug("Got room {} for event {}", room, newEventEntity);
 
             LOG.info("#2/2: create manual-time-manual-room event for {}", userMail);
@@ -116,9 +117,10 @@ public class EventService extends LoggableService {
             DateTime endDateTime = DateTime.parse(newEventEntity.getManTimeDateEnd() + "T" + newEventEntity.getManTimeTimeEnd());
 
             CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
-                    room, calendarId, startDateTime, endDateTime, attendees);
+                    room.getName(), calendarId, startDateTime, endDateTime, attendees);
             LOG.debug("Creating event: {}", calendarEvent);
             calendarProvider.createEvent(calendarEvent, userMail);
+            providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
         }
     }
 
@@ -132,14 +134,17 @@ public class EventService extends LoggableService {
         List<CalendarEvent.Attendee> attendees = getEventAttendees(newEventEntity.getAttendees());
         LOG.debug("Got {} attendees: {}", attendees.size(), attendees);
 
-        if (newEventEntity.isAutoRoom())
+        if (newEventEntity.isAutoRoom()) {
+            final RoomEntity room = roomService.getBestRoomFor(newEventEntity.getRoomValues(), newEventEntity.getAttendees().size() + 1);
+            LOG.info("Got best room: {}", room);
+
             throw new NotImplementedException("Auto room was not implemented, yet");
-        else {
+        } else {
             //#1: get room from provider
             LOG.info("Manual room -> use fix room!");
             LOG.info("#1/4: Getting room...");
             // TODO: 2019-01-28 getRoom-CalendarID & provider to get freeTimes
-            String room = roomService.getRoomById(newEventEntity.getRoomId());
+            RoomEntity room = roomService.getRoomById(newEventEntity.getRoomId());
             LOG.debug("Got room {} for event {}", room, newEventEntity);
             //2: get workingHours & busyTimes
             LOG.info("#2/4: Get workingHours and busyTimes");
@@ -163,9 +168,10 @@ public class EventService extends LoggableService {
                 LOG.debug("got timeSlot {} for {} - {}", timeSlot, userMail, newEventEntity);
             LOG.info("#4/4: create auto-time-manual-room event for {}", userMail);
             CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
-                    room, calendarId, timeSlot, attendees);
+                    room.getName(), calendarId, timeSlot, attendees);
             LOG.debug("Creating event: {}", calendarEvent);
             calendarProvider.createEvent(calendarEvent, userMail);
+            providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
         }
     }
 

@@ -61,7 +61,7 @@ public class CalendarController {
             checkNewEvent(newEventEntity);
             eventService.addEvent(newEventEntity, userId.replace("@", "%40"), calendarId);
         } catch (IllegalArgumentException ex) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.toString());
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
         } catch (CalendarProvider.CalendarException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event was not created - contact administrator.");
         }
@@ -73,12 +73,13 @@ public class CalendarController {
     }
 
     private void checkNewEvent(NewEventEntity newEventEntity) {
-        checkArgument(!newEventEntity.getSubject().isBlank());
+        checkArgument(!newEventEntity.getSubject().isBlank(), "Subject can't be blank");
         //if manual time, manual date & time are required
         checkArgument(/* auto-time */ (newEventEntity.isAutoTime()
                 /* man-time */ || !(newEventEntity.getManTimeDateEnd().isBlank() || newEventEntity.getManTimeDateStart().isBlank()
                 || newEventEntity.getManTimeTimeEnd().isBlank() || newEventEntity.getManTimeTimeStart().isBlank())));
-        checkArgument(/* auto-room // man-room */ !newEventEntity.isAutoRoom() || newEventEntity.getRoomId() != null);
+        checkArgument(/* auto-room // man-room */ newEventEntity.isAutoRoom() || newEventEntity.getRoomId() != null,
+                "need a room for manual room");
     }
 
     @RequestMapping(value = "/events/user_quality", method = RequestMethod.GET)

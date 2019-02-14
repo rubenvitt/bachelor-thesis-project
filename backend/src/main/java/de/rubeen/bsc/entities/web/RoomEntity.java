@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import java.util.Collection;
 import java.util.List;
 
+import static java.text.MessageFormat.format;
+
 public class RoomEntity implements Comparable<RoomEntity> {
     private int roomId;
     private String roomName;
@@ -69,6 +71,12 @@ public class RoomEntity implements Comparable<RoomEntity> {
         this.equipments = List.copyOf(equipmentEntities);
     }
 
+    @Override
+    public String toString() {
+        return format("room: [id: {0}, name: {1}, size: {2}, equipments: {3}]",
+                roomId, roomName, roomSize, equipments);
+    }
+
     public static class EquipmentEntity {
         private int equipId;
         private String equipName;
@@ -97,6 +105,11 @@ public class RoomEntity implements Comparable<RoomEntity> {
 
         public void setEquipName(String equipName) {
             this.equipName = equipName;
+        }
+
+        @Override
+        public String toString() {
+            return format("[id: {0}, name: {1}]", equipId, equipName);
         }
     }
 }

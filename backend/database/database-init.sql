@@ -1,4 +1,4 @@
-create type calProvider as enum ('google', 'office');
+create type calProvider as enum ('google', 'office', 'room-service');
 
 create table appUser
 (
@@ -46,7 +46,9 @@ create table calendar
 create table room (
   room_id  serial primary key,
   room_name varchar(255) not null,
-  room_size int not null
+  room_size int not null,
+  provider calProvider not null,
+  calendarID varchar(1000) not null
 );
 
 create table room_Equipment (

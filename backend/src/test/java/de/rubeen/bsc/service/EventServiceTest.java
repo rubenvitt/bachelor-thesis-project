@@ -1,10 +1,7 @@
 package de.rubeen.bsc.service;
 
 import de.rubeen.bsc.entities.provider.CalendarEvent;
-import de.rubeen.bsc.entities.web.AppUserEntity;
-import de.rubeen.bsc.entities.web.CalendarEntity;
-import de.rubeen.bsc.entities.web.LoginHoursEntity;
-import de.rubeen.bsc.entities.web.NewEventEntity;
+import de.rubeen.bsc.entities.web.*;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
 import de.rubeen.bsc.service.provider.TestProviderImplementation;
@@ -107,7 +104,7 @@ class EventServiceTest {
                                 workingHour_friday, workingHour_saturday, workingHour_sunday)
                 )
         );
-        when(roomService.getRoomById(anyInt())).thenReturn("test-room");
+        when(roomService.getRoomById(anyInt())).thenReturn(new RoomEntity());
         when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
                 List.of(
                         new Interval(DateTime.parse("2019-01-01"), DateTime.parse("2019-01-04").withTime(LocalTime.parse("09:00"))),

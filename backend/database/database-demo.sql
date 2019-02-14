@@ -6,15 +6,11 @@ values ('123', 'Marcel Kastner', 'marcel@rubeen.me', 'Consultant', 'https://rand
        ('222', 'Annett Schneider', 'annett@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/81.jpg'),
        ('333', 'Ruben Vitt', 'r.vitt@fme.de', 'Student', 'https://www.xing.com/image/3_d_b_8160fa37a_24954449_5/ruben-vitt-foto.256x256.jpg');
 
-insert into room (room_name, room_size)
-values ('Room 1', 5),
-       ('Room 2', 6),
-       ('Small room', 3),
-       ('Large room', 15);
-select *
-from room;
-
-select * from calendar;
+insert into room (room_name, room_size, provider, calendarid)
+values ('Room 1', 5, 'room-service', 'room-1-calendar-id'),
+       ('Room 2', 6, 'room-service', 'room-2-calendar-id'),
+       ('Small room', 3, 'room-service', 'small-room-calendar-id'),
+       ('Large room', 15, 'room-service', 'large-room-calendar-id');
 
 insert into room_Equipment (equip_name)
 values ('Windows'),

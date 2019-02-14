@@ -28,7 +28,9 @@ public enum Calprovider implements EnumType {
 
     google("google"),
 
-    office("office");
+    office("office"),
+
+    room_service("room-service");
 
     private final String literal;
 
