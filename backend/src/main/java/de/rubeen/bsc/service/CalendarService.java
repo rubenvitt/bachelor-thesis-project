@@ -86,9 +86,9 @@ public class CalendarService extends LoggableService {
         final Stream<Interval> workingIntervals = workingHours
                 .map(loginHoursEntity -> {
                     List<Interval> intervals = new LinkedList<>();
-                    List<DateTime> days = getDaysOfInterval(initInterval, loginHoursEntity.isMonday(), loginHoursEntity.isTuesday(),
-                            loginHoursEntity.isWednesday(), loginHoursEntity.isThursday(), loginHoursEntity.isFriday(),
-                            loginHoursEntity.isSaturday(), loginHoursEntity.isSunday());
+                    List<DateTime> days = getDaysOfInterval(initInterval, loginHoursEntity.getMonday(), loginHoursEntity.getTuesday(),
+                            loginHoursEntity.getWednesday(), loginHoursEntity.getThursday(), loginHoursEntity.getFriday(),
+                            loginHoursEntity.getSaturday(), loginHoursEntity.getSunday());
                     final List<DateTime> startDateTimes = days.stream()
                             .map(dateTime -> dateTime.withTime(LocalTime.parse(loginHoursEntity.getStartTime()))).collect(toList());
                     final List<DateTime> endDateTimes = days.stream()

@@ -7,7 +7,6 @@ import org.jooq.SelectConditionStep;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.NameTokenizers;
 import org.modelmapper.jooq.RecordValueReader;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -65,10 +64,10 @@ public class UserService extends LoggableService {
                         WORKINGHOURS.MONDAY, WORKINGHOURS.TUESDAY, WORKINGHOURS.WEDNESDAY, WORKINGHOURS.THURSDAY,
                         WORKINGHOURS.FRIDAY, WORKINGHOURS.SATURDAY, WORKINGHOURS.SUNDAY)
                 .values(loginService.getUserID(userMail), Time.valueOf(loginHoursEntity.getStartTime()),
-                        Time.valueOf(loginHoursEntity.getEndTime()), loginHoursEntity.isMonday(),
-                        loginHoursEntity.isTuesday(), loginHoursEntity.isWednesday(),
-                        loginHoursEntity.isThursday(), loginHoursEntity.isFriday(),
-                        loginHoursEntity.isSaturday(), loginHoursEntity.isSunday()).executeAsync();
+                        Time.valueOf(loginHoursEntity.getEndTime()), loginHoursEntity.getMonday(),
+                        loginHoursEntity.getTuesday(), loginHoursEntity.getWednesday(),
+                        loginHoursEntity.getThursday(), loginHoursEntity.getFriday(),
+                        loginHoursEntity.getSaturday(), loginHoursEntity.getSunday()).executeAsync();
     }
 
     private void updateWorkingHour(LoginHoursEntity loginHoursEntity, String userMail) {
@@ -76,13 +75,13 @@ public class UserService extends LoggableService {
                 .update(WORKINGHOURS)
                 .set(WORKINGHOURS.STARTTIME, Time.valueOf(loginHoursEntity.getStartTime()))
                 .set(WORKINGHOURS.ENDTIME, Time.valueOf(loginHoursEntity.getEndTime()))
-                .set(WORKINGHOURS.MONDAY, loginHoursEntity.isMonday())
-                .set(WORKINGHOURS.TUESDAY, loginHoursEntity.isTuesday())
-                .set(WORKINGHOURS.WEDNESDAY, loginHoursEntity.isWednesday())
-                .set(WORKINGHOURS.THURSDAY, loginHoursEntity.isThursday())
-                .set(WORKINGHOURS.FRIDAY, loginHoursEntity.isFriday())
-                .set(WORKINGHOURS.SATURDAY, loginHoursEntity.isSaturday())
-                .set(WORKINGHOURS.SUNDAY, loginHoursEntity.isSunday())
+                .set(WORKINGHOURS.MONDAY, loginHoursEntity.getMonday())
+                .set(WORKINGHOURS.TUESDAY, loginHoursEntity.getTuesday())
+                .set(WORKINGHOURS.WEDNESDAY, loginHoursEntity.getWednesday())
+                .set(WORKINGHOURS.THURSDAY, loginHoursEntity.getThursday())
+                .set(WORKINGHOURS.FRIDAY, loginHoursEntity.getFriday())
+                .set(WORKINGHOURS.SATURDAY, loginHoursEntity.getSaturday())
+                .set(WORKINGHOURS.SUNDAY, loginHoursEntity.getSunday())
                 .where(WORKINGHOURS.USER_FK.eq(loginService.getUserID(userMail)))
                 .and(WORKINGHOURS.ID.eq(loginHoursEntity.getId()))
                 .executeAsync();

@@ -88,7 +88,7 @@ public class EventService extends LoggableService {
 
     public void addEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws CalendarProvider.CalendarException {
         CalendarProvider calendarProvider = providerService.getCalendarProvider(calendarId, userMail);
-        if (newEventEntity.isAutoTime())
+        if (newEventEntity.getAutoTime())
             createAutoEvent(newEventEntity, userMail, calendarId, calendarProvider);
         else
             createManualEvent(newEventEntity, userMail, calendarId, calendarProvider);
@@ -104,7 +104,7 @@ public class EventService extends LoggableService {
         // create event for all attendees
         List<CalendarEvent.Attendee> attendees = getEventAttendees(newEventEntity.getAttendees());
 
-        if (newEventEntity.isAutoRoom()) {
+        if (newEventEntity.getAutoRoom()) {
             throw new NotImplementedException("AutoRoom was not implemented, yet");
         } else {
             LOG.info("#1/2: Getting room...");
@@ -135,7 +135,7 @@ public class EventService extends LoggableService {
         LOG.debug("Got {} attendees: {}", attendees.size(), attendees);
 
         final RoomEntity room;
-        if (newEventEntity.isAutoRoom()) {
+        if (newEventEntity.getAutoRoom()) {
             room = roomService.getBestRoomFor(newEventEntity.getRoomValues(), newEventEntity.getAttendees().size() + 1);
             LOG.info("Got best room: {}", room);
 

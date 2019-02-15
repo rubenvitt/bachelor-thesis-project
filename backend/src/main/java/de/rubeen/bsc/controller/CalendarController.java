@@ -75,10 +75,10 @@ public class CalendarController {
     private void checkNewEvent(NewEventEntity newEventEntity) {
         checkArgument(!newEventEntity.getSubject().isBlank(), "Subject can't be blank");
         //if manual time, manual date & time are required
-        checkArgument(/* auto-time */ (newEventEntity.isAutoTime()
+        checkArgument(/* auto-time */ (newEventEntity.getAutoTime()
                 /* man-time */ || !(newEventEntity.getManTimeDateEnd().isBlank() || newEventEntity.getManTimeDateStart().isBlank()
                 || newEventEntity.getManTimeTimeEnd().isBlank() || newEventEntity.getManTimeTimeStart().isBlank())));
-        checkArgument(/* auto-room // man-room */ newEventEntity.isAutoRoom() || newEventEntity.getRoomId() != null,
+        checkArgument(/* auto-room // man-room */ newEventEntity.getAutoRoom() || newEventEntity.getRoomId() != null,
                 "need a room for manual room");
     }
 
