@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -86,7 +85,7 @@ class EventServiceTest {
     @DisplayName("Auto-Time / man-room event should be created successfully")
     void addEvent() throws CalendarProvider.CalendarException {
         final String subject = "test-subject", description = "test-description", autoTimeDateStart = "2019-01-01", autoTimeDateEnd = "2019-01-08", durationUnit = "hours";
-        final Integer meetingDuration = 2, roomId = 123;
+        final int meetingDuration = 2, roomId = 123;
         final List<Integer> attendeeIds = List.of(1, 2, 3, 4, 5);
 
         final Integer workingHour_Id = 1;
@@ -97,7 +96,13 @@ class EventServiceTest {
 
         final Integer[] eventsCreated = {0};
 
-        when(userService.getAppUser(anyInt())).thenReturn(new AppUserEntity());
+        //generate new appUser with given id in all parameters
+        when(userService.getAppUser(anyInt())).then(invocationOnMock -> {
+            int userId = invocationOnMock.getArgument(0);
+            return new AppUserEntity(userId, "username-" + userId, "user-mail" + userId,
+                    "avatar-" + userId, "position-" + userId);
+        });
+
         when(userService.getWorkingHours(anyString())).thenReturn(
                 List.of(
                         new LoginHoursEntity(workingHour_Id, workingHour_startTime, workingHour_endTime,
@@ -155,12 +160,6 @@ class EventServiceTest {
 
         assertThat(eventsCreated[0])
                 .isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("Add event for some attendees")
-    void addEventWithSomeAttendees() {
-
     }
 
     @Test
