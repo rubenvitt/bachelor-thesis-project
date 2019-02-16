@@ -59,7 +59,7 @@ backend-deploy-docker:
   stage: deploy
   script:
     - cd backend
-    - mvn jib:build -Djib.to.auth.username=gitlab-ci-token -Djib.to.auth.password=$CI_BUILD_TOKEN -Dskip.jooq.generation=true
+    - mvn clean compile jib:build -Djib.to.auth.username=gitlab-ci-token -Djib.to.auth.password=$CI_BUILD_TOKEN -Dskip.jooq.generation=true
   tags:
     - docker
 
