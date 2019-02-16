@@ -54,6 +54,15 @@ backend-build:
 #  tags:
 #    - docker
 
+backend-deploy-docker:
+  image: maven:3.6.0-jdk-11
+  stage: deploy
+  before_script:
+    - chmod +x backend/mvnw
+  script:
+    - cd backend
+    - ./mvnw compile jib:dockerBuild -Djib.to.auth.username gitlab-ci-token -Djib.to.auth.password $CI_BUILD_TOKEN
+
 frontend-build:
   image: node:latest
   stage: build
