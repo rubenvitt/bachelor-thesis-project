@@ -187,6 +187,7 @@
                     <to>
                         <image>docker.fme.de/r.vitt/bsc/backend</image>
                     </to>
+                    <allowInsecureRegistries>true</allowInsecureRegistries>
                 </configuration>
             </plugin>
             <plugin>
