@@ -70,7 +70,7 @@ function getFormData() {
     result.roomValues = $('#meeting-creation-equipment-select').val();
     result.roomId = getRoomId();
     result.attendees = [];
-    $('#newMeeting-attendee-list').children('a.active').each(function () {
+    $('#newMeeting-attendee-list').children('a[active=true]').each(function () {
         result.attendees.push($(this).attr('itemid'));
     });
     return result;

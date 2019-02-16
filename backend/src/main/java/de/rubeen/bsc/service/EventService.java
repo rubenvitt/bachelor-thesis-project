@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.Tables.APPUSER;
@@ -149,22 +146,19 @@ public class EventService extends LoggableService {
             LOG.debug("Got room {} for event {}", room, newEventEntity);
         }
 
+        LOG.info("#2/4: Get workingHours and busyTimes for all event-attendees");
+        LOG.debug("Generating collection of all attendees");
+        Collection<UserTimeEntity> attendeeUserTimeEntities = newEventEntity.getAttendees().parallelStream()
+                .map(UserTimeEntity::new)
+                .collect(Collectors.toCollection(HashSet::new));
+        attendeeUserTimeEntities.add(new UserTimeEntity(userMail));
+        final HashSet<Collection<Interval>> collect = attendeeUserTimeEntities.parallelStream()
+                .map(userTimeEntity -> userTimeEntity.getFreeTimesForEvent(newEventEntity))
+                .collect(Collectors.toCollection(HashSet::new));
+        final Collection<Interval> unionOfTimeIntervals = getUnionOfAttendeeFreeTimes(collect);
+        LOG.info("Union of timeIntervals: {}", unionOfTimeIntervals);
 
-        //2: get workingHours & busyTimes
-        LOG.info("#2/4: Get workingHours and busyTimes");
-        List<LoginHoursEntity> workingHours = userService.getWorkingHours(userMail);
-        LOG.debug("Got workingHours {} for user {}", workingHours, userMail);
-        List<Interval> busyTimes;
-        busyTimes = (getAllBusyTimes(userMail, newEventEntity));
-        LOG.debug("Got busyTimes {} for user {}", busyTimes, userMail);
-        //3: calculate free-times
-        LOG.info("#3/4: calculate time-slot for meeting");
-        Collection<Interval> freeTimes =
-                calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
-                        DateTime.parse(newEventEntity.getAutoTimeDateStart()),
-                        DateTime.parse(newEventEntity.getAutoTimeDateEnd()));
-        LOG.debug("got freeTimes {} for {}", freeTimes, userMail);
-        Interval timeSlot = searchTimeSlot(freeTimes, newEventEntity);
+        Interval timeSlot = searchTimeSlot(unionOfTimeIntervals, newEventEntity);
         if (timeSlot == null) {
             LOG.error("No timeSlot found for {} - {}", userMail, newEventEntity);
             throw new CalendarProvider.CalendarException("Unable to find timeSlot for event.", null);
@@ -177,6 +171,40 @@ public class EventService extends LoggableService {
         calendarProvider.createEvent(calendarEvent, userMail);
         LOG.info("{} -- {}", providerService, room);
         providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
+    }
+
+    Collection<Interval> getUnionOfAttendeeFreeTimes(Set<Collection<Interval>> freeTimesPerAttendee) {
+        var result = new Object() {
+            Boolean first = true;
+            List<Interval> resultTimes;
+        };
+        freeTimesPerAttendee
+                .forEach(intervals -> {
+                    if (result.first) {
+                        result.first = false;
+                        result.resultTimes = new LinkedList<>(intervals);
+                        return;
+                    }
+
+                    List<Interval> resultTimes = new LinkedList<>();
+                    intervals.parallelStream()
+                            .filter(freeInterval -> result.resultTimes.parallelStream()
+                                    .noneMatch(freeInterval::contains))
+                            .filter(freeInterval -> result.resultTimes.parallelStream()
+                                    .allMatch(freeInterval::overlaps))
+                            .forEach(freeInterval -> {
+                                result.resultTimes.parallelStream()
+                                        .filter(freeInterval::overlaps)
+                                        .forEach(resultInterval -> {
+                                            resultTimes.add(new Interval(freeInterval.getStart().isBefore(resultInterval.getStart())
+                                                    ? resultInterval.getStart() : freeInterval.getStart(),
+                                                    freeInterval.getEnd().isAfter(resultInterval.getEnd())
+                                                            ? resultInterval.getEnd() : freeInterval.getEnd()));
+                                        });
+                            });
+                    result.resultTimes = resultTimes;
+                });
+        return result.resultTimes;
     }
 
     private List<Interval> getAllBusyTimes(String userMail, NewEventEntity newEventEntity) {
@@ -303,5 +331,41 @@ public class EventService extends LoggableService {
         final long result = (long) Math.max(0, 100 - (duration / (endDateTime.getMillis() - startDateTime.getMillis()) * 100));
         LOG.info("calculating with {} and {} - result: {}", duration, (endDateTime.getMillis() - startDateTime.getMillis()), result);
         return result;
+    }
+
+
+    private class UserTimeEntity {
+        private final String userMail;
+
+        UserTimeEntity(String userMail) {
+            LOG.debug("Creating new userTimeEntity for user with mail {}", userMail);
+            this.userMail = userMail;
+        }
+
+        UserTimeEntity(Integer userId) {
+            this(userService.getAppUser(userId).getMail());
+        }
+
+        Collection<Interval> getFreeTimesForEvent(NewEventEntity newEventEntity) {
+            //2: get workingHours & busyTimes
+            List<LoginHoursEntity> workingHours = userService.getWorkingHours(userMail);
+            LOG.debug("Got workingHours {} for user {}", workingHours, userMail);
+
+            List<Interval> busyTimes = (getAllBusyTimes(userMail, newEventEntity));
+            LOG.debug("Got busyTimes {} for user {}", busyTimes, userMail);
+
+            //3: calculate free-times
+            LOG.info("calculate time-slot for meeting for user {}", userMail);
+
+            Collection<Interval> freeTimes =
+                    calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
+                            DateTime.parse(newEventEntity.getAutoTimeDateStart()),
+                            DateTime.parse(newEventEntity.getAutoTimeDateEnd()));
+            LOG.debug("got freeTimes {} for {}", freeTimes, userMail);
+
+            return freeTimes;
+        }
+
+
     }
 }

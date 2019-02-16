@@ -135,7 +135,7 @@ public class GoogleProviderService implements CalendarProvider {
     @Override
     public List<CalendarEntity> getAllCalendars(String user_id) throws CalendarException {
         try {
-            Credential credential = flow.loadCredential(user_id);
+            Credential credential = flow.loadCredential(getCredentialUserId(user_id));
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             CalendarList calendarList = calendar.calendarList().list().execute();
@@ -152,7 +152,7 @@ public class GoogleProviderService implements CalendarProvider {
     @Override
     public List<CalendarEntity> getAllActiveCalendars(String user_id) throws CalendarException {
         try {
-            Credential credential = flow.loadCredential(user_id);
+            Credential credential = flow.loadCredential(getCredentialUserId(user_id));
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             CalendarList calendarList = calendar.calendarList().list().execute();
@@ -219,7 +219,7 @@ public class GoogleProviderService implements CalendarProvider {
     public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
         Credential credential;
         try {
-            credential = flow.loadCredential(userId);
+            credential = flow.loadCredential(getCredentialUserId(userId));
         } catch (IOException e) {
             LOG.error("Error while getting credential for user {}", userId, e);
             throw new CalendarException("Unable to get credential for user " + userId, e);
@@ -252,7 +252,7 @@ public class GoogleProviderService implements CalendarProvider {
     public List<Interval> getBusyTimes(String userId, NewEventEntity eventEntity) throws CalendarException {
         Credential credential;
         try {
-            credential = flow.loadCredential(userId.replace("@", "%40"));
+            credential = flow.loadCredential(getCredentialUserId(userId));
         } catch (IOException e) {
             throw new CalendarException("Unable to get credential for user " + userId, e);
         }
@@ -284,7 +284,7 @@ public class GoogleProviderService implements CalendarProvider {
     @Override
     public CalendarEntity getCalendar(String calendarId, String userId, boolean isActivated) {
         try {
-            Credential credential = flow.loadCredential(userId);
+            Credential credential = flow.loadCredential(getCredentialUserId(userId));
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             CalendarListEntry calendarListEntry = calendar.calendarList().get(calendarId).execute();

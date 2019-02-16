@@ -21,8 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -110,6 +112,7 @@ class EventServiceTest {
                                 workingHour_friday, workingHour_saturday, workingHour_sunday)
                 )
         );
+        //Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end
         when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, "test-room-name", 2, Collections.emptyList()));
         when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
                 List.of(
@@ -160,6 +163,25 @@ class EventServiceTest {
 
         assertThat(eventsCreated[0])
                 .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("TimeInterval-Union for attendees should be calculated correctly")
+    void unionForAttendeeTimeIntervalsTest() {
+        Collection<Interval> user1 = List.of(
+                Interval.parse("2019-02-18T10:00:00.000+01:00/2019-02-18T16:00:00.000+01:00"),
+                Interval.parse("2019-02-19T09:00:00.000+01:00/2019-02-19T16:00:00.000+01:00")
+        );
+        Collection<Interval> user2 = List.of(
+                Interval.parse("2019-02-18T08:00:00.000+01:00/2019-02-18T16:00:00.000+01:00"),
+                Interval.parse("2019-02-21T08:00:00.000+01:00/2019-02-21T16:00:00.000+01:00")
+        );
+        Interval resultInterval = Interval.parse("2019-02-18T10:00:00.000+01:00/2019-02-18T16:00:00.000+01:00");
+        Set<Collection<Interval>> freeTimesPerAttendee = Set.of(user1, user2);
+        Collection<Interval> unionOfAttendeeFreeTimes = eventService.getUnionOfAttendeeFreeTimes(freeTimesPerAttendee);
+        assertThat(unionOfAttendeeFreeTimes)
+                .hasSize(1)
+                .contains(resultInterval);
     }
 
     @Test

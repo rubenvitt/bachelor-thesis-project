@@ -154,6 +154,7 @@ function insertAppUsers(filter, attendeeList) {
                     default:
                         console.error("got wrong content");
                 }
+                attendee.attr('active', true);
                 attendee.find('.spinner').addClass('vis-h');
                 attendee.find('.spinner').removeClass('vis-v');
             });
@@ -163,6 +164,7 @@ function insertAppUsers(filter, attendeeList) {
             attendee.removeClass('bg-warning');
             attendee.removeClass('bg-success');
             attendee.removeClass('active');
+            attendee.attr('active', false);
             attendee.find('.spinner').addClass('vis-h');
             attendee.find('.spinner').removeClass('vis-v');
         }

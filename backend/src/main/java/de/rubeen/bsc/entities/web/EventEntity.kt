@@ -8,7 +8,7 @@ class EventEntity {
     var startTime: DateTime? = null
     var endTime: DateTime? = null
 
-    constructor(subject: String, startTime: DateTime, endTime: DateTime) {
+    constructor(subject: String?, startTime: DateTime, endTime: DateTime) {
         this.subject = subject
         this.startTime = startTime
         this.endTime = endTime
