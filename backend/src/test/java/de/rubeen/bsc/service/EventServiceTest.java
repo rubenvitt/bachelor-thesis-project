@@ -179,9 +179,9 @@ class EventServiceTest {
         Interval resultInterval = Interval.parse("2019-02-18T10:00:00.000+01:00/2019-02-18T16:00:00.000+01:00");
         Set<Collection<Interval>> freeTimesPerAttendee = Set.of(user1, user2);
         Collection<Interval> unionOfAttendeeFreeTimes = eventService.getUnionOfAttendeeFreeTimes(freeTimesPerAttendee);
-        /*assertThat(unionOfAttendeeFreeTimes)
+        assertThat(unionOfAttendeeFreeTimes)
                 .hasSize(1)
-                .contains(resultInterval);*/
+                .contains(resultInterval);
     }
 
     @Test
