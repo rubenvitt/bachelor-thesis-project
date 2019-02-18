@@ -2,13 +2,9 @@ package de.rubeen.bsc.controller;
 
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.provider.office365.*;
-import de.rubeen.bsc.provider.office365.entities.Calendar;
-import de.rubeen.bsc.provider.office365.entities.Event;
 import de.rubeen.bsc.provider.office365.entities.OutlookUser;
-import de.rubeen.bsc.provider.office365.entities.PagedResult;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.OfficeProviderService;
-import org.jooq.meta.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,13 +16,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 

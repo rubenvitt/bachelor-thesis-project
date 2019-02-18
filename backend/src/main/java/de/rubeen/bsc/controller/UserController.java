@@ -2,7 +2,6 @@ package de.rubeen.bsc.controller;
 
 import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
-import de.rubeen.bsc.service.EventService;
 import de.rubeen.bsc.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

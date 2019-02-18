@@ -35,14 +35,14 @@ class RoomEntity : Comparable<RoomEntity> {
         this.size = roomSize
     }
 
-    override fun equals(obj: Any?): Boolean {
-        return if (obj is RoomEntity) {
-            obj.id == this.id
+    override fun equals(other: Any?): Boolean {
+        return if (other is RoomEntity) {
+            other.id == this.id
         } else false
     }
 
-    override fun compareTo(o: RoomEntity): Int {
-        return this.id - o.id
+    override fun compareTo(other: RoomEntity): Int {
+        return this.id - other.id
     }
 
     fun setEquipments(equipmentEntities: Collection<EquipmentEntity>) {

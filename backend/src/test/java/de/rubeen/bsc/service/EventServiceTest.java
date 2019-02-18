@@ -170,6 +170,7 @@ class EventServiceTest {
     void unionForAttendeeTimeIntervalsTest() {
         Collection<Interval> user1 = List.of(
                 Interval.parse("2019-02-18T10:00:00.000+01:00/2019-02-18T16:00:00.000+01:00"),
+                Interval.parse("2019-02-21T08:00:00.000+01:00/2019-02-21T16:00:00.000+01:00"),
                 Interval.parse("2019-02-19T09:00:00.000+01:00/2019-02-19T16:00:00.000+01:00")
         );
         Collection<Interval> user2 = List.of(

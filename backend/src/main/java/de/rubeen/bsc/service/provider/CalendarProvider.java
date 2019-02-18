@@ -1,6 +1,5 @@
 package de.rubeen.bsc.service.provider;
 
-import com.google.api.services.calendar.model.TimePeriod;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;

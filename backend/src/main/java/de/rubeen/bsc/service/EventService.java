@@ -8,6 +8,7 @@ import de.rubeen.bsc.entities.web.RoomEntity;
 import de.rubeen.bsc.helper.EventComparatorFactory;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
+import kotlin.Pair;
 import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -187,21 +188,39 @@ public class EventService extends LoggableService {
                     }
 
                     List<Interval> resultTimes = new LinkedList<>();
-                    intervals.parallelStream()
-                            .filter(freeInterval -> result.resultTimes.parallelStream()
-                                    .noneMatch(freeInterval::contains))
-                            .filter(freeInterval -> result.resultTimes.parallelStream()
-                                    .allMatch(freeInterval::overlaps))
-                            .forEach(freeInterval -> {
-                                result.resultTimes.parallelStream()
-                                        .filter(freeInterval::overlaps)
-                                        .forEach(resultInterval -> {
-                                            resultTimes.add(new Interval(freeInterval.getStart().isBefore(resultInterval.getStart())
-                                                    ? resultInterval.getStart() : freeInterval.getStart(),
-                                                    freeInterval.getEnd().isAfter(resultInterval.getEnd())
-                                                            ? resultInterval.getEnd() : freeInterval.getEnd()));
+                    intervals.stream()
+                            .filter(freeInterval -> {
+                                return result.resultTimes.stream()
+                                        .noneMatch(readableInterval -> {
+                                            LOG.info("{} contains {} ? : {}", freeInterval, readableInterval, freeInterval.contains(readableInterval));
+                                            return freeInterval.contains(readableInterval);
                                         });
-                            });
+                            })
+                            .map(freeInterval -> {
+                                List<Interval> list = result.resultTimes.stream()
+                                        .filter(readableInterval -> {
+                                            LOG.info("{} overlaps {} ? : {}", freeInterval, readableInterval, freeInterval.overlaps(readableInterval));
+                                            return freeInterval.overlaps(readableInterval);
+                                        })
+                                        .collect(Collectors.toList());
+                                LOG.info("creating pair of {} and {}", freeInterval, list);
+                                return new Pair<>(freeInterval, list);
+                            })
+                            .forEach(pair -> {
+                                        LOG.info("Using pair: {}", pair);
+                                        pair.component2().stream()
+                                                .forEach(interval -> {
+                                                    Interval addInterval = new Interval(
+                                                            pair.component1().getStart().isBefore(interval.getStart())
+                                                                    ? interval.getStart() : pair.component1().getStart(),
+                                                            pair.component1().getEnd().isAfter(interval.getEnd())
+                                                                    ? interval.getEnd() : pair.component1().getEnd()
+                                                    );
+                                                    LOG.info("Adding interval: {} --- data: {} & {}", addInterval, pair.component1(), interval);
+                                                    resultTimes.add(addInterval);
+                                                });
+                                    }
+                            );
                     result.resultTimes = resultTimes;
                 });
         return result.resultTimes;
