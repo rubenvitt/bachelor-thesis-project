@@ -1,5 +1,6 @@
 package de.rubeen.bsc.service;
 
+import com.google.common.base.Preconditions;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
@@ -175,6 +176,7 @@ public class EventService extends LoggableService {
     }
 
     Collection<Interval> getUnionOfAttendeeFreeTimes(Set<Collection<Interval>> freeTimesPerAttendee) {
+        LOG.debug("Searching for union of attendeeFreeTimes in {}", freeTimesPerAttendee);
         var result = new Object() {
             Boolean first = true;
             List<Interval> resultTimes;
@@ -339,6 +341,7 @@ public class EventService extends LoggableService {
         final List<EventEntity> allEventsForUser = getAllEventsForUser(userMail, startDateTime.getMillis(), endDateTime.getMillis());
         double duration = allEventsForUser.parallelStream()
                 .mapToDouble(eventEntity -> {
+                    assert eventEntity.getEndTime() != null && eventEntity.getStartTime() != null;
                     final double dur = eventEntity.getEndTime().getMillis() - eventEntity.getStartTime().getMillis();
                     LOG.info("{} has a duration of {} --- start: {} || end: {}", eventEntity.getSubject(),
                             new Duration(eventEntity.getStartTime().getMillis(), eventEntity.getEndTime().getMillis()),
@@ -378,8 +381,8 @@ public class EventService extends LoggableService {
 
             Collection<Interval> freeTimes =
                     calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
-                            DateTime.parse(newEventEntity.getAutoTimeDateStart()),
-                            DateTime.parse(newEventEntity.getAutoTimeDateEnd()));
+                            getBeginOfDay(DateTime.parse(newEventEntity.getAutoTimeDateStart())),
+                            getEndOfDay(DateTime.parse(newEventEntity.getAutoTimeDateEnd())));
             LOG.debug("got freeTimes {} for {}", freeTimes, userMail);
 
             return freeTimes;

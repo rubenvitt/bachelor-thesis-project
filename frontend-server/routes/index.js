@@ -69,6 +69,11 @@ router.get("/settings", function (req, res, next) {
     }
 });
 
+router.get("/callback", function (req, res, next) {
+   let subject = req.query.subject;
+   res.send(subject);
+});
+
 router.get('index.html', function (req, res) {
     res.redirect("/")
 });

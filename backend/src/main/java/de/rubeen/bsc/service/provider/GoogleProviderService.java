@@ -5,6 +5,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.OAuth2Utils;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -16,6 +17,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
+import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
@@ -28,17 +30,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.annotation.PostConstruct;
 import javax.security.auth.login.CredentialException;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static java.text.MessageFormat.format;
 
 @Service
 public class GoogleProviderService implements CalendarProvider {
@@ -217,6 +223,7 @@ public class GoogleProviderService implements CalendarProvider {
 
     @Override
     public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
+        AppUserEntity appUserEntity = userService.getAppUser(userId);
         Credential credential;
         try {
             credential = flow.loadCredential(getCredentialUserId(userId));
@@ -226,15 +233,26 @@ public class GoogleProviderService implements CalendarProvider {
         }
         Calendar calendar = getCalendar(credential);
         try {
+            List<EventAttendee> attendees = getEventAttendees(calendarEvent.getAttendees());
+            attendees.add(new EventAttendee()
+                    .setOrganizer(true)
+                    .setDisplayName(appUserEntity.getName())
+                    .setResponseStatus("accepted")
+                    //not working:
+                    .setDisplayName(appUserEntity.getName())
+                    //replace -> google-mailAddress
+                    .setEmail("rubyrubyruby22@gmail.com")
+                    .setComment("Created in name of (by 'my business day')"));
             calendar.events().insert(calendarEvent.getCalendarId(),
                     new Event()
+                            .setSource(new Event.Source().setTitle("My-Business-Day").setUrl(format("https://localhost:3333/callback?subject={0}", calendarEvent.getSubject())))
                             .setSummary(calendarEvent.getSubject())
                             .setDescription(calendarEvent.getDescription())
                             .setLocation(calendarEvent.getRoom())
                             .setStart(getEventDateTime(calendarEvent.getStartDateTime()))
                             .setEnd(getEventDateTime(calendarEvent.getEndDateTime()))
-                            .setAttendees(getEventAttendees(calendarEvent.getAttendees()))
-            ).execute();
+                            .setAttendees(attendees)
+            ).setSendNotifications(true).execute();
             return true;
         } catch (IOException e) {
             LOG.error("Error while adding event {} for user {}", calendarEvent, userId);

@@ -83,7 +83,9 @@ public class CalendarService extends LoggableService {
         final Interval initInterval = new Interval(start, end);
         final List<Interval> busyIntervals = busyTimePeriods
                 .collect(toList());
-        final Stream<Interval> workingIntervals = workingHours
+        List<LoginHoursEntity> workingHoursList = workingHours.collect(Collectors.toList());
+        LOG.info("Got workingHours: {}", workingHoursList);
+        final Stream<Interval> workingIntervals = workingHoursList.stream()
                 .map(loginHoursEntity -> {
                     List<Interval> intervals = new LinkedList<>();
                     List<DateTime> days = getDaysOfInterval(initInterval, loginHoursEntity.getMonday(), loginHoursEntity.getTuesday(),
@@ -297,11 +299,14 @@ public class CalendarService extends LoggableService {
     private List<DateTime> getDaysOfIntervalOfDay(final DayOfWeek dayOfWeek, final Interval interval) {
         final DateTime start = interval.getStart();
         final List<DateTime> result = new LinkedList<>();
-        for (int i = 0; i < interval.toDuration().getStandardDays(); i++) {
+
+        long iMax = interval.toDuration().getStandardDays();
+        for (int i = 0; i < (iMax > 0 ? iMax : 1); i++) {
             final DateTime dateTime = start.plusDays(i);
             if (dateTime.getDayOfWeek() == dayOfWeek.getValue())
                 result.add(dateTime);
         }
+        LOG.debug("get days of interval of day: i max={} dayOfWeek={}, interval={}, result={}", interval.toDuration().getStandardDays(), dayOfWeek, interval, result);
         return result;
     }
 }
