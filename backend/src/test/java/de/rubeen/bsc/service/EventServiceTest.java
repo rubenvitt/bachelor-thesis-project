@@ -105,6 +105,9 @@ class EventServiceTest {
                     "avatar-" + userId, "position-" + userId);
         });
 
+        when(userService.getAppUser(anyString())).then(invocationOnMock -> new AppUserEntity(1, "user-" + invocationOnMock.getArgument(0), "user-mail-" + invocationOnMock.getArgument(0), "avatar", "position"));
+        when(providerService.getDefaultCalendar(anyString())).thenReturn(new CalendarEntity("calendar-name", "calendar-id", true, "test-provider", true));
+
         when(userService.getWorkingHours(anyString())).thenReturn(
                 List.of(
                         new LoginHoursEntity(workingHour_Id, workingHour_startTime, workingHour_endTime,
@@ -162,7 +165,7 @@ class EventServiceTest {
         eventService.addEvent(newEventEntity, "user@mail", "cal-id");
 
         assertThat(eventsCreated[0])
-                .isEqualTo(1);
+                .isEqualTo(6);
     }
 
     @Test
