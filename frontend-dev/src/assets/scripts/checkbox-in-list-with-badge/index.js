@@ -1,8 +1,11 @@
 function setChangeListener(checkbox, changedListener, radioList) {
     $(checkbox).change(function () {
-        if (radioList)
-            removeActiveStateFromCheckboxes(this);
-        setCheckboxVisibility(this);
+        if (radioList) {
+            removeActiveStateFromCheckboxes(checkbox);
+            setRadiobuttonVisibility(checkbox)
+        } else {
+            setCheckboxVisibility(this);
+        }
         changedListener(this.checked, $(this).attr('data-content'));
     });
 }
@@ -36,6 +39,16 @@ function setCheckboxVisibility(checkbox) {
     }
 }
 
+function setRadiobuttonVisibility(checkbox) {
+    const parent = $(checkbox).parent();
+    parent.children('i').css('visibility', checkbox.checked ? 'visible' : 'hidden');
+    if (checkbox.checked) {
+        parent.addClass('active');
+    } else {
+        parent.removeClass('active');
+    }
+}
+
 export function initCheckboxList(checkboxes, changedListener, onButtonClickListener) {
     checkboxes.each(function () {
         setCheckboxVisibility(this);
@@ -46,7 +59,7 @@ export function initCheckboxList(checkboxes, changedListener, onButtonClickListe
 
 export function initRadioList(checkboxes, changedListener) {
     checkboxes.each(function () {
-        setCheckboxVisibility(this);
+        setRadiobuttonVisibility(this);
         setChangeListener(this, changedListener, true);
     })
 }

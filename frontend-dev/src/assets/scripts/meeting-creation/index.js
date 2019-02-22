@@ -7,6 +7,8 @@ import * as localStorage from '../localStorage';
 import * as appUser from '../appuser'
 import * as clockPicker from '../clockpicker';
 
+const yesButton = $('#calendar-select-modal-yes');
+
 function displayActiveCalendarsInModal(calendars) {
     function getIconForProvider(provider) {
         switch (provider) {
@@ -50,12 +52,13 @@ function displayActiveCalendarsInModal(calendars) {
 
     const inputList = list.children().children('input');
     checkboxController.initRadioList(inputList, function (checked, id) {
+        yesButton.removeAttr('disabled');
+        yesButton.removeClass('btn-danger btn-success');
+        yesButton.text('Choose calendar');
     });
 
-    const yesButton = $('#calendar-select-modal-yes');
-    yesButton.removeAttr('disabled');
     yesButton.removeClass('btn-danger btn-success');
-    yesButton.text('Choose calendar');
+    yesButton.text('Select calendar');
 
     yesButton.click(function () {
         yesButton.attr('disabled', 'true');
@@ -88,6 +91,8 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
     });
 
     $('#meeting-creation-submitButton').click(function () {
+        yesButton.attr('disabled', true);
+        yesButton.html('<i class="fa fa-spinner fa-spin mR-10"></i>Loading calendar');
         $("#calendar-select-modal").modal();
         calendar.getAllActiveCalendars(displayActiveCalendarsInModal);
         //form.sendForm();
