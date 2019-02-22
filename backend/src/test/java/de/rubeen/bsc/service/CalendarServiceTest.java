@@ -23,6 +23,7 @@ class CalendarServiceTest extends LoggableService {
     LoginService loginService;
     @Mock
     DatabaseService databaseService;
+
     private CalendarService calendarService;
 
     @BeforeEach

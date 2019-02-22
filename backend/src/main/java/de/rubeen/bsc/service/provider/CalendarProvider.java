@@ -23,7 +23,7 @@ public interface CalendarProvider {
 
     List<Interval> getBusyTimes(String userId, NewEventEntity eventEntity) throws CalendarException;
 
-    CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated);
+    CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated, boolean isDefault);
 
     class CalendarException extends Exception {
         public CalendarException(String message, Exception e) {

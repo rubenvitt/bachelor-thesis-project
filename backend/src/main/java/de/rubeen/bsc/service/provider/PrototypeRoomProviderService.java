@@ -36,7 +36,7 @@ public class PrototypeRoomProviderService extends LoggableService implements Cal
     @Override
     public List<CalendarEntity> getAllActiveCalendars(String roomId) throws CalendarException {
         LOG.info("Getting all active calendars for room {}", roomId);
-        return List.of(getCalendar(roomId));
+        return List.of(getCalendar(roomId, true));
     }
 
     @Override
@@ -54,18 +54,18 @@ public class PrototypeRoomProviderService extends LoggableService implements Cal
     }
 
     @Override
-    public CalendarEntity getCalendar(String calendarId, String roomId, boolean isActivated) {
+    public CalendarEntity getCalendar(String calendarId, String roomId, boolean isActivated, boolean isDefault) {
         LOG.info("Getting calendar {} for room {}", calendarId, roomId);
         //calendarID is not needed for rooms, since they only have a single calendar
-        return getCalendar(roomId);
+        return getCalendar(roomId, isDefault);
     }
 
-    private CalendarEntity getCalendar(String roomId) {
+    private CalendarEntity getCalendar(String roomId, boolean isDefault) {
         final RoomRecord roomRecord = databaseService.getContext()
                 .selectFrom(ROOM)
                 .where(ROOM.ROOM_ID.eq(Integer.parseInt(roomId)))
                 .fetchOne();
         return new CalendarEntity(roomRecord.getRoomName(), roomRecord.getCalendarid(), true,
-                roomRecord.getProvider().getName());
+                roomRecord.getProvider().getName(), isDefault);
     }
 }

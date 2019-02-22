@@ -41,6 +41,20 @@ public class CalendarController {
         return ResponseEntity.ok().build();
     }
 
+    @RequestMapping(value = "/default", method = RequestMethod.POST)
+    public ResponseEntity setDefaultCalendar(@RequestParam("calendar_id") String calendarID,
+                                             @RequestParam("user_id") String userID) {
+        LOG.info("Set calendar: {} for {} as default", calendarID, userID);
+        providerService.setDefaultCalendar(calendarID, userID);
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(value = "/default", method = RequestMethod.GET)
+    public CalendarEntity getDefaultCalendar(@RequestParam("user_id") String userID) {
+        LOG.info("Get default calendar for {}", userID);
+        return providerService.getDefaultCalendar(userID);
+    }
+
     @RequestMapping(value = "/events/today", method = RequestMethod.GET)
     public List<EventEntity> allEventsOfActivatedCalendars(@RequestParam("user_id") String userID) {
         return eventService.getAllEventsForToday(userID);
@@ -84,10 +98,10 @@ public class CalendarController {
 
     @RequestMapping(value = "/events/user_quality", method = RequestMethod.GET)
     public long getUserQualityValueForEvent(@RequestParam(value = "user_id") int userId,
-                                           @RequestParam(value = "start_date") String startDate,
-                                           @RequestParam(value = "start_time") String startTime,
-                                           @RequestParam(value = "end_date") String endDate,
-                                           @RequestParam(value = "end_time") String endTime) {
+                                            @RequestParam(value = "start_date") String startDate,
+                                            @RequestParam(value = "start_time") String startTime,
+                                            @RequestParam(value = "end_date") String endDate,
+                                            @RequestParam(value = "end_time") String endTime) {
         return eventService.getUserQualityValue(userId, startDate, startTime, endDate, endTime);
     }
 }

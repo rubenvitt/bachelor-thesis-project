@@ -93,6 +93,10 @@ public class CalendarEvent {
                 subject, description, room, calendarId, startDateTime, endDateTime, attendees);
     }
 
+    public CalendarEvent withCalendarId(final String calendarID) {
+        return new CalendarEvent(subject, description, room, calendarID, startDateTime, endDateTime, attendees);
+    }
+
     public static class Attendee {
         private String name, mail;
 

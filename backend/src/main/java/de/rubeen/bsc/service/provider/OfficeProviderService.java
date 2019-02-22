@@ -3,6 +3,7 @@ package de.rubeen.bsc.service.provider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
+import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
@@ -21,12 +22,10 @@ import org.joda.time.Interval;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.rubeen.bsc.entities.db.tables.Calendar.CALENDAR;
 import static de.rubeen.bsc.entities.db.tables.Credential.CREDENTIAL;
 
 @Service
@@ -63,10 +62,21 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
     public List<CalendarEntity> getAllCalendars(String user_id) throws CalendarException {
         try {
             final List<Calendar> calendarList = getCalendarFromOffice(user_id);
-            calendarList.parallelStream().forEach(calendar -> calendarService.addCalendarToDatabase(calendar.getId(), user_id, Calprovider.office));
+            calendarList.parallelStream()
+                    .forEachOrdered(calendar ->
+                            calendarService.addCalendarToDatabase(calendar.getId(), user_id, Calprovider.office));
+            final Map<String, CalendarRecord> recordMap = new HashMap<>();
+            databaseService.getContext().selectFrom(CALENDAR)
+                    .where(CALENDAR.PROVIDER.eq(Calprovider.office))
+                    .and(CALENDAR.USER_ID.eq(loginService.getUserID(user_id)))
+                    .fetch().forEach(calendarRecord -> recordMap.put(calendarRecord.getCalendarid(), calendarRecord));
+
             return calendarList.parallelStream()
-                    .map(calendar -> new CalendarEntity(calendar, calendarService.isCalendarActivated(calendar.getId(), user_id)))
-                    .collect(Collectors.toList());
+                    .map(calendar -> {
+                        CalendarRecord calendarRecord = recordMap.get(calendar.getId());
+                        return new CalendarEntity(calendar.getName(), calendar.getId(), calendarRecord.getActivated(),
+                                calendarRecord.getProvider().getName(), calendarRecord.getIsdefault());
+                    }).collect(Collectors.toList());
         } catch (IOException e) {
             LOG.error("Error while getting calendars");
             throw new CalendarException("Unable to get all calendars", e);
@@ -82,10 +92,21 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
     public List<CalendarEntity> getAllActiveCalendars(String user_id) throws CalendarException {
         try {
             final List<Calendar> calendarList = getCalendarFromOffice(user_id);
+
+            Map<String, CalendarRecord> recordMap = new HashMap<>();
+            databaseService.getContext().selectFrom(CALENDAR)
+                    .where(CALENDAR.PROVIDER.eq(Calprovider.office))
+                    .and(CALENDAR.ACTIVATED.isTrue())
+                    .and(CALENDAR.USER_ID.eq(loginService.getUserID(user_id)))
+                    .fetch().forEach(calendarRecord -> recordMap.put(calendarRecord.getCalendarid(), calendarRecord));
+
             return calendarList.parallelStream()
                     .filter(calendar -> calendarService.isCalendarActivated(calendar.getId(), user_id))
-                    .map(calendar -> new CalendarEntity(calendar, true))
-                    .collect(Collectors.toList());
+                    .map(calendar -> {
+                        CalendarRecord calendarRecord = recordMap.get(calendar.getId());
+                        return new CalendarEntity(calendar.getName(), calendar.getId(), calendarRecord.getActivated(),
+                                calendarRecord.getProvider().getName(), calendarRecord.getIsdefault());
+                    }).collect(Collectors.toList());
         } catch (IOException e) {
             LOG.error("Error while getting calendars");
             throw new CalendarException("Unable to get all active calendars", e);
@@ -208,11 +229,11 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
     }
 
     @Override
-    public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated) {
+    public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated, boolean isDefault) {
         try {
             Calendar calendar = getSingleCalendarFromOffice(userMail, calendarId);
             LOG.debug("Got calendar: {} with name {}", calendar.getId(), calendar.getName());
-            return new CalendarEntity(calendar, isActivated);
+            return new CalendarEntity(calendar, isActivated, isDefault);
         } catch (IOException e) {
             LOG.error("Unable to get calendar {} for {}", calendarId, userMail);
             return null;

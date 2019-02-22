@@ -5,7 +5,6 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.OAuth2Utils;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -16,34 +15,30 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
+import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
-import de.rubeen.bsc.service.CalendarService;
-import de.rubeen.bsc.service.LoginService;
-import de.rubeen.bsc.service.RoomService;
-import de.rubeen.bsc.service.UserService;
+import de.rubeen.bsc.service.*;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.annotation.PostConstruct;
 import javax.security.auth.login.CredentialException;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.rubeen.bsc.entities.db.tables.Calendar.CALENDAR;
+import static de.rubeen.bsc.service.EventService.getBeginOfDay;
+import static de.rubeen.bsc.service.EventService.getEndOfDay;
 import static java.text.MessageFormat.format;
 
 @Service
@@ -53,7 +48,9 @@ public class GoogleProviderService implements CalendarProvider {
     private static final Logger LOG = LoggerFactory.getLogger(GoogleProviderService.class);
     private final CalendarService calendarService;
     private final RoomService roomService;
+    private final LoginService loginService;
     private final UserService userService;
+    private final DatabaseService databaseService;
     @Value("${google.client.redirectUri}")
     private String redirectURL;
     @Value("${google.client.client-id}")
@@ -65,10 +62,12 @@ public class GoogleProviderService implements CalendarProvider {
     private JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
     @Autowired
-    public GoogleProviderService(CalendarService calendarService, RoomService roomService, UserService userService, LoginService loginService) {
+    public GoogleProviderService(CalendarService calendarService, RoomService roomService, LoginService loginService1, UserService userService, LoginService loginService, DatabaseService databaseService) {
         this.calendarService = calendarService;
         this.roomService = roomService;
+        this.loginService = loginService1;
         this.userService = userService;
+        this.databaseService = databaseService;
     }
 
     private static EventDateTime getEventDateTime(org.joda.time.DateTime startDateTime) {
@@ -145,10 +144,22 @@ public class GoogleProviderService implements CalendarProvider {
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             CalendarList calendarList = calendar.calendarList().list().execute();
-            calendarList.getItems().parallelStream().forEach(calendarListEntry -> calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id, Calprovider.google));
+
+            calendarList.getItems().parallelStream()
+                    .forEachOrdered(calendarListEntry ->
+                            calendarService.addCalendarToDatabase(calendarListEntry.getId(), user_id, Calprovider.google));
+
+            final Map<String, CalendarRecord> recordMap = new HashMap<>();
+            databaseService.getContext().selectFrom(CALENDAR)
+                    .where(CALENDAR.PROVIDER.eq(Calprovider.google))
+                    .and(CALENDAR.USER_ID.eq(loginService.getUserID(user_id)))
+                    .fetch().forEach(calendarRecord -> recordMap.put(calendarRecord.getCalendarid(), calendarRecord));
+
             return calendarList.getItems().parallelStream()
-                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, calendarService.isCalendarActivated(calendarListEntry.getId(), user_id)))
-                    .collect(Collectors.toList());
+                    .map(calendarListEntry -> {
+                        CalendarRecord calendarRecord = recordMap.get(calendarListEntry.getId());
+                        return new CalendarEntity(calendarListEntry, calendarRecord.getActivated(), calendarRecord.getIsdefault());
+                    }).collect(Collectors.toList());
         } catch (CredentialException | IOException e) {
             LOG.error("Credential exception: ", e);
             throw new CalendarException("failure...", e);
@@ -162,9 +173,18 @@ public class GoogleProviderService implements CalendarProvider {
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             CalendarList calendarList = calendar.calendarList().list().execute();
+
+            final Map<String, CalendarRecord> recordMap = new HashMap<>();
+            databaseService.getContext().selectFrom(CALENDAR)
+                    .where(CALENDAR.PROVIDER.eq(Calprovider.google))
+                    .and(CALENDAR.ACTIVATED.isTrue())
+                    .and(CALENDAR.USER_ID.eq(loginService.getUserID(user_id)))
+                    .fetch().forEach(calendarRecord -> recordMap.put(calendarRecord.getCalendarid(), calendarRecord));
+
+
             return calendarList.getItems().parallelStream()
                     .filter(calendarListEntry -> calendarService.isCalendarActivated(calendarListEntry.getId(), user_id))
-                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, true))
+                    .map(calendarListEntry -> new CalendarEntity(calendarListEntry, true, recordMap.get(calendarListEntry.getId()).getIsdefault()))
                     .collect(Collectors.toList());
         } catch (CredentialException | IOException e) {
             LOG.error("Credential exception: ", e);
@@ -238,8 +258,6 @@ public class GoogleProviderService implements CalendarProvider {
                     .setOrganizer(true)
                     .setDisplayName(appUserEntity.getName())
                     .setResponseStatus("accepted")
-                    //not working:
-                    .setDisplayName(appUserEntity.getName())
                     //replace -> google-mailAddress
                     .setEmail("rubyrubyruby22@gmail.com")
                     .setComment("Created in name of (by 'my business day')"));
@@ -276,8 +294,14 @@ public class GoogleProviderService implements CalendarProvider {
         }
         //get active calendars for user
         try {
-            DateTime timeMin = new DateTime(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()).toDate());
-            DateTime timeMax = new DateTime(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()).toDate());
+            DateTime timeMin = new DateTime(
+                    getBeginOfDay(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateStart()))
+                            .toDate()
+            );
+            DateTime timeMax = new DateTime(
+                    getEndOfDay(org.joda.time.DateTime.parse(eventEntity.getAutoTimeDateEnd()))
+                            .toDate()
+            );
             LOG.debug("Creating response");
             FreeBusyResponse response = getCalendar(credential).freebusy().query(
                     new FreeBusyRequest()
@@ -300,13 +324,13 @@ public class GoogleProviderService implements CalendarProvider {
     }
 
     @Override
-    public CalendarEntity getCalendar(String calendarId, String userId, boolean isActivated) {
+    public CalendarEntity getCalendar(String calendarId, String userId, boolean isActivated, boolean isDefault) {
         try {
             Credential credential = flow.loadCredential(getCredentialUserId(userId));
             validateCredential(credential);
             Calendar calendar = getCalendar(credential);
             CalendarListEntry calendarListEntry = calendar.calendarList().get(calendarId).execute();
-            return new CalendarEntity(calendarListEntry, isActivated);
+            return new CalendarEntity(calendarListEntry, isActivated, isDefault);
         } catch (IOException | CredentialException e) {
             LOG.error("Unable to handle credential for {}", userId);
             return null;

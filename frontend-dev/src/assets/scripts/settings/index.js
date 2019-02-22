@@ -97,20 +97,11 @@ function addModalListener(cookie) {
  * @property {string} name          name of the calendar
  * @property {number} id            id of the calendar
  * @property {boolean} activated    is calendar activated?
+ * @property {boolean} default      is calendar default calendar?
  */
 
 /**
- * handler for office calendars
- * @param {calendarEntity[]} calendars
- */
-function showOfficeCalendars(calendars) {
-    list.html(getHtmlFromCalendarEntities(calendars));
-    const inputList = list.children().children('input');
-    checkboxController.initCheckboxList(inputList, undefined);
-}
-
-/**
- * handler for google calendars
+ * handler for all calendars
  * @param {calendarEntity[]} calendars
  */
 function showCalendars(list, calendars) {
@@ -127,6 +118,17 @@ function showCalendars(list, calendars) {
         }).done(function () {
 
         })
+    }, function (id) {
+        $.ajax({
+            url: `${URLS.apiUrl}/calendar/default?${jQuery.param({
+                "calendar_id": id,
+                "user_id": cookie.getUserID()
+            })}`,
+            method: 'post'
+        }).done(function () {
+            calendar.getAllCalendars('office', showCalendars);
+            calendar.getAllCalendars('google', showCalendars);
+        });
     });
 }
 
@@ -137,16 +139,20 @@ function showCalendars(list, calendars) {
  */
 function getHtmlFromCalendarEntities(calendars) {
     let html = '';
-    calendars.forEach(item => html += getListItemFor(item.id, item.name, item.activated));
+    calendars.forEach(item => html += getListItemFor(item.id, item.name, item.activated, item.default));
     return html;
 }
 
-function getListItemFor(id, name, activated) {
+function getListItemFor(id, name, activated, isDefault) {
     return `
 <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-    <input data-content="${id}" type="checkbox" ${activated ? "checked" : ""} class="form-check-input">
+    <input default=${isDefault} data-content="${id}" type="checkbox" ${activated ? "checked" : ""} class="form-check-input">
     ${name}
-    <i class="fa fa-check badge badge-primary badge-pill"></i>
+    <!--<i class="fa fa-check badge badge-primary badge-pill"></i>-->
+    <div class="input-group-append ${(isDefault || !activated) ? 'd-none' : ''}">
+        <button class="btn btn-outline-light" type="button">Set default</button>
+    </div>
+    <i class="text-primary bg-white badge badge-primary badge-pill ${!isDefault ? 'd-none' : ''}">Default</i>
 </label>`;
 }
 

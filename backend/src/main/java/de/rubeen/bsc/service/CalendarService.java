@@ -2,6 +2,7 @@ package de.rubeen.bsc.service;
 
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
+import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -49,15 +50,27 @@ public class CalendarService extends LoggableService {
     public void addCalendarToDatabase(String calendarID, String user, Calprovider provider) {
         Integer userID = loginService.getUserID(user);
 
-        Integer integer = databaseService.getContext()
+        Integer allCalendarCount = databaseService.getContext()
                 .selectCount().from(CALENDAR)
-                .where(CALENDAR.CALENDARID.eq(calendarID))
-                .and(CALENDAR.USER_ID.eq(userID))
-                .fetchOne(0, int.class);
-        LOG.info("Found: " + integer);
-        if (integer < 1) {
-            databaseService.getContext().insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED, CALENDAR.PROVIDER)
-                    .values(calendarID, userID, true, provider).execute();
+                .where(CALENDAR.USER_ID.eq(userID))
+                .fetchOneInto(int.class);
+
+        if (allCalendarCount < 1) {
+            LOG.info("User has no calendars, add first one as default");
+            databaseService.getContext()
+                    .insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED, CALENDAR.PROVIDER, CALENDAR.ISDEFAULT)
+                    .values(calendarID, userID, true, provider, true).execute();
+        } else {
+            boolean calendarExist = databaseService.getContext()
+                    .selectCount().from(CALENDAR)
+                    .where(CALENDAR.CALENDARID.eq(calendarID))
+                    .and(CALENDAR.USER_ID.eq(userID))
+                    .fetchOne(0, int.class) > 0;
+            if (!calendarExist) {
+                databaseService.getContext()
+                        .insertInto(CALENDAR).columns(CALENDAR.CALENDARID, CALENDAR.USER_ID, CALENDAR.ACTIVATED, CALENDAR.PROVIDER)
+                        .values(calendarID, userID, true, provider).execute();
+            }
         }
     }
 

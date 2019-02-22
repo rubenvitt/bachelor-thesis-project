@@ -7,6 +7,17 @@ function setChangeListener(checkbox, changedListener, radioList) {
     });
 }
 
+function setOnButtonClickListener(checkbox, onButtonClickListener) {
+    $(checkbox).parent().find('button').click(function () {
+        onButtonClickListener($(checkbox).attr('data-content'));
+        $(checkbox).attr('default', 'true');
+        $(checkbox).parent().parent().find('input[default="true"]').parent().find('.input-group-append').removeClass('d-none');
+        $(checkbox).parent().parent().find('input[default="true"]').parent().find('i.bg-white.badge').addClass('d-none');
+        $(checkbox).parent().find('.input-group-append').addClass('d-none');
+        $(checkbox).parent().find('i.bg-white.badge').removeClass('d-none');
+    });
+}
+
 function removeActiveStateFromCheckboxes(checkbox) {
     const parent = $(checkbox).parent().parent();
     parent.find('label').find('i').css('visibility', 'hidden');
@@ -17,7 +28,7 @@ function removeActiveStateFromCheckboxes(checkbox) {
 
 function setCheckboxVisibility(checkbox) {
     const parent = $(checkbox).parent();
-    parent.find('i').css('visibility', checkbox.checked ? 'visible' : 'hidden');
+    parent.find('.input-group-append').toggleClass('d-none', !checkbox.checked || checkbox.getAttribute('default') === 'true');
     if (checkbox.checked) {
         parent.addClass('active');
     } else {
@@ -25,10 +36,11 @@ function setCheckboxVisibility(checkbox) {
     }
 }
 
-export function initCheckboxList(checkboxes, changedListener) {
+export function initCheckboxList(checkboxes, changedListener, onButtonClickListener) {
     checkboxes.each(function () {
         setCheckboxVisibility(this);
         setChangeListener(this, changedListener, false);
+        setOnButtonClickListener(this, onButtonClickListener);
     });
 }
 

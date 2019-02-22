@@ -148,7 +148,7 @@ class EventServiceTest {
             }
 
             @Override
-            public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated) {
+            public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated, boolean isDefault) {
                 return null;
             }
         });

@@ -23,11 +23,11 @@ public class TestProviderImplementation extends LoggableService implements Calen
     public List<CalendarEntity> getAllCalendars(String user_id) throws CalendarException {
         LOG.info("Getting all calendars for {}", user_id);
         CalendarEntity calendarEntity1 = new CalendarEntity("test-calendar 1", "test-calendar-1",
-                true, "test-provider");
+                true, "test-provider", true);
         CalendarEntity calendarEntity2 = new CalendarEntity("test-calendar 2", "test-calendar-2",
-                true, "test-provider");
+                true, "test-provider", true);
         CalendarEntity inactiveCalendarEntity = new CalendarEntity("inactive test-calendar", "test-calendar-3",
-                true, "test-provider");
+                true, "test-provider", true);
         return List.of(calendarEntity1, calendarEntity2, inactiveCalendarEntity);
     }
 
@@ -35,9 +35,9 @@ public class TestProviderImplementation extends LoggableService implements Calen
     public List<CalendarEntity> getAllActiveCalendars(String user_id) throws CalendarException {
         LOG.info("Getting all ACTIVE calendars for {}", user_id);
         CalendarEntity calendarEntity1 = new CalendarEntity("test-calendar 1", "test-calendar-1",
-                true, "test-provider");
+                true, "test-provider", true);
         CalendarEntity calendarEntity2 = new CalendarEntity("test-calendar 2", "test-calendar-2",
-                true, "test-provider");
+                true, "test-provider", true);
         return List.of(calendarEntity1, calendarEntity2);
     }
 
@@ -46,17 +46,17 @@ public class TestProviderImplementation extends LoggableService implements Calen
         LOG.info("Getting events for {} - cal {} in interval: {}", userId, calendarId, interval);
         if (userId.equals("full-event")) {
             return List.of(new CalendarEvent("full-day-event", "event for given interval", "test-room",
-                    getCalendar(calendarId, userId, true).getCalendarID(), interval, Collections.emptyList()));
+                    getCalendar(calendarId, userId, true, true).getCalendarID(), interval, Collections.emptyList()));
         }
         if (userId.equals("one-hour-event-at-start")) {
             return List.of(new CalendarEvent("one-hour-event", "event with a duration of one hour", "test-room",
-                    getCalendar(calendarId, userId, true).getCalendarID(),
+                    getCalendar(calendarId, userId, true, true).getCalendarID(),
                     new Interval(interval.getStart(), interval.getStart().plusHours(1)),
                     Collections.emptyList()));
         }
         if (userId.equals("two-one-hour-events-with-1-hour-break-and-one-hour-before")) {
             return List.of(new CalendarEvent("one-hour-event #1", "first of two one-hour events", "test-room",
-                    getCalendar(calendarId, userId, true).getCalendarID(),
+                    getCalendar(calendarId, userId, true, true).getCalendarID(),
                     new Interval(interval.getStart().plusHours(1), interval.getStart().plusHours(1)),
                     Collections.emptyList()));
         }
@@ -75,7 +75,7 @@ public class TestProviderImplementation extends LoggableService implements Calen
     }
 
     @Override
-    public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated) {
+    public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated, boolean isDefault) {
         LOG.info("Getting infos for calendar {}", calendarId);
         final Optional<CalendarEntity> calendar;
         try {

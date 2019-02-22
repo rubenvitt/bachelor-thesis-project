@@ -78,7 +78,8 @@ function mapCalendarEntities(content) {
         name: item.calendarName,
         id: item.calendarID,
         activated: item.activated,
-        provider: item.provider
+        provider: item.provider,
+        default: item.default
     }));
 }
 

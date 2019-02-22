@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Calendar extends TableImpl<CalendarRecord> {
 
-    private static final long serialVersionUID = -1572444138;
+    private static final long serialVersionUID = 702014845;
 
     /**
      * The reference instance of <code>public.calendar</code>
@@ -81,6 +81,11 @@ public class Calendar extends TableImpl<CalendarRecord> {
      * The column <code>public.calendar.user_id</code>.
      */
     public final TableField<CalendarRecord, Integer> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
+     * The column <code>public.calendar.isdefault</code>.
+     */
+    public final TableField<CalendarRecord, Boolean> ISDEFAULT = createField("isdefault", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false).defaultValue(org.jooq.impl.DSL.field("false", org.jooq.impl.SQLDataType.BOOLEAN)), this, "");
 
     /**
      * Create a <code>public.calendar</code> table reference

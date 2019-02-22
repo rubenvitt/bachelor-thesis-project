@@ -2,10 +2,7 @@ package de.rubeen.bsc.service;
 
 import com.google.common.base.Preconditions;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
-import de.rubeen.bsc.entities.web.EventEntity;
-import de.rubeen.bsc.entities.web.LoginHoursEntity;
-import de.rubeen.bsc.entities.web.NewEventEntity;
-import de.rubeen.bsc.entities.web.RoomEntity;
+import de.rubeen.bsc.entities.web.*;
 import de.rubeen.bsc.helper.EventComparatorFactory;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
@@ -171,6 +168,21 @@ public class EventService extends LoggableService {
                 room.getName(), calendarId, timeSlot, attendees);
         LOG.debug("Creating event: {}", calendarEvent);
         calendarProvider.createEvent(calendarEvent, userMail);
+        attendees.parallelStream().forEach(attendee -> {
+            AppUserEntity appUser = userService.getAppUser(attendee.getMail());
+            //check, if user is appUser
+            if (appUser != null) {
+                LOG.info("Creating event for attendee: {}", attendee);
+                CalendarEntity defaultCalendar = providerService.getDefaultCalendar(attendee.getMail());
+                LOG.info("Default-calender for {} is {}", attendee, defaultCalendar);
+                try {
+                    providerService.getCalendarProvider(defaultCalendar.getCalendarID(), attendee.getMail())
+                            .createEvent(calendarEvent.withCalendarId(defaultCalendar.getCalendarID()), attendee.getMail());
+                } catch (CalendarProvider.CalendarException e) {
+                    LOG.error("Unable to create event {} for {}", calendarEvent, attendee);
+                }
+            }
+        });
         LOG.info("{} -- {}", providerService, room);
         providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
     }
@@ -321,11 +333,11 @@ public class EventService extends LoggableService {
         return getBeginOfDay(DateTime.now());
     }
 
-    private DateTime getBeginOfDay(DateTime day) {
+    public static final DateTime getBeginOfDay(DateTime day) {
         return day.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
     }
 
-    private DateTime getEndOfDay(DateTime day) {
+    public static final DateTime getEndOfDay(DateTime day) {
         return day.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999);
     }
 

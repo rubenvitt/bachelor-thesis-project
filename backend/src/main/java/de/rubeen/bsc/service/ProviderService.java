@@ -82,7 +82,29 @@ public class ProviderService extends LoggableService {
                 .map(record -> modelMapper.map(record, CalendarRecord.class))
                 .parallelStream()
                 .map(calendarRecord -> getCalendarProvider(calendarRecord.getCalendarid(), userMail)
-                        .getCalendar(calendarRecord.getCalendarid(), userMail, calendarRecord.getActivated()))
+                        .getCalendar(calendarRecord.getCalendarid(), userMail, calendarRecord.getActivated(), calendarRecord.getIsdefault()))
                 .collect(Collectors.toList());
+    }
+
+    public void setDefaultCalendar(String calendarID, String userID) {
+        databaseService.getContext().update(CALENDAR)
+                .set(CALENDAR.ISDEFAULT, true)
+                .where(CALENDAR.CALENDARID.eq(calendarID))
+                .and(CALENDAR.USER_ID.eq(loginService.getUserID(userID)))
+                .execute();
+        databaseService.getContext().update(CALENDAR)
+                .set(CALENDAR.ISDEFAULT, false)
+                .where(CALENDAR.CALENDARID.notEqual(calendarID))
+                .and(CALENDAR.USER_ID.eq(loginService.getUserID(userID)))
+                .execute();
+    }
+
+    public CalendarEntity getDefaultCalendar(String userID) {
+        return databaseService.getContext().selectFrom(CALENDAR)
+                .where(CALENDAR.USER_ID.eq(loginService.getUserID(userID)))
+                .and(CALENDAR.ISDEFAULT)
+                .and(CALENDAR.ACTIVATED)
+                .fetchOne(calendarRecord -> getCalendarProvider(calendarRecord.getCalendarid(), userID)
+                        .getCalendar(calendarRecord.getCalendarid(), userID, calendarRecord.getActivated(), calendarRecord.getIsdefault()));
     }
 }

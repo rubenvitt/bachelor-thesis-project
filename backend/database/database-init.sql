@@ -40,7 +40,8 @@ create table calendar
   calendarID varchar(1000)   not null,
   activated  boolean         not null,
   provider    calProvider   not null,
-  user_id    int             not null references appUser (id)
+  user_id    int             not null references appUser (id),
+  isDefault   boolean         not null default false
 );
 
 create table room (
