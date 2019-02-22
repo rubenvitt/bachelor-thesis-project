@@ -14,6 +14,8 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.*;
+import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
@@ -87,7 +89,11 @@ public class GoogleProviderService implements CalendarProvider {
                     .setClientSecret(clientSecret);
             GoogleClientSecrets clientSecrets = new GoogleClientSecrets().setWeb(web);
             httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets, List.of(CalendarScopes.CALENDAR))
+            flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, jsonFactory, clientSecrets,
+                    List.of(
+                            CalendarScopes.CALENDAR,
+                            "https://www.googleapis.com/auth/userinfo.profile",
+                            "https://www.googleapis.com/auth/userinfo.email"))
                     .setDataStoreFactory(new FileDataStoreFactory(new File(CREDENTIAL_DATA_STORE_PATH)))
                     .setApprovalPrompt("force")
                     .setAccessType("offline")
@@ -103,6 +109,10 @@ public class GoogleProviderService implements CalendarProvider {
 
     private Calendar getCalendar(Credential credential) {
         return new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName(APP_NAME).build();
+    }
+
+    private Oauth2 getOAuth2(Credential credential) {
+        return new Oauth2.Builder(httpTransport, jsonFactory, credential).setApplicationName(APP_NAME).build();
     }
 
     private List<FreeBusyRequestItem> getFreeBusyRequestItems(String userId) throws IOException, CalendarException {
@@ -205,6 +215,7 @@ public class GoogleProviderService implements CalendarProvider {
         Calendar calendar = getCalendar(credential);
         DateTime startDateTime = new DateTime(interval.getStartMillis()),
                 endDateTime = new DateTime(interval.getEndMillis());
+        AppUserEntity appUserEntity = userService.getAppUser(userId);
         try {
             return calendar.events().list(calendarId).setTimeMin(startDateTime).setTimeMax(endDateTime).execute()
                     .getItems().parallelStream()
@@ -232,7 +243,7 @@ public class GoogleProviderService implements CalendarProvider {
                                                 event.getEnd().getDate().getValue());
 
                         return new CalendarEvent(event.getSummary(), event.getDescription(), event.getLocation(),
-                                calendarId, eventInterval, attendees);
+                                calendarId, eventInterval, attendees, new CalendarEvent.Attendee(appUserEntity.getName(), appUserEntity.getMail()));
                     })
                     .collect(Collectors.toList());
         } catch (IOException e) {
@@ -256,10 +267,9 @@ public class GoogleProviderService implements CalendarProvider {
             List<EventAttendee> attendees = getEventAttendees(calendarEvent.getAttendees());
             attendees.add(new EventAttendee()
                     .setOrganizer(true)
-                    .setDisplayName(appUserEntity.getName())
+                    .setDisplayName(getUserInfoPlus(calendarEvent.getCreator().getMail()).orElse(new Userinfoplus().setName(calendarEvent.getCreator().getName())).getName())
+                    .setEmail(getUserInfoPlus(calendarEvent.getCreator().getMail()).orElse(new Userinfoplus().setEmail(calendarEvent.getCreator().getMail())).getEmail())
                     .setResponseStatus("accepted")
-                    //replace -> google-mailAddress
-                    .setEmail("rubyrubyruby22@gmail.com")
                     .setComment("Created in name of (by 'my business day')"));
             calendar.events().insert(calendarEvent.getCalendarId(),
                     new Event()
@@ -279,8 +289,14 @@ public class GoogleProviderService implements CalendarProvider {
     }
 
     private List<EventAttendee> getEventAttendees(List<CalendarEvent.Attendee> attendees) {
+        // FIXME: 2019-02-22 events will be created twice
         return attendees.parallelStream()
-                .map(attendee -> new EventAttendee().setDisplayName(attendee.getName()).setEmail(attendee.getMail()))
+                .map(attendee -> new EventAttendee()
+                        .setDisplayName(
+                                getUserInfoPlus(attendee.getMail())
+                                        .orElse(new Userinfoplus().setName(attendee.getName())).getName())
+                        .setEmail(getUserInfoPlus(attendee.getMail())
+                                .orElse(new Userinfoplus().setEmail(attendee.getMail())).getEmail()))
                 .collect(Collectors.toList());
     }
 
@@ -340,6 +356,16 @@ public class GoogleProviderService implements CalendarProvider {
 
     private String getCredentialUserId(String mail) {
         return mail.replace("@", "%40");
+    }
+
+    private Optional<Userinfoplus> getUserInfoPlus(String userId) {
+        try {
+            Credential credential = flow.loadCredential(getCredentialUserId(userId));
+            return Optional.of(getOAuth2(credential).userinfo().get().execute());
+        } catch (IOException e) {
+            LOG.error("Unable to get OAuth2 for user {}", userId);
+            return Optional.empty();
+        }
     }
 
 }

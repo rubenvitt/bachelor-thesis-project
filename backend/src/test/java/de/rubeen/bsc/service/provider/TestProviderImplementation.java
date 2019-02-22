@@ -46,19 +46,19 @@ public class TestProviderImplementation extends LoggableService implements Calen
         LOG.info("Getting events for {} - cal {} in interval: {}", userId, calendarId, interval);
         if (userId.equals("full-event")) {
             return List.of(new CalendarEvent("full-day-event", "event for given interval", "test-room",
-                    getCalendar(calendarId, userId, true, true).getCalendarID(), interval, Collections.emptyList()));
+                    getCalendar(calendarId, userId, true, true).getCalendarID(), interval, Collections.emptyList(), null));
         }
         if (userId.equals("one-hour-event-at-start")) {
             return List.of(new CalendarEvent("one-hour-event", "event with a duration of one hour", "test-room",
                     getCalendar(calendarId, userId, true, true).getCalendarID(),
                     new Interval(interval.getStart(), interval.getStart().plusHours(1)),
-                    Collections.emptyList()));
+                    Collections.emptyList(), null));
         }
         if (userId.equals("two-one-hour-events-with-1-hour-break-and-one-hour-before")) {
             return List.of(new CalendarEvent("one-hour-event #1", "first of two one-hour events", "test-room",
                     getCalendar(calendarId, userId, true, true).getCalendarID(),
                     new Interval(interval.getStart().plusHours(1), interval.getStart().plusHours(1)),
-                    Collections.emptyList()));
+                    Collections.emptyList(), null));
         }
         return Collections.emptyList();
     }

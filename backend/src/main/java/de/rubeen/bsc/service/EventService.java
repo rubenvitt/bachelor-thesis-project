@@ -1,6 +1,7 @@
 package de.rubeen.bsc.service;
 
 import com.google.common.base.Preconditions;
+import de.rubeen.bsc.entities.db.tables.Appuser;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.*;
 import de.rubeen.bsc.helper.EventComparatorFactory;
@@ -98,6 +99,8 @@ public class EventService extends LoggableService {
         //manual event:
         // check room Auto-Mode
         // create event for all attendees
+        AppUserEntity appUserEntity = userService.getAppUser(userMail);
+        CalendarEvent.Attendee creator = new CalendarEvent.Attendee(appUserEntity.getName(), appUserEntity.getMail());
         List<CalendarEvent.Attendee> attendees = getEventAttendees(newEventEntity.getAttendees());
 
         if (newEventEntity.getAutoRoom()) {
@@ -113,7 +116,7 @@ public class EventService extends LoggableService {
             DateTime endDateTime = DateTime.parse(newEventEntity.getManTimeDateEnd() + "T" + newEventEntity.getManTimeTimeEnd());
 
             CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
-                    room.getName(), calendarId, startDateTime, endDateTime, attendees);
+                    room.getName(), calendarId, startDateTime, endDateTime, attendees, creator);
             LOG.debug("Creating event: {}", calendarEvent);
             calendarProvider.createEvent(calendarEvent, userMail);
             providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
@@ -129,6 +132,7 @@ public class EventService extends LoggableService {
         LOG.debug("Get all attendees of {}", newEventEntity);
         List<CalendarEvent.Attendee> attendees = getEventAttendees(newEventEntity.getAttendees());
         LOG.debug("Got {} attendees: {}", attendees.size(), attendees);
+        AppUserEntity creatorAppUser = userService.getAppUser(userMail);
 
         final RoomEntity room;
         if (newEventEntity.getAutoRoom()) {
@@ -165,7 +169,8 @@ public class EventService extends LoggableService {
             LOG.debug("got timeSlot {} for {} - {}", timeSlot, userMail, newEventEntity);
         LOG.info("#4/4: create auto-time-manual-room event for {}", userMail);
         CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
-                room.getName(), calendarId, timeSlot, attendees);
+                room.getName(), calendarId, timeSlot, attendees,
+                new CalendarEvent.Attendee(creatorAppUser.getName(), creatorAppUser.getMail()));
         LOG.debug("Creating event: {}", calendarEvent);
         calendarProvider.createEvent(calendarEvent, userMail);
         attendees.parallelStream().forEach(attendee -> {

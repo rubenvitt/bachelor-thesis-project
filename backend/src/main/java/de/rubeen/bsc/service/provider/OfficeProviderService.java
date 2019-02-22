@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
+import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.provider.office365.AuthHelper;
@@ -13,10 +14,7 @@ import de.rubeen.bsc.provider.office365.OutlookServiceBuilder;
 import de.rubeen.bsc.provider.office365.TokenResponse;
 import de.rubeen.bsc.provider.office365.entities.Calendar;
 import de.rubeen.bsc.provider.office365.entities.Event;
-import de.rubeen.bsc.service.CalendarService;
-import de.rubeen.bsc.service.DatabaseService;
-import de.rubeen.bsc.service.LoggableService;
-import de.rubeen.bsc.service.LoginService;
+import de.rubeen.bsc.service.*;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.springframework.stereotype.Service;
@@ -33,12 +31,14 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
 
     private final DatabaseService databaseService;
     private final LoginService loginService;
+    private final UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final CalendarService calendarService;
 
-    public OfficeProviderService(DatabaseService databaseService, LoginService loginService, CalendarService calendarService) {
+    public OfficeProviderService(DatabaseService databaseService, LoginService loginService, UserService userService, CalendarService calendarService) {
         this.databaseService = databaseService;
         this.loginService = loginService;
+        this.userService = userService;
         this.calendarService = calendarService;
     }
 
@@ -134,24 +134,18 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
             Integer maxResults = 20;
             String sort = "start/dateTime DESC";
             String properties = "organizer,subject,start,end";
+            AppUserEntity appUserEntity = userService.getAppUser(userId);
+
             final List<Event> outlookEvents = outlookService
                     .getEvents(calendarId, sort, properties, maxResults, convertDateToString(interval.getStart()), convertDateToString(interval.getEnd()))
                     .execute().body().getValue();
             return outlookEvents.parallelStream()
                     .map(event -> {
-                        /*
-                        public CalendarEvent(String subject,
-                     String description,
-                     String room,
-                     String calendarId,
-                     @NotNull Interval meetingInterval,
-                     List<CalendarEvent.Attendee> attendees)
-                         */
                         LOG.info("Got outlook-event: {}", event);
                         return new CalendarEvent(event.getSubject(), "empty description", "empty room",
                                 calendarId, new Interval(event.getStart().getDateDateTime().toInstant().toEpochMilli(),
                                 event.getEnd().getDateDateTime().toInstant().toEpochMilli()
-                        ), Collections.emptyList());
+                        ), Collections.emptyList(), new CalendarEvent.Attendee(appUserEntity.getName(), appUserEntity.getMail()));
                     }).collect(Collectors.toList());
         } catch (IOException e) {
             throw new CalendarException("Unable to get token for user " + userId, e);

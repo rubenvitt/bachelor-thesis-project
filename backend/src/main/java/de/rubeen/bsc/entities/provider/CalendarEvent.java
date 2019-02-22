@@ -9,11 +9,11 @@ import java.util.List;
 import static java.text.MessageFormat.format;
 
 public class CalendarEvent {
+    private Attendee creator;
     private String subject, description, room, calendarId;
     private DateTime startDateTime, endDateTime;
     private List<Attendee> attendees;
-
-    public CalendarEvent(String subject, String description, String room, String calendarId, DateTime startDateTime, DateTime endDateTime, List<Attendee> attendees) {
+    public CalendarEvent(String subject, String description, String room, String calendarId, DateTime startDateTime, DateTime endDateTime, List<Attendee> attendees, Attendee creator) {
         this.subject = subject;
         this.description = description;
         this.room = room;
@@ -21,13 +21,21 @@ public class CalendarEvent {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.attendees = attendees;
+        this.creator = creator;
     }
-
     public CalendarEvent() {
     }
 
-    public CalendarEvent(String subject, String description, String room, String calendarId, Interval meetingInterval, List<Attendee> attendees) {
-        this(subject, description, room, calendarId, meetingInterval.getStart(), meetingInterval.getEnd(), attendees);
+    public CalendarEvent(String subject, String description, String room, String calendarId, Interval meetingInterval, List<Attendee> attendees, Attendee creator) {
+        this(subject, description, room, calendarId, meetingInterval.getStart(), meetingInterval.getEnd(), attendees, creator);
+    }
+
+    public Attendee getCreator() {
+        return creator;
+    }
+
+    public void setCreator(Attendee creator) {
+        this.creator = creator;
     }
 
     public String getSubject() {
@@ -94,7 +102,7 @@ public class CalendarEvent {
     }
 
     public CalendarEvent withCalendarId(final String calendarID) {
-        return new CalendarEvent(subject, description, room, calendarID, startDateTime, endDateTime, attendees);
+        return new CalendarEvent(subject, description, room, calendarID, startDateTime, endDateTime, attendees, creator);
     }
 
     public static class Attendee {
