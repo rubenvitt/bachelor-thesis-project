@@ -19,11 +19,11 @@ function displayActiveCalendarsInModal(calendars) {
         }
     }
 
-    function getListItemFor(id, name, provider) {
+    function getListItemFor(id, name, provider, isDefault) {
         return `
 <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
     <i class="${getIconForProvider(provider)} c-black"></i>
-    <input data-content="${id}" type="checkbox" class="form-check-input">
+    <input data-content="${id}" type="checkbox" ${isDefault ? 'checked' : ''} class="form-check-input">
     ${name}
     <i class="fa fa-check badge badge-primary badge-pill"></i>
 </label>`;
@@ -39,7 +39,7 @@ function displayActiveCalendarsInModal(calendars) {
      */
     function getHtmlFromCalendarEntities(calendars) {
         let html = ``;
-        calendars.forEach(item => html += getListItemFor(item.id, item.name, item.provider));
+        calendars.forEach(item => html += getListItemFor(item.id, item.name, item.provider, item.default));
         return html;
     }
 
@@ -54,10 +54,12 @@ function displayActiveCalendarsInModal(calendars) {
     checkboxController.initRadioList(inputList, function (checked, id) {
         yesButton.removeAttr('disabled');
         yesButton.removeClass('btn-danger btn-success');
+
         yesButton.text('Choose calendar');
     });
 
     yesButton.removeClass('btn-danger btn-success');
+    yesButton.removeAttr('disabled');
     yesButton.text('Select calendar');
 
     yesButton.click(function () {
