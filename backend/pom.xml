@@ -24,7 +24,6 @@
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
         <skip.jooq.generation>false</skip.jooq.generation>
-        <kotlin.version>1.3.21</kotlin.version>
     </properties>
 
     <dependencies>
@@ -61,34 +60,34 @@
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>retrofit</artifactId>
-            <version>2.0.2</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>converter-jackson</artifactId>
-            <version>2.0.2</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>logging-interceptor</artifactId>
-            <version>3.2.0</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
-            <version>1.27.0</version>
+            <version>LATEST</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-calendar</artifactId>
-            <version>v3-rev364-1.25.0</version>
+            <version>LATEST</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-oauth2</artifactId>
-            <version>v2-rev141-1.25.0</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
@@ -100,23 +99,29 @@
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq</artifactId>
-            <version>3.11.9</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq-meta</artifactId>
-            <version>3.11.9</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq-codegen</artifactId>
-            <version>3.11.9</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jool</artifactId>
-            <version>0.9.14</version>
+            <version>LATEST</version>
         </dependency>
+        <dependency>
+            <groupId>org.modelmapper.extensions</groupId>
+            <artifactId>modelmapper-jooq</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -126,54 +131,40 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.modelmapper.extensions</groupId>
-            <artifactId>modelmapper-jooq</artifactId>
-            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-runner</artifactId>
-            <version>1.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit</artifactId>
-            <version>${kotlin.version}</version>
+            <version>LATEST</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -183,7 +174,6 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>1.0.0</version>
                 <configuration>
                     <from>
                         <image>gcr.io/distroless/java:11</image>
@@ -192,6 +182,12 @@
                         <image>docker.fme.de/r.vitt/bsc/backend</image>
                     </to>
                     <allowInsecureRegistries>true</allowInsecureRegistries>
+                    <container>
+                        <useCurrentTimestamp>true</useCurrentTimestamp>
+                        <ports>
+                            <port>8443</port>
+                        </ports>
+                    </container>
                 </configuration>
             </plugin>
             <plugin>
@@ -270,7 +266,6 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-                <version>${kotlin.version}</version>
                 <executions>
                     <execution>
                         <id>compile</id>
