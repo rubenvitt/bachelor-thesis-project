@@ -15,7 +15,7 @@ function createClockPicker(clockPicker, handler) {
         buttonTextColor: colors.COLORS["deep-orange-500"],
         popupHeaderBackgroundColor: colors.COLORS["deep-orange-500"],
         selectorColor: colors.COLORS["deep-orange-500"],
-        required: true
+        required: true,
     });
 }
 

@@ -219,6 +219,9 @@ if (document.getElementById("newMeeting-chooseMeetingType")) {
                 calendarWeeks: true,
                 assumeNearbyYear: true,
                 todayHighlight: true,
+                title: 'Select range for new meeting',
+                weekStart: 1,
+                startDate: '-0d'
             });
             $(this).on('changeDate', () => {
                 $(this).datepicker('hide');
