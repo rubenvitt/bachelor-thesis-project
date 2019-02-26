@@ -10,3 +10,10 @@ services:
     image: docker.fme.de/r.vitt/bsc/backend
     ports:
       - 8443:8443
+    depends_on:
+      - database
+
+  database:
+    image: docker.fme.de/r.vitt/bsc/database
+    ports:
+      - 5432:5432

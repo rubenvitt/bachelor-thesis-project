@@ -89,3 +89,14 @@ frontend-deploy-docker:
     - docker push docker.fme.de/r.vitt/bsc/frontend
   tags:
     - docker
+
+database-deploy-docker:
+  image: docker:latest
+  stage: deploy
+  before_script:
+    - echo "downloading postgres and setup database"
+  script:
+    - cd backend/database
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN docker.fme.de
+    - docker build -t docker.fme.de/r.vitt/bsc/database .
+    - docker push docker.fme.de/r.vitt/bsc/database
