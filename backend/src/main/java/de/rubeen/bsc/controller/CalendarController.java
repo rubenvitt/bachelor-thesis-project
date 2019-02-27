@@ -9,7 +9,9 @@ import de.rubeen.bsc.service.ProviderService;
 import de.rubeen.bsc.service.provider.CalendarProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;

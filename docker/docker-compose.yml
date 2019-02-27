@@ -17,3 +17,4 @@ services:
     image: docker.fme.de/r.vitt/bsc/database
     ports:
       - 5432:5432
+w

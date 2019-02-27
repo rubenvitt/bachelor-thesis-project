@@ -53,7 +53,7 @@ function sendWorkingHours(workingHours) {
         data: JSON.stringify(workingHours),
         contentType: "application/json"
     }).done(function (content) {
-        console.log('Saved workingHours');
+        location.reload();
     });
 }
 
