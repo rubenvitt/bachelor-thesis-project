@@ -6,6 +6,7 @@ import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
 import de.rubeen.bsc.service.provider.PrototypeRoomProviderService;
 import de.rubeen.bsc.service.provider.TestProviderImplementation;
+import io.opencensus.metrics.LongGauge;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalTime;
@@ -15,11 +16,14 @@ import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+import java.rmi.UnexpectedException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,7 +35,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-class EventServiceTest {
+class EventServiceTest extends LoggableService {
 
     EventService eventService;
     @Mock
@@ -81,6 +85,133 @@ class EventServiceTest {
         //-> databaseService, get Calendars
         //-> googleService
         // TODO: 2019-01-28 should not use googleService
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("Auto-Time with attendees")
+    void addAttendeeAutoEvent() throws CalendarProvider.CalendarException {
+        final String subject = "test-subject", description = "test-description", autoTimeDateStart = "2019-01-01", autoTimeDateEnd = "2019-01-08", durationUnit = "hours";
+        final int meetingDuration = 2, roomId = 123;
+        int attendee1 = 1, attendee2 = 2;
+        final List<Integer> attendeeIds = List.of(1, 2);
+
+        final Integer workingHour_Id = 1;
+        final String workingHour_startTimeOrga = "08:00", workingHour_endTimeOrga = "16:00";
+        final String workingHour_startTimeAttendee1 = "08:00", workingHour_endTimeAttendee1 = "14:00";
+        final String workingHour_startTimeAttendee2 = "08:00", workingHour_endTimeAttendee2 = "16:00";
+        final boolean workingHour_monday = false, workingHour_tuesday = false, workingHour_wednesday = false,
+                workingHour_thursday = false, workingHour_friday = true, workingHour_saturday = true,
+                workingHour_sunday = false;
+
+        final Integer[] eventsCreated = {0};
+
+        when(userService.getAppUser(anyInt())).then(invocationOnMock -> {
+            int userId = invocationOnMock.getArgument(0);
+            return new AppUserEntity(userId, "username-" + userId, "user-mail" + userId,
+                    "avatar-" + userId, "position-" + userId);
+        });
+
+
+        when(userService.getAppUser(anyString())).then(invocationOnMock -> {
+            String param = invocationOnMock.getArgument(0);
+            LOG.info("search={}", param);
+            int id;
+            if (param.equals("user@mail"))
+                id = 0;
+            else
+                id = Integer.parseInt(param.charAt(param.length() - 1) + "");
+            if (!List.of(0, 1, 2).contains(id))
+                throw new UnexpectedException("ID is unexpected: " + id);
+            return new AppUserEntity(id, "user-" + invocationOnMock.getArgument(0), "user-mail-" + invocationOnMock.getArgument(0), "avatar", "position");
+        });
+
+        when(providerService.getDefaultCalendar(anyString())).thenReturn(new CalendarEntity("calendar-name", "calendar-id", true, "test-provider", true));
+
+        when(userService.getWorkingHours(anyString())).then(invocationOnMock -> {
+            String param = invocationOnMock.getArgument(0);
+            int id;
+            if (param.equals("user@mail"))
+                id = 0;
+            else
+                id = Integer.parseInt(param.charAt(param.length() - 1) + "");
+            String workingHour_startTime, workingHour_endTime;
+            switch (id) {
+                case 0:
+                    workingHour_startTime = workingHour_startTimeOrga;
+                    workingHour_endTime = workingHour_endTimeOrga;
+                    break;
+                case 1:
+                    workingHour_startTime = workingHour_startTimeAttendee1;
+                    workingHour_endTime = workingHour_endTimeAttendee1;
+                    break;
+                case 2:
+                    workingHour_startTime = workingHour_startTimeAttendee2;
+                    workingHour_endTime = workingHour_endTimeAttendee2;
+                    break;
+                default:
+                    throw new UnexpectedException("ID is unexpected: " + id);
+            }
+            return List.of(
+                    new LoginHoursEntity(workingHour_Id, workingHour_startTime, workingHour_endTime,
+                            workingHour_monday, workingHour_tuesday, workingHour_wednesday, workingHour_thursday,
+                            workingHour_friday, workingHour_saturday, workingHour_sunday)
+            );
+        });
+        //Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end
+        when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, "test-room-name", 3, Collections.emptyList()));
+        when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
+                List.of(
+                        new Interval(DateTime.parse("2019-01-01"), DateTime.parse("2019-01-04").withTime(LocalTime.parse("09:00"))),
+                        new Interval(DateTime.parse("2019-01-04").withTime(LocalTime.parse("15:00")), DateTime.parse("2019-01-08").withTime(LocalTime.parse("23:59")))
+                )
+        );
+        when(providerService.getCalendarProvider(anyString(), anyString())).thenReturn(new CalendarProvider() {
+            @Override
+            public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
+                eventsCreated[0]++;
+                LOG.info("calendarEvent to create: {}", calendarEvent);
+                LOG.info("CalenderEvent has start: {}", calendarEvent.getStartDateTime());
+                LOG.info("CalendarEvent has end: {}", calendarEvent.getEndDateTime());
+                return true;
+            }
+
+            @Override
+            public List<CalendarEntity> getAllCalendars(String user_id) throws CalendarException {
+                return null;
+            }
+
+            @Override
+            public List<CalendarEntity> getAllActiveCalendars(String user_id) throws CalendarException {
+                return null;
+            }
+
+            @Override
+            public List<CalendarEvent> getEventsBetween(Interval interval, String userId, String calendarId) throws CalendarException {
+                return null;
+            }
+
+            @Override
+            public List<Interval> getBusyTimes(String userId, NewEventEntity eventEntity) throws CalendarException {
+                return List.of(new Interval(0, 1));
+            }
+
+            @Override
+            public CalendarEntity getCalendar(String calendarId, String userMail, boolean isActivated, boolean isDefault) {
+                return null;
+            }
+        });
+
+        when(providerService.getRoomCalendarProvider(roomId)).thenReturn(new PrototypeRoomProviderService(databaseService));
+
+        NewEventEntity newEventEntity = new NewEventEntity(subject, description, true, false, autoTimeDateStart,
+                autoTimeDateEnd, meetingDuration, durationUnit, attendeeIds);
+        newEventEntity.setRoomId(roomId);
+
+        eventService.addEvent(newEventEntity, "user@mail", "cal-id");
+
+        assertThat(eventsCreated[0])
+                .isEqualTo(6);
     }
 
     @Test
