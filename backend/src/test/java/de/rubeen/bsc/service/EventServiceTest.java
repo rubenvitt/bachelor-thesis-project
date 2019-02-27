@@ -88,12 +88,11 @@ class EventServiceTest extends LoggableService {
     }
 
     @Test
-    @Disabled
     @DisplayName("Auto-Time with attendees")
     void addAttendeeAutoEvent() throws CalendarProvider.CalendarException {
         final String subject = "test-subject", description = "test-description", autoTimeDateStart = "2019-01-01", autoTimeDateEnd = "2019-01-08", durationUnit = "hours";
         final int meetingDuration = 2, roomId = 123;
-        int attendee1 = 1, attendee2 = 2;
+        final int attendee1 = 1, attendee2 = 2;
         final List<Integer> attendeeIds = List.of(1, 2);
 
         final Integer workingHour_Id = 1;
@@ -121,7 +120,7 @@ class EventServiceTest extends LoggableService {
                 id = 0;
             else
                 id = Integer.parseInt(param.charAt(param.length() - 1) + "");
-            if (!List.of(0, 1, 2).contains(id))
+            if (!Set.of(0, attendee1, attendee2).contains(id))
                 throw new UnexpectedException("ID is unexpected: " + id);
             return new AppUserEntity(id, "user-" + invocationOnMock.getArgument(0), "user-mail-" + invocationOnMock.getArgument(0), "avatar", "position");
         });
@@ -141,11 +140,11 @@ class EventServiceTest extends LoggableService {
                     workingHour_startTime = workingHour_startTimeOrga;
                     workingHour_endTime = workingHour_endTimeOrga;
                     break;
-                case 1:
+                case attendee1:
                     workingHour_startTime = workingHour_startTimeAttendee1;
                     workingHour_endTime = workingHour_endTimeAttendee1;
                     break;
-                case 2:
+                case attendee2:
                     workingHour_startTime = workingHour_startTimeAttendee2;
                     workingHour_endTime = workingHour_endTimeAttendee2;
                     break;
@@ -160,12 +159,16 @@ class EventServiceTest extends LoggableService {
         });
         //Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end
         when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, "test-room-name", 3, Collections.emptyList()));
-        when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
+
+        when(calendarService.getFreeTimes(any(), any(), any(), any())).thenCallRealMethod();
+        when(calendarService.calculateFreeTimeWith(any(), anyCollection())).thenCallRealMethod();
+
+        /*when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
                 List.of(
                         new Interval(DateTime.parse("2019-01-01"), DateTime.parse("2019-01-04").withTime(LocalTime.parse("09:00"))),
                         new Interval(DateTime.parse("2019-01-04").withTime(LocalTime.parse("15:00")), DateTime.parse("2019-01-08").withTime(LocalTime.parse("23:59")))
                 )
-        );
+        );*/
         when(providerService.getCalendarProvider(anyString(), anyString())).thenReturn(new CalendarProvider() {
             @Override
             public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
@@ -203,6 +206,7 @@ class EventServiceTest extends LoggableService {
         });
 
         when(providerService.getRoomCalendarProvider(roomId)).thenReturn(new PrototypeRoomProviderService(databaseService));
+        calendarService.LOG = LOG;
 
         NewEventEntity newEventEntity = new NewEventEntity(subject, description, true, false, autoTimeDateStart,
                 autoTimeDateEnd, meetingDuration, durationUnit, attendeeIds);
@@ -211,7 +215,7 @@ class EventServiceTest extends LoggableService {
         eventService.addEvent(newEventEntity, "user@mail", "cal-id");
 
         assertThat(eventsCreated[0])
-                .isEqualTo(6);
+                .isEqualTo(3);
     }
 
     @Test
