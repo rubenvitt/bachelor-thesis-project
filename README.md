@@ -3,7 +3,7 @@
 ## Installation & Start
 #### Create docker-postgres:
 ```bash
-docker run -d -e POSTGRES_PASSWORD=postgres --name "postgres" -p 5432:5432 postgres
+docker run -d -p 5432:5432 --name postgres --restart always docker.fme.de/r.vitt/bsc/database
 ```
 #### build & start backend
 ```bash
