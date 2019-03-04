@@ -3,7 +3,18 @@ values ('123', 'Marcel Kastner', 'marcel@rubeen.me', 'Consultant', 'https://rand
        ('222', 'Alisa Amendt', 'alisa@rubeen.me', 'Senior Consultant', 'https://randomuser.me/api/portraits/women/91.jpg'),
        ('222', 'Laurenz Bergmann', 'laurenz@rubeen.me', 'Consultant', 'https://randomuser.me/api/portraits/men/33.jpg'),
        ('222', 'David Faber', 'david@rubeen.me', 'Management Consultant', 'https://randomuser.me/api/portraits/men/37.jpg'),
-       ('222', 'Annett Schneider', 'annett@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/81.jpg'),
+       ('222', 'Annett Schneider', 'annett@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/27.jpg'),
+       ('222', 'Angelika Hirsch', 'angelika@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/53.jpg'),
+       ('222', 'Johanna Pfeiffer', 'johanna@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/31.jpg'),
+       ('222', 'Steffen Gersten', 'steffen@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/men/11.jpg'),
+       ('222', 'Manuela Moeller', 'manuela@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/11.jpg'),
+       ('222', 'Ines Zimmermann', 'ines@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/62.jpg'),
+       ('222', 'Katharina Reiniger', 'katharina@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/61.jpg'),
+       ('222', 'Kathrin Trommler', 'kathrin@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/60.jpg'),
+       ('222', 'Michelle Loewe', 'michelle@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/women/59.jpg'),
+       ('222', 'Daniel Jager', 'daniel@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/men/58.jpg'),
+       ('222', 'Phillipp Rothschild', 'phillip@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/men/57.jpg'),
+       ('222', 'René Peters', 'rene@rubeen.me', 'External, Hubertus AG', 'https://randomuser.me/api/portraits/men/56.jpg'),
        ('333', 'Ruben Vitt', 'r.vitt@fme.de', 'Student', 'https://www.xing.com/image/3_d_b_8160fa37a_24954449_5/ruben-vitt-foto.256x256.jpg');
 
 insert into room (room_name, room_size, provider, calendarid)
