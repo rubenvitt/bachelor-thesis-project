@@ -104,7 +104,7 @@ class CalendarServiceTest extends LoggableService {
                     assertThat(interval.getStart())
                             .has(anyOf(
                                     new Condition<>(o -> interval.getStart().equals(startWorkingInterval) ||
-                                            interval.getStart().equals(busy1End), "interval == workingStart || busyTimeEnd")
+                                            interval.getStart().equals(busy1End.plusMinutes(5)), "interval == workingStart || busyTimeEnd")
                             ));
                     return true;
                 }).containsExactly(true, true);
@@ -114,7 +114,7 @@ class CalendarServiceTest extends LoggableService {
         assertThat(result2)
                 .extracting(interval -> {
                     assertThat(interval.getEnd())
-                            .isEqualTo(busy2Start);
+                            .isEqualTo(busy2Start.minusMinutes(5));
                     return true;
                 }).containsExactly(true);
 
@@ -123,7 +123,7 @@ class CalendarServiceTest extends LoggableService {
         assertThat(result3)
                 .extracting(interval -> {
                     assertThat(interval.getStart())
-                            .isEqualTo(busy3End);
+                            .isEqualTo(busy3End.plusMinutes(5));
                     return true;
                 }).containsExactly(true);
         assertThat(result4)
