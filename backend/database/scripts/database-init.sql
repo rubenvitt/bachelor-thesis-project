@@ -5,7 +5,7 @@ create table appUser
   id       serial primary key,
   password varchar(255) not null,
   name     varchar(255) not null,
-  mail     varchar(255) not null,
+  mail     varchar(255) not null unique,
   position varchar(255) not null,
   avatar   varchar(500) not null default 'https://randomuser.me/api/portraits/lego/1.jpg'
 );
