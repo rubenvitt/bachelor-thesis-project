@@ -10,6 +10,8 @@ import * as clockPicker from '../clockpicker';
 const yesButton = $('#calendar-select-modal-yes');
 
 function displayActiveCalendarsInModal(calendars) {
+    yesButton.off();
+
     function getIconForProvider(provider) {
         switch (provider) {
             case 'google':

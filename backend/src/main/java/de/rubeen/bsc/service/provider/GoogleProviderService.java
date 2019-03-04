@@ -22,7 +22,10 @@ import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
-import de.rubeen.bsc.service.*;
+import de.rubeen.bsc.service.CalendarService;
+import de.rubeen.bsc.service.DatabaseService;
+import de.rubeen.bsc.service.LoginService;
+import de.rubeen.bsc.service.UserService;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +52,6 @@ public class GoogleProviderService implements CalendarProvider {
             CREDENTIAL_DATA_STORE_PATH = "google-auth-clients";
     private static final Logger LOG = LoggerFactory.getLogger(GoogleProviderService.class);
     private final CalendarService calendarService;
-    private final RoomService roomService;
     private final LoginService loginService;
     private final UserService userService;
     private final DatabaseService databaseService;
@@ -64,10 +66,9 @@ public class GoogleProviderService implements CalendarProvider {
     private JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
     @Autowired
-    public GoogleProviderService(CalendarService calendarService, RoomService roomService, LoginService loginService1, UserService userService, LoginService loginService, DatabaseService databaseService) {
+    public GoogleProviderService(CalendarService calendarService, LoginService loginService, UserService userService, DatabaseService databaseService) {
         this.calendarService = calendarService;
-        this.roomService = roomService;
-        this.loginService = loginService1;
+        this.loginService = loginService;
         this.userService = userService;
         this.databaseService = databaseService;
     }
@@ -254,7 +255,6 @@ public class GoogleProviderService implements CalendarProvider {
 
     @Override
     public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
-        AppUserEntity appUserEntity = userService.getAppUser(userId);
         Credential credential;
         try {
             credential = flow.loadCredential(getCredentialUserId(userId));
@@ -265,12 +265,6 @@ public class GoogleProviderService implements CalendarProvider {
         Calendar calendar = getCalendar(credential);
         try {
             List<EventAttendee> attendees = getEventAttendees(calendarEvent.getAttendees());
-            attendees.add(new EventAttendee()
-                    .setOrganizer(true)
-                    .setDisplayName(getUserInfoPlus(calendarEvent.getCreator().getMail()).orElse(new Userinfoplus().setName(calendarEvent.getCreator().getName())).getName())
-                    .setEmail(getUserInfoPlus(calendarEvent.getCreator().getMail()).orElse(new Userinfoplus().setEmail(calendarEvent.getCreator().getMail())).getEmail())
-                    .setResponseStatus("accepted")
-                    .setComment("Created in name of (by 'my business day')"));
             calendar.events().insert(calendarEvent.getCalendarId(),
                     new Event()
                             .setSource(new Event.Source().setTitle("My-Business-Day").setUrl(format("https://localhost:3333/callback?subject={0}", calendarEvent.getSubject())))
@@ -280,7 +274,7 @@ public class GoogleProviderService implements CalendarProvider {
                             .setStart(getEventDateTime(calendarEvent.getStartDateTime()))
                             .setEnd(getEventDateTime(calendarEvent.getEndDateTime()))
                             .setAttendees(attendees)
-            ).setSendNotifications(true).execute();
+            ).setSendNotifications(false).execute();
             return true;
         } catch (IOException e) {
             LOG.error("Error while adding event {} for user {}", calendarEvent, userId);

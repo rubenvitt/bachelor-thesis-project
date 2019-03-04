@@ -2,7 +2,6 @@ package de.rubeen.bsc.service;
 
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
-import de.rubeen.bsc.entities.web.CalendarEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -263,6 +262,9 @@ public class CalendarService extends LoggableService {
     }
 
     private List<Interval> calculateForInterval(Interval workingInterval, Interval busyInterval) {
+        busyInterval = busyInterval
+                .withStart(busyInterval.getStart().minusMinutes(5))
+                .withEnd(busyInterval.getEnd().plusMinutes(5));
         BusyBlockingState blockingState = BusyBlockingState.getBlockingState(workingInterval, busyInterval);
         LOG.debug("BlockingState for {} in {} is: {}", busyInterval, workingInterval, blockingState);
         switch (blockingState) {

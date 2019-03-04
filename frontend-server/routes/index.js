@@ -70,8 +70,8 @@ router.get("/settings", function (req, res, next) {
 });
 
 router.get("/callback", function (req, res, next) {
-   let subject = req.query.subject;
-   res.send(subject);
+    let subject = req.query.subject;
+    res.send(`Event was (maybe) created by this application. Subject is: ${subject}`);
 });
 
 router.get('index.html', function (req, res) {
