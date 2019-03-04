@@ -23,7 +23,7 @@ function displayActiveCalendarsInModal(calendars) {
         return `
 <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
     <i class="${getIconForProvider(provider)} c-black"></i>
-    <input data-content="${id}" type="checkbox" ${isDefault ? 'checked' : ''} class="form-check-input">
+    <input data-content="${id}" type="checkbox" ${isDefault ? 'checked="checked"' : ''} class="form-check-input">
     ${name}
     <i class="fa fa-check badge badge-primary badge-pill"></i>
 </label>`;
@@ -44,7 +44,7 @@ function displayActiveCalendarsInModal(calendars) {
     }
 
     function getSelectedItem() {
-        return list.children().children('input:checked').attr('data-content');
+        return list.children().children('input[checked="checked"]').attr('data-content');
     }
 
     const list = $('#meeting-creation-dialog-list-group-cal-list');
@@ -52,6 +52,9 @@ function displayActiveCalendarsInModal(calendars) {
 
     const inputList = list.children().children('input');
     checkboxController.initRadioList(inputList, function (checked, id) {
+        console.log("radio-changed");
+        console.log("checked: " + checked);
+        console.log("id: " + id);
         yesButton.removeAttr('disabled');
         yesButton.removeClass('btn-danger btn-success');
 

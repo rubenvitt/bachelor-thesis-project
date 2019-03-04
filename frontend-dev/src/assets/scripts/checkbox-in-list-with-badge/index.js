@@ -1,4 +1,5 @@
 function setChangeListener(checkbox, changedListener, radioList) {
+    console.log("bbb");
     $(checkbox).change(function () {
         if (radioList) {
             removeActiveStateFromCheckboxes(checkbox);
@@ -6,6 +7,7 @@ function setChangeListener(checkbox, changedListener, radioList) {
         } else {
             setCheckboxVisibility(this);
         }
+        console.log("lala");
         changedListener(this.checked, $(this).attr('data-content'));
     });
 }
@@ -25,8 +27,8 @@ function removeActiveStateFromCheckboxes(checkbox) {
     const parent = $(checkbox).parent().parent();
     parent.find('label').find('i').css('visibility', 'hidden');
     parent.find('label').removeClass('active');
-    parent.find('label').find('input').checked = false;
-    checkbox.checked = true;
+    parent.find('label').find('input').attr('checked', false);
+    $(checkbox).attr('checked', true);
 }
 
 function setCheckboxVisibility(checkbox) {
@@ -41,8 +43,8 @@ function setCheckboxVisibility(checkbox) {
 
 function setRadiobuttonVisibility(checkbox) {
     const parent = $(checkbox).parent();
-    parent.children('i').css('visibility', checkbox.checked ? 'visible' : 'hidden');
-    if (checkbox.checked) {
+    parent.children('i').css('visibility', $(checkbox).attr('checked') ? 'visible' : 'hidden');
+    if ($(checkbox).attr('checked')) {
         parent.addClass('active');
     } else {
         parent.removeClass('active');

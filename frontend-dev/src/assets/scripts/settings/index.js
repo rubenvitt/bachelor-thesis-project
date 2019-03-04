@@ -102,9 +102,12 @@ function addModalListener(cookie) {
 
 /**
  * handler for all calendars
+ * @param list
  * @param {calendarEntity[]} calendars
  */
 function showCalendars(list, calendars) {
+    console.log('show-calendars... list: ');
+    console.log(list);
     list.html(getHtmlFromCalendarEntities(calendars));
     const inputList = list.children().children('input');
     checkboxController.initCheckboxList(inputList, function (checked, id) {
@@ -119,6 +122,7 @@ function showCalendars(list, calendars) {
 
         })
     }, function (id) {
+        console.log(`button clicked with id: ${id}`);
         $.ajax({
             url: `${URLS.apiUrl}/calendar/default?${jQuery.param({
                 "calendar_id": id,
@@ -126,6 +130,7 @@ function showCalendars(list, calendars) {
             })}`,
             method: 'post'
         }).done(function () {
+            console.log(`${id} is done`);
             calendar.getAllCalendars('office', showCalendars);
             calendar.getAllCalendars('google', showCalendars);
         });
@@ -152,7 +157,7 @@ function getListItemFor(id, name, activated, isDefault) {
     <div class="input-group-append ${(isDefault || !activated) ? 'd-none' : ''}">
         <button class="btn btn-outline-light" type="button">Set default</button>
     </div>
-    <i class="text-primary bg-white badge badge-primary badge-pill ${!isDefault ? 'd-none' : ''}">Default</i>
+    <i class="text-primary bg-white badge badge-primary badge-pill ${!isDefault ? 'd-none' : ''}">invitations-calendar</i>
 </label>`;
 }
 
