@@ -1,7 +1,10 @@
 package de.rubeen.bsc.controller;
 
+import de.rubeen.bsc.entities.db.tables.Appuser;
+import de.rubeen.bsc.entities.db.tables.records.AppuserRecord;
 import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
+import de.rubeen.bsc.entities.web.NewAppUserEntity;
 import de.rubeen.bsc.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,13 @@ public class UserController {
     public List<LoginHoursEntity> getLoginHours(HttpServletResponse response,
                                                 @RequestParam(value = "user_id") String userId) {
         return userService.getWorkingHours(userId);
+    }
+
+    @RequestMapping(path = "/register", method = RequestMethod.POST)
+    public void registerUser(HttpServletResponse response,
+                             @RequestBody NewAppUserEntity newAppUserEntity) {
+        userService.addUser(newAppUserEntity);
+        response.setStatus(HttpServletResponse.SC_CREATED);
     }
 
     @RequestMapping(path = "/workingHours", method = RequestMethod.POST)

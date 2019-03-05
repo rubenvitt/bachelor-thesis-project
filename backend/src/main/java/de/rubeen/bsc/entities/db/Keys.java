@@ -56,6 +56,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<AppuserRecord> APPUSER_PKEY = UniqueKeys0.APPUSER_PKEY;
+    public static final UniqueKey<AppuserRecord> APPUSER_MAIL_KEY = UniqueKeys0.APPUSER_MAIL_KEY;
     public static final UniqueKey<CalendarRecord> CALENDAR_PKEY = UniqueKeys0.CALENDAR_PKEY;
     public static final UniqueKey<CredentialRecord> CREDENTIAL_PKEY = UniqueKeys0.CREDENTIAL_PKEY;
     public static final UniqueKey<RoomRecord> ROOM_PKEY = UniqueKeys0.ROOM_PKEY;
@@ -87,6 +88,7 @@ public class Keys {
 
     private static class UniqueKeys0 {
         public static final UniqueKey<AppuserRecord> APPUSER_PKEY = Internal.createUniqueKey(Appuser.APPUSER, "appuser_pkey", Appuser.APPUSER.ID);
+        public static final UniqueKey<AppuserRecord> APPUSER_MAIL_KEY = Internal.createUniqueKey(Appuser.APPUSER, "appuser_mail_key", Appuser.APPUSER.MAIL);
         public static final UniqueKey<CalendarRecord> CALENDAR_PKEY = Internal.createUniqueKey(Calendar.CALENDAR, "calendar_pkey", Calendar.CALENDAR.ID);
         public static final UniqueKey<CredentialRecord> CREDENTIAL_PKEY = Internal.createUniqueKey(Credential.CREDENTIAL, "credential_pkey", Credential.CREDENTIAL.USER_ID);
         public static final UniqueKey<RoomRecord> ROOM_PKEY = Internal.createUniqueKey(Room.ROOM, "room_pkey", Room.ROOM.ROOM_ID);

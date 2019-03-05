@@ -1,7 +1,9 @@
 package de.rubeen.bsc.service;
 
+import de.rubeen.bsc.entities.db.tables.records.AppuserRecord;
 import de.rubeen.bsc.entities.web.AppUserEntity;
 import de.rubeen.bsc.entities.web.LoginHoursEntity;
+import de.rubeen.bsc.entities.web.NewAppUserEntity;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.modelmapper.ModelMapper;
@@ -126,5 +128,14 @@ public class UserService extends LoggableService {
                 .where(APPUSER.ID.eq(userId))
                 .fetchOne()
                 .map(record -> modelMapper.map(record, AppUserEntity.class));
+    }
+
+    public void addUser(NewAppUserEntity newAppUserEntity) {
+        checkNotNull(newAppUserEntity);
+        databaseService.getContext()
+                .insertInto(APPUSER)
+                .columns(APPUSER.MAIL, APPUSER.NAME, APPUSER.PASSWORD, APPUSER.POSITION, APPUSER.AVATAR)
+                .values(newAppUserEntity.getMail(), newAppUserEntity.getName(), newAppUserEntity.getPassword(), newAppUserEntity.getPosition(), newAppUserEntity.getAvatar())
+                .execute();
     }
 }

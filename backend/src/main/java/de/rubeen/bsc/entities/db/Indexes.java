@@ -36,6 +36,7 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index APPUSER_MAIL_KEY = Indexes0.APPUSER_MAIL_KEY;
     public static final Index APPUSER_PKEY = Indexes0.APPUSER_PKEY;
     public static final Index CALENDAR_PKEY = Indexes0.CALENDAR_PKEY;
     public static final Index CREDENTIAL_PKEY = Indexes0.CREDENTIAL_PKEY;
@@ -49,6 +50,7 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     private static class Indexes0 {
+        public static Index APPUSER_MAIL_KEY = Internal.createIndex("appuser_mail_key", Appuser.APPUSER, new OrderField[] { Appuser.APPUSER.MAIL }, true);
         public static Index APPUSER_PKEY = Internal.createIndex("appuser_pkey", Appuser.APPUSER, new OrderField[] { Appuser.APPUSER.ID }, true);
         public static Index CALENDAR_PKEY = Internal.createIndex("calendar_pkey", Calendar.CALENDAR, new OrderField[] { Calendar.CALENDAR.ID }, true);
         public static Index CREDENTIAL_PKEY = Internal.createIndex("credential_pkey", Credential.CREDENTIAL, new OrderField[] { Credential.CREDENTIAL.USER_ID }, true);
