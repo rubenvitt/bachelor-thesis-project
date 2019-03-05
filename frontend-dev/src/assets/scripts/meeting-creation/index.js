@@ -60,12 +60,14 @@ function displayActiveCalendarsInModal(calendars) {
         yesButton.removeAttr('disabled');
         yesButton.removeClass('btn-danger btn-success');
 
+        yesButton.focus();
         yesButton.text('Choose calendar');
     });
 
     yesButton.removeClass('btn-danger btn-success');
     yesButton.removeAttr('disabled');
     yesButton.text('Select calendar');
+    yesButton.focus();
 
     yesButton.click(function () {
         yesButton.attr('disabled', 'true');

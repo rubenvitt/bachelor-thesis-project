@@ -1,7 +1,5 @@
 package de.rubeen.bsc.service;
 
-import com.google.common.base.Preconditions;
-import de.rubeen.bsc.entities.db.tables.Appuser;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.*;
 import de.rubeen.bsc.helper.EventComparatorFactory;
@@ -42,6 +40,14 @@ public class EventService extends LoggableService {
         this.databaseService = databaseService;
         this.userService = userService;
         this.calendarService = calendarService;
+    }
+
+    public static final DateTime getBeginOfDay(DateTime day) {
+        return day.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
+    }
+
+    public static final DateTime getEndOfDay(DateTime day) {
+        return day.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999);
     }
 
     public List<EventEntity> getAllEventsForToday(String userMail) {
@@ -338,14 +344,6 @@ public class EventService extends LoggableService {
         return getBeginOfDay(DateTime.now());
     }
 
-    public static final DateTime getBeginOfDay(DateTime day) {
-        return day.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
-    }
-
-    public static final DateTime getEndOfDay(DateTime day) {
-        return day.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999);
-    }
-
     public long getUserQualityValue(int userId, String startDate, String startTime, String endDate, String endTime) {
         // TODO: 2019-02-05 implementation: 100: user completely free || 0: user has NO time between
         final DateTime startDateTime = DateTime.parse(startDate + "T" + startTime);
@@ -353,6 +351,36 @@ public class EventService extends LoggableService {
         final String userMail = userService.getAppUser(userId).getMail();
 
         LOG.info("Getting quality-times for {} between {} and {}", userMail, startDateTime, endDateTime);
+
+        // TODO: 2019-03-04 add implementation in frontend & here:
+        /* this is better, but doesn't work, if duration is unknown.
+        //2: get workingHours & busyTimes
+        List<LoginHoursEntity> workingHours = userService.getWorkingHours(userMail);
+        LOG.debug("Got workingHours {} for user {}", workingHours, userMail);
+
+        NewEventEntity newEventEntity = new NewEventEntity("", "", true, false, startDate, endDate, new Duration(startDateTime, endDateTime).toStandardMinutes().getMinutes(), "minutes", Collections.emptyList());
+
+        List<Interval> busyTimes = (getAllBusyTimes(userMail, newEventEntity));
+        LOG.debug("Got busyTimes {} for user {}", busyTimes, userMail);
+
+        //3: calculate free-times
+        LOG.info("calculate time-slot for meeting for user {}", userMail);
+        Collection<Interval> freeTimes =
+                calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
+                        getBeginOfDay(DateTime.parse(newEventEntity.getAutoTimeDateStart())),
+                        getEndOfDay(DateTime.parse(newEventEntity.getAutoTimeDateEnd())));
+
+        long sumOfFreeTimes = freeTimes.parallelStream()
+                .mapToLong(value -> value.toDuration().getStandardMinutes())
+                .sum();
+
+        LOG.info("sum of freeTimes for {} = {} || need sum of: {}", userMail, sumOfFreeTimes, new Duration(startDateTime, endDateTime).toStandardMinutes().getMinutes());
+
+        if (sumOfFreeTimes < new Duration(startDateTime, endDateTime).toStandardMinutes().getMinutes())
+            return 0;
+        if (sumOfFreeTimes < new Duration(startDateTime, endDateTime).toStandardMinutes().getMinutes() / 2)
+            return 50;
+        */
 
         // TODO: 2019-02-05 better calculations
         final List<EventEntity> allEventsForUser = getAllEventsForUser(userMail, startDateTime.getMillis(), endDateTime.getMillis());

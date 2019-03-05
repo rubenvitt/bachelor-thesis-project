@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.tables.Calendar.CALENDAR;
@@ -256,6 +257,7 @@ public class GoogleProviderService implements CalendarProvider {
     @Override
     public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
         Credential credential;
+        AppUserEntity appUser = userService.getAppUser(userId);
         try {
             credential = flow.loadCredential(getCredentialUserId(userId));
         } catch (IOException e) {
@@ -265,6 +267,20 @@ public class GoogleProviderService implements CalendarProvider {
         Calendar calendar = getCalendar(credential);
         try {
             List<EventAttendee> attendees = getEventAttendees(calendarEvent.getAttendees());
+            //remove actual user and add eventCreator as attendee
+            AtomicReference<EventAttendee> creator = new AtomicReference<>();
+            attendees.removeIf(eventAttendee -> {
+                boolean isEventAttendee = eventAttendee.getEmail().equals(appUser.getMail());
+                if (isEventAttendee) {
+                    creator.set(new EventAttendee()
+                            .setDisplayName(calendarEvent.getCreator().getName())
+                            .setEmail(calendarEvent.getCreator().getMail()));
+                }
+                return isEventAttendee;
+            });
+            EventAttendee attendee;
+            if ((attendee = creator.get()) != null)
+                attendees.add(attendee);
             calendar.events().insert(calendarEvent.getCalendarId(),
                     new Event()
                             .setSource(new Event.Source().setTitle("My-Business-Day").setUrl(format("https://localhost:3333/callback?subject={0}", calendarEvent.getSubject())))
