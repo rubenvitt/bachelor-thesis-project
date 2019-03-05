@@ -26,8 +26,11 @@ function createClockPicker(clockPicker, handler) {
  * @param {number} offset
  */
 function fillInputWithTime(endInput, value, offset) {
-    const regexMinutes = /(?<=:)(\d)+/g;
-    const regexHours = /(\d)+(?=:)/g;
+    //fixme ecmaScript 2018 is only supported in Chrome, now...
+    // using lookBefore-expressions are not working in safari...
+    //const regexMinutes = /(?<=:)(\d)+/;
+    const regexMinutes = /(\d)+(?=\n|$)/g;
+    const regexHours = /(\d)+(?=:)/;
     let minutesResult = Number.parseInt(regexMinutes.exec(value)[0]);
     let hoursResult = Number.parseInt(regexHours.exec(value)[0]);
     if (endInput.val() === "" || endInput.val() === '00:00')
