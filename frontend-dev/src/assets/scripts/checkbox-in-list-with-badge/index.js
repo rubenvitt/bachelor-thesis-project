@@ -1,5 +1,4 @@
 function setChangeListener(checkbox, changedListener, radioList) {
-    console.log("bbb");
     $(checkbox).change(function () {
         if (radioList) {
             removeActiveStateFromCheckboxes(checkbox);
