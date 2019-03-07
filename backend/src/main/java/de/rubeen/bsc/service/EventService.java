@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.Tables.APPUSER;
 import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
+import static java.text.MessageFormat.format;
 
 @Service
 public class EventService extends LoggableService {
@@ -157,15 +158,20 @@ public class EventService extends LoggableService {
 
         LOG.info("#2/4: Get workingHours and busyTimes for all event-attendees");
         LOG.debug("Generating collection of all attendees");
-        Collection<UserTimeEntity> attendeeUserTimeEntities = newEventEntity.getAttendees().parallelStream()
-                .map(UserTimeEntity::new)
-                .collect(Collectors.toCollection(HashSet::new));
+        Collection<UserTimeEntity> attendeeUserTimeEntities =
+                newEventEntity.getAttendees().parallelStream()
+                        .map(UserTimeEntity::new)
+                        .collect(Collectors.toCollection(HashSet::new));
         attendeeUserTimeEntities.add(new UserTimeEntity(userMail));
+
+
         final HashSet<Collection<Interval>> collect = attendeeUserTimeEntities.parallelStream()
                 .map(userTimeEntity -> userTimeEntity.getFreeTimesForEvent(newEventEntity))
                 .collect(Collectors.toCollection(HashSet::new));
         final Collection<Interval> unionOfTimeIntervals = getUnionOfAttendeeFreeTimes(collect);
         LOG.info("Union of timeIntervals: {}", unionOfTimeIntervals);
+
+
 
         Interval timeSlot = searchTimeSlot(unionOfTimeIntervals, newEventEntity);
         if (timeSlot == null) {
@@ -214,13 +220,12 @@ public class EventService extends LoggableService {
 
                     List<Interval> resultTimes = new LinkedList<>();
                     intervals.stream()
-                            .filter(freeInterval -> {
-                                return result.resultTimes.stream()
-                                        .noneMatch(readableInterval -> {
-                                            LOG.info("{} contains {} ? : {}", freeInterval, readableInterval, freeInterval.contains(readableInterval));
-                                            return freeInterval.contains(readableInterval);
-                                        });
-                            })
+                            .filter(freeInterval -> result.resultTimes.stream()
+                                    .anyMatch(readableInterval -> {
+                                        //freeInterval should contain any interval from result-list
+                                        LOG.info("{} contains {} ? : {}", freeInterval, readableInterval, freeInterval.contains(readableInterval));
+                                        return !freeInterval.contains(readableInterval);
+                                    }))
                             .map(freeInterval -> {
                                 List<Interval> list = result.resultTimes.stream()
                                         .filter(readableInterval -> {
@@ -433,6 +438,9 @@ public class EventService extends LoggableService {
             return freeTimes;
         }
 
-
+        @Override
+        public String toString() {
+            return format("(userMail: {0})", userMail);
+        }
     }
 }
