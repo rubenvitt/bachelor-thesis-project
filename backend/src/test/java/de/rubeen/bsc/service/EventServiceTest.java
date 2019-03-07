@@ -6,7 +6,6 @@ import de.rubeen.bsc.service.provider.CalendarProvider;
 import de.rubeen.bsc.service.provider.GoogleProviderService;
 import de.rubeen.bsc.service.provider.PrototypeRoomProviderService;
 import de.rubeen.bsc.service.provider.TestProviderImplementation;
-import io.opencensus.metrics.LongGauge;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalTime;
@@ -16,10 +15,9 @@ import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -304,8 +302,8 @@ class EventServiceTest extends LoggableService {
     }
 
     @Test
-    @Disabled("method works, but test fails sometimes for no reason")
     @DisplayName("TimeInterval-Union for attendees should be calculated correctly")
+    @RepeatedTest(10)
     void unionForAttendeeTimeIntervalsTest() {
         Collection<Interval> user1 = List.of(
                 Interval.parse("2019-02-18T10:00:00.000+01:00/2019-02-18T16:00:00.000+01:00"),
@@ -316,12 +314,12 @@ class EventServiceTest extends LoggableService {
                 Interval.parse("2019-02-18T08:00:00.000+01:00/2019-02-18T16:00:00.000+01:00"),
                 Interval.parse("2019-02-21T08:00:00.000+01:00/2019-02-21T16:00:00.000+01:00")
         );
-        Interval resultInterval = Interval.parse("2019-02-18T10:00:00.000+01:00/2019-02-18T16:00:00.000+01:00");
         Set<Collection<Interval>> freeTimesPerAttendee = Set.of(user1, user2);
         Collection<Interval> unionOfAttendeeFreeTimes = eventService.getUnionOfAttendeeFreeTimes(freeTimesPerAttendee);
         assertThat(unionOfAttendeeFreeTimes)
-                .hasSize(1)
-                .contains(resultInterval);
+                .hasSize(2)
+                .containsExactly(Interval.parse("2019-02-18T10:00:00.000+01:00/2019-02-18T16:00:00.000+01:00"),
+                        Interval.parse("2019-02-21T08:00:00.000+01:00/2019-02-21T16:00:00.000+01:00"));
     }
 
     @Test
