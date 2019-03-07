@@ -24,7 +24,6 @@ import static java.text.MessageFormat.format;
 
 @Service
 public class EventService extends LoggableService {
-    private final GoogleProviderService googleProviderService;
     private final ProviderService providerService;
     private final LoginService loginService;
     private final RoomService roomService;
@@ -33,8 +32,7 @@ public class EventService extends LoggableService {
     private final CalendarService calendarService;
 
     @Autowired
-    public EventService(GoogleProviderService googleProviderService, ProviderService providerService, LoginService loginService, RoomService roomService, DatabaseService databaseService, UserService userService, CalendarService calendarService) throws SQLException {
-        this.googleProviderService = googleProviderService;
+    public EventService(ProviderService providerService, LoginService loginService, RoomService roomService, DatabaseService databaseService, UserService userService, CalendarService calendarService) throws SQLException {
         this.providerService = providerService;
         this.loginService = loginService;
         this.roomService = roomService;

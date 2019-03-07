@@ -37,8 +37,6 @@ class EventServiceTest extends LoggableService {
 
     EventService eventService;
     @Mock
-    GoogleProviderService googleProviderService;
-    @Mock
     ProviderService providerService;
     @Mock
     LoginService loginService;
@@ -54,17 +52,14 @@ class EventServiceTest extends LoggableService {
     @BeforeEach
     void setupEach() throws SQLException {
         initMocks(this);
-        MockDataProvider provider = new MockDataProvider() {
-            @Override
-            public MockResult[] execute(MockExecuteContext mockExecuteContext) throws SQLException {
-                System.out.println(mockExecuteContext);
-                return new MockResult[0];
-            }
+        MockDataProvider provider = mockExecuteContext -> {
+            System.out.println(mockExecuteContext);
+            return new MockResult[0];
         };
         MockConnection connection = new MockConnection(provider);
         //mock database
         when(databaseService.getContext()).thenReturn(DSL.using(connection, SQLDialect.POSTGRES));
-        eventService = new EventService(googleProviderService, providerService, loginService, roomService,
+        eventService = new EventService(providerService, loginService, roomService,
                 databaseService, userService, calendarService);
     }
 
@@ -325,7 +320,7 @@ class EventServiceTest extends LoggableService {
     @Test
     @DisplayName("Event-times should be calculated successfully with calendarService")
     void addEventWithRealCalendarService() throws SQLException {
-        eventService = new EventService(googleProviderService, providerService, loginService, roomService, databaseService, userService,
+        eventService = new EventService(providerService, loginService, roomService, databaseService, userService,
                 new CalendarService(loginService, databaseService));
         when(providerService.getCalendarProvider(anyString(), anyString())).thenReturn(new TestProviderImplementation());
 
