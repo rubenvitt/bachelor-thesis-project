@@ -45,13 +45,10 @@ if (document.getElementById('login-failure-alert') !== null) {
             contentType: 'application/json'
         }).done(function () {
             console.log('finished user-registering');
+            location.href = '/';
         }).fail(evt => {
-            if (evt.status === 201) {
-                console.log('finished user-registering');
-                location.href = '/';
-            }
-            else
-                $('#register-failure-alert').removeClass('d-none');
+            console.error("Unable to register user");
+            $('#register-failure-alert').removeClass('d-none');
         });
     });
 
