@@ -6,6 +6,8 @@ import * as formSender from './form-sending-handler';
 import * as localStorage from '../localStorage';
 import * as appUser from '../appuser'
 import * as clockPicker from '../clockpicker';
+import {getUserID} from "../cookie";
+import {getFormData} from "./form-sending-handler";
 
 const yesButton = $('#calendar-select-modal-yes');
 
@@ -71,7 +73,65 @@ function displayActiveCalendarsInModal(calendars) {
 
     yesButton.click(function () {
         yesButton.attr('disabled', 'true');
-        formSender.sendForm(getSelectedItem(), $(this));
+        formSender.sendForm(getSelectedItem(), $(this), function (content) {
+            $('#new-event-modal-yes').prop('disabled', false);
+            $('#new-event-modal-yes').removeClass('btn-danger btn-success');
+            $('#new-event-modal-yes').addClass('btn-primary');
+            $('#new-event-modal-yes').text('Create this appointment');
+            $('#new-event-modal').modal();
+
+            console.log(content);
+
+            const startDate = new Date(content.startDate);
+            const endDate = new Date(content.endDate);
+            let attendees = '';
+            content.attendees.forEach(value => {
+                attendees += `<a href="mailto:${value.mail}" class="list-group-item list-group-item-action">${value.name}</a>`;
+            });
+
+            $('#new-event-modal-info-group').html(`
+<div class="card">
+    <div class="card-header">
+           Your new meeting
+    </div>
+    <div class="card-body">
+          <h5 class="card-title">${content.subject}</h5>
+          <h6 class="card-subtitle">${startDate.toLocaleString()} - ${endDate.toLocaleString()}</h6>
+          <p class="card-text"><b>Room:</b> ${content.room}<br>
+            <b>Description:</b><br>${content.description.replace(/\n/g, '<br>')}
+          </p>
+          <ul class="list-group list-group-flush">
+            ${attendees}
+          </ul>
+    </div>
+</div>
+            `);
+            $('#new-event-modal-yes').off();
+            $('#new-event-modal-yes').click(function () {
+                $.ajax({
+                        url: `${URLS.apiUrl}/calendar/events/add?user_id=${getUserID()}`,
+                        type: 'POST',
+                        data:
+                            JSON.stringify(content),
+                        contentType: "application/json"
+                    }
+                ).done(function () {
+                    console.log('new appointment created:');
+                    console.log(content);
+                    $('#new-event-modal-yes').prop('disabled', true);
+                    $('#new-event-modal-yes').text('Event created');
+                    $('#new-event-modal-yes').removeClass('btn-primary');
+                    $('#new-event-modal-yes').addClass('btn-success');
+                }).fail(function (message) {
+                    console.error(message);
+                    $('#new-event-modal-yes').prop('disabled', true);
+                    $('#new-event-modal-yes').text('Error');
+                    $('#new-event-modal-yes').removeClass('btn-primary');
+                    $('#new-event-modal-yes').addClass('btn-danger');
+                });
+            });
+
+        });
         return false;
     });
 }

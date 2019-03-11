@@ -111,6 +111,18 @@ public class RoomService extends LoggableService {
         return room;
     }
 
+    public RoomEntity getRoomByName(String roomName) {
+        checkNotNull(roomName);
+        LOG.debug("Search for room {} in database", roomName);
+        RoomEntity roomEntity = databaseService.getContext()
+                .selectFrom(ROOM)
+                .where(ROOM.ROOM_NAME.eq(roomName))
+                .limit(1)
+                .fetchOneInto(RoomEntity.class);
+        LOG.debug("Got room {} for roomName {}", roomEntity, roomName);
+        return roomEntity;
+    }
+
     public RoomEntity getBestRoomFor(List<String> roomValues, int minSize) {
         final Result<RoomRecord> rooms = databaseService.getContext()
                 .selectFrom(ROOM)

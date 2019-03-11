@@ -1,9 +1,14 @@
 package de.rubeen.bsc.entities.provider;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.joda.deser.DateTimeDeserializer;
+import com.fasterxml.jackson.datatype.joda.deser.LocalDateDeserializer;
+import de.rubeen.bsc.entities.web.CalendarWebEventEntity;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static java.text.MessageFormat.format;
@@ -11,8 +16,10 @@ import static java.text.MessageFormat.format;
 public class CalendarEvent {
     private Attendee creator;
     private String subject, description, room, calendarId;
+    @JsonDeserialize(using = DateTimeDeserializer.class)
     private DateTime startDateTime, endDateTime;
     private List<Attendee> attendees;
+
     public CalendarEvent(String subject, String description, String room, String calendarId, DateTime startDateTime, DateTime endDateTime, List<Attendee> attendees, Attendee creator) {
         this.subject = subject;
         this.description = description;
@@ -23,11 +30,34 @@ public class CalendarEvent {
         this.attendees = attendees;
         this.creator = creator;
     }
+
+    public CalendarEvent(String subject, String description, String room, String calendarId, Date startDate, Date endDate, List<Attendee> attendees, Attendee creator) {
+        this.subject = subject;
+        this.description = description;
+        this.room = room;
+        this.calendarId = calendarId;
+        this.startDateTime = new DateTime(startDate);
+        this.endDateTime = new DateTime(endDate);
+        this.attendees = attendees;
+        this.creator = creator;
+    }
+
     public CalendarEvent() {
     }
 
     public CalendarEvent(String subject, String description, String room, String calendarId, Interval meetingInterval, List<Attendee> attendees, Attendee creator) {
         this(subject, description, room, calendarId, meetingInterval.getStart(), meetingInterval.getEnd(), attendees, creator);
+    }
+
+    public CalendarEvent(CalendarWebEventEntity webEventEntity) {
+        this.subject = webEventEntity.getSubject();
+        this.description = webEventEntity.getDescription();
+        this.room = webEventEntity.getRoom();
+        this.calendarId = webEventEntity.getCalendarID();
+        this.startDateTime = new DateTime(webEventEntity.getStartDate());
+        this.endDateTime = new DateTime(webEventEntity.getEndDate());
+        this.attendees = webEventEntity.getAttendees();
+        this.creator = webEventEntity.getCreator();
     }
 
     public Attendee getCreator() {

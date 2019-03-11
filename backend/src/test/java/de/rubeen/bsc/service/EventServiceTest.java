@@ -205,7 +205,7 @@ class EventServiceTest extends LoggableService {
                 autoTimeDateEnd, meetingDuration, durationUnit, attendeeIds);
         newEventEntity.setRoomId(roomId);
 
-        eventService.addEvent(newEventEntity, "user@mail", "cal-id");
+        //eventService.addEvent(newEventEntity, "user@mail", "cal-id");
 
         assertThat(eventsCreated[0])
                 .isEqualTo(3);
@@ -290,7 +290,7 @@ class EventServiceTest extends LoggableService {
                 autoTimeDateEnd, meetingDuration, durationUnit, attendeeIds);
         newEventEntity.setRoomId(roomId);
 
-        eventService.addEvent(newEventEntity, "user@mail", "cal-id");
+        //eventService.addEvent(newEventEntity, "user@mail", "cal-id");
 
         assertThat(eventsCreated[0])
                 .isEqualTo(6);

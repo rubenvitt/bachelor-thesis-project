@@ -88,15 +88,15 @@ public class EventService extends LoggableService {
         return eventEntities;
     }
 
-    public void addEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws CalendarProvider.CalendarException {
+    public CalendarWebEventEntity createCalendarEvent(NewEventEntity newEventEntity, String userMail, String calendarId) throws CalendarProvider.CalendarException {
         CalendarProvider calendarProvider = providerService.getCalendarProvider(calendarId, userMail);
         if (newEventEntity.getAutoTime())
-            createAutoEvent(newEventEntity, userMail, calendarId, calendarProvider);
+            return new CalendarWebEventEntity(createAutoCalendarEvent(newEventEntity, userMail, calendarId, calendarProvider));
         else
-            createManualEvent(newEventEntity, userMail, calendarId, calendarProvider);
+            return new CalendarWebEventEntity(createManualCalendarEvent(newEventEntity, userMail, calendarId, calendarProvider));
     }
 
-    private void createManualEvent(final NewEventEntity newEventEntity, final String userMail, final String calendarId,
+    private CalendarEvent createManualCalendarEvent(final NewEventEntity newEventEntity, final String userMail, final String calendarId,
                                    final CalendarProvider calendarProvider) throws CalendarProvider.CalendarException {
         LOG.info("using calendarProvider: {} to create an event for {} - calendarId: {} - event: {}",
                 calendarService, userMail, calendarId, newEventEntity);
@@ -130,12 +130,15 @@ public class EventService extends LoggableService {
                 calendarEvent.setDescription(calendarEvent.getDescription() + "\n------------------------------\nRoom-equipment:\nSize for "+room.getSize()+" people\n" + roomEquipments);
             }
             LOG.debug("Creating event: {}", calendarEvent);
-            calendarProvider.createEvent(calendarEvent, userMail);
-            providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
+
+            return calendarEvent;
+
+/*            calendarProvider.createEvent(calendarEvent, userMail);
+            providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));*/
         }
     }
 
-    private void createAutoEvent(final NewEventEntity newEventEntity, final String userMail, final String calendarId,
+    private CalendarEvent createAutoCalendarEvent(final NewEventEntity newEventEntity, final String userMail, final String calendarId,
                                  final CalendarProvider calendarProvider) throws CalendarProvider.CalendarException {
         LOG.info("using calendarProvider: {} to create an event for {} - calendarId: {} - event: {}",
                 calendarProvider, userMail, calendarId, newEventEntity);
@@ -195,6 +198,15 @@ public class EventService extends LoggableService {
                     .collect(Collectors.joining("\n"));
             calendarEvent.setDescription(calendarEvent.getDescription() + "\n------------------------------\nRoom-equipment:\nSize for "+room.getSize()+" people\n" + roomEquipments);
         }
+
+        return calendarEvent;
+    }
+
+    public void addEvent(CalendarWebEventEntity webEventEntity, String userMail) throws CalendarProvider.CalendarException {
+        CalendarEvent calendarEvent = new CalendarEvent(webEventEntity);
+        Collection<CalendarEvent.Attendee> attendees = calendarEvent.getAttendees();
+        RoomEntity room = roomService.getRoomByName(calendarEvent.getRoom());
+        CalendarProvider calendarProvider = providerService.getCalendarProvider(calendarEvent.getCalendarId(), userMail);
 
 
         LOG.debug("Creating event: {}", calendarEvent);

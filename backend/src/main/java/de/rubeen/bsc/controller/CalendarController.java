@@ -1,6 +1,8 @@
 package de.rubeen.bsc.controller;
 
+import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.CalendarEntity;
+import de.rubeen.bsc.entities.web.CalendarWebEventEntity;
 import de.rubeen.bsc.entities.web.EventEntity;
 import de.rubeen.bsc.entities.web.NewEventEntity;
 import de.rubeen.bsc.service.CalendarService;
@@ -69,15 +71,27 @@ public class CalendarController {
     }
 
     @RequestMapping(value = "/events/create", method = RequestMethod.POST, consumes = "application/json")
-    public void createNewEvent(@RequestBody NewEventEntity newEventEntity, HttpServletResponse response,
-                               @RequestParam(value = "user_id") String userId,
-                               @RequestParam(value = "calendar_id") String calendarId) throws IOException {
+    public CalendarWebEventEntity createNewEvent(@RequestBody NewEventEntity newEventEntity, HttpServletResponse response,
+                                                 @RequestParam(value = "user_id") String userId,
+                                                 @RequestParam(value = "calendar_id") String calendarId) throws IOException {
         try {
             LOG.info("got event entity: " + newEventEntity);
             checkNewEvent(newEventEntity);
-            eventService.addEvent(newEventEntity, userId.replace("@", "%40"), calendarId);
+            return eventService.createCalendarEvent(newEventEntity, userId.replace("@", "%40"), calendarId);
         } catch (IllegalArgumentException ex) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+            return null;
+        } catch (CalendarProvider.CalendarException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event was not created - contact administrator.");
+            return null;
+        }
+    }
+
+    @RequestMapping(value = "/events/add", method = RequestMethod.POST, consumes = "application/json")
+    public void createCalendarEvent(@RequestBody CalendarWebEventEntity calendarEvent, HttpServletResponse response,
+                                    @RequestParam(value = "user_id") String userId) throws IOException {
+        try {
+            eventService.addEvent(calendarEvent, userId);
         } catch (CalendarProvider.CalendarException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Event was not created - contact administrator.");
         }

@@ -2,7 +2,7 @@ import * as urls from '../constants/urls';
 import {getUserID} from "../cookie";
 import {getRoomId} from '../localStorage';
 
-function sendForm(calenderID, button) {
+function sendForm(calenderID, button, finishedEventHandler) {
     button.text('Creating event...');
     //manual time settings:
     $.ajax({
@@ -12,9 +12,10 @@ function sendForm(calenderID, button) {
                 JSON.stringify(getFormData()),
             contentType: "application/json"
         }
-    ).done(function () {
+    ).done(function (content) {
         console.log("Done creating new appointment");
-        window.location = '/finished';
+        //window.location = '/finished';
+        finishedEventHandler(content);
         button.text("Finished!");
         button.addClass('btn-success');
     }).fail(function (message) {
