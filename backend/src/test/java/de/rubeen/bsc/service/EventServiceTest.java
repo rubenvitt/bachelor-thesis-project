@@ -87,6 +87,7 @@ class EventServiceTest extends LoggableService {
         final int meetingDuration = 2, roomId = 123;
         final int attendee1 = 1, attendee2 = 2;
         final List<Integer> attendeeIds = List.of(1, 2);
+        final String roomName = "test-room-name";
 
         final Integer workingHour_Id = 1;
         final String workingHour_startTimeOrga = "08:00", workingHour_endTimeOrga = "16:00";
@@ -151,7 +152,8 @@ class EventServiceTest extends LoggableService {
             );
         });
         //Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end
-        when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, "test-room-name", 3, Collections.emptyList()));
+        when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, roomName, 3, Collections.emptyList()));
+        when(roomService.getRoomByName(roomName)).thenReturn(new RoomEntity(roomId, roomName, 3, Collections.emptyList()));
 
         when(calendarService.getFreeTimes(any(), any(), any(), any())).thenCallRealMethod();
         when(calendarService.calculateFreeTimeWith(any(), anyCollection())).thenCallRealMethod();
@@ -205,7 +207,8 @@ class EventServiceTest extends LoggableService {
                 autoTimeDateEnd, meetingDuration, durationUnit, attendeeIds);
         newEventEntity.setRoomId(roomId);
 
-        //eventService.addEvent(newEventEntity, "user@mail", "cal-id");
+        final CalendarWebEventEntity calendarEvent = eventService.createCalendarEvent(newEventEntity, "user@mail", "cal-id");
+        eventService.addEvent(calendarEvent, "user@mail");
 
         assertThat(eventsCreated[0])
                 .isEqualTo(3);
@@ -217,6 +220,7 @@ class EventServiceTest extends LoggableService {
         final String subject = "test-subject", description = "test-description", autoTimeDateStart = "2019-01-01", autoTimeDateEnd = "2019-01-08", durationUnit = "hours";
         final int meetingDuration = 2, roomId = 123;
         final List<Integer> attendeeIds = List.of(1, 2, 3, 4, 5);
+        final String roomName = "test-room-name";
 
         final Integer workingHour_Id = 1;
         final String workingHour_startTime = "08:00", workingHour_endTime = "16:00";
@@ -244,7 +248,8 @@ class EventServiceTest extends LoggableService {
                 )
         );
         //Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end
-        when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, "test-room-name", 2, Collections.emptyList()));
+        when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, roomName, 2, Collections.emptyList()));
+        when(roomService.getRoomByName(roomName)).thenReturn(new RoomEntity(roomId, roomName, 2, Collections.emptyList()));
         when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
                 List.of(
                         new Interval(DateTime.parse("2019-01-01"), DateTime.parse("2019-01-04").withTime(LocalTime.parse("09:00"))),
@@ -290,7 +295,8 @@ class EventServiceTest extends LoggableService {
                 autoTimeDateEnd, meetingDuration, durationUnit, attendeeIds);
         newEventEntity.setRoomId(roomId);
 
-        //eventService.addEvent(newEventEntity, "user@mail", "cal-id");
+        final CalendarWebEventEntity calendarEvent = eventService.createCalendarEvent(newEventEntity, "user@mail", "cal-id");
+        eventService.addEvent(calendarEvent, "user@mail");
 
         assertThat(eventsCreated[0])
                 .isEqualTo(6);
