@@ -41,7 +41,8 @@ create table calendar
   activated  boolean         not null,
   provider    calProvider   not null,
   user_id    int             not null references appUser (id),
-  isDefault   boolean         not null default false
+  isDefault   boolean         not null default false,
+  exclude (isDefault  WITH =) where ( isDefault )
 );
 
 create table room (
