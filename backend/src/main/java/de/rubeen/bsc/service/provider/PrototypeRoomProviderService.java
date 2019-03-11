@@ -23,7 +23,7 @@ public class PrototypeRoomProviderService extends LoggableService implements Cal
 
     @Override
     public boolean createEvent(CalendarEvent calendarEvent, String roomId) throws CalendarException {
-        LOG.info("Creating event {} for room: {}", calendarEvent, roomId);
+        LOG.info("ROOM-EVENT: Create event {} for room {}", calendarEvent, roomId);
         return false;
     }
 
