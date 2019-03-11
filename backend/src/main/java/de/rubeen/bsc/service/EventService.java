@@ -4,7 +4,6 @@ import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.*;
 import de.rubeen.bsc.helper.EventComparatorFactory;
 import de.rubeen.bsc.service.provider.CalendarProvider;
-import de.rubeen.bsc.service.provider.GoogleProviderService;
 import kotlin.Pair;
 import org.apache.commons.lang3.NotImplementedException;
 import org.joda.time.DateTime;
@@ -122,6 +121,13 @@ public class EventService extends LoggableService {
 
             CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
                     room.getName(), calendarId, startDateTime, endDateTime, attendees, creator);
+            {
+                LOG.info("getting roomEquipments as string");
+                final String roomEquipments = room.getEquipments().stream()
+                        .map(equipmentEntity -> "- " + equipmentEntity.getName())
+                        .collect(Collectors.joining("\n"));
+                calendarEvent.setDescription(calendarEvent.getDescription() + "\n------------------------------\nRoom-equipment:\nSize for "+room.getSize()+" people\n" + roomEquipments);
+            }
             LOG.debug("Creating event: {}", calendarEvent);
             calendarProvider.createEvent(calendarEvent, userMail);
             providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
@@ -170,7 +176,6 @@ public class EventService extends LoggableService {
         LOG.info("Union of timeIntervals: {}", unionOfTimeIntervals);
 
 
-
         Interval timeSlot = searchTimeSlot(unionOfTimeIntervals, newEventEntity);
         if (timeSlot == null) {
             LOG.error("No timeSlot found for {} - {}", userMail, newEventEntity);
@@ -181,6 +186,16 @@ public class EventService extends LoggableService {
         CalendarEvent calendarEvent = new CalendarEvent(newEventEntity.getSubject(), newEventEntity.getDescription(),
                 room.getName(), calendarId, timeSlot, attendees,
                 new CalendarEvent.Attendee(creatorAppUser.getName(), creatorAppUser.getMail()));
+
+        {
+            LOG.info("getting roomEquipments as string");
+            final String roomEquipments = room.getEquipments().stream()
+                    .map(equipmentEntity -> "- " + equipmentEntity.getName())
+                    .collect(Collectors.joining("\n"));
+            calendarEvent.setDescription(calendarEvent.getDescription() + "\n------------------------------\nRoom-equipment:\nSize for "+room.getSize()+" people\n" + roomEquipments);
+        }
+
+
         LOG.debug("Creating event: {}", calendarEvent);
         calendarProvider.createEvent(calendarEvent, userMail);
         attendees.parallelStream().forEach(attendee -> {

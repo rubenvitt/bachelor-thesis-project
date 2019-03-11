@@ -16,4 +16,8 @@ class AppUserEntity {
         this.avatar = avatar
         this.position = position
     }
+
+    override fun toString(): String {
+        return "(id: $id, name: $name, mail: $mail, avatar: $avatar, position: $position)"
+    }
 }

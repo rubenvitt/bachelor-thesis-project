@@ -157,7 +157,7 @@ public class RoomService extends LoggableService {
             for (i = bestSize; i >= 0 && !sizePerRoomIds.containsKey(i); i--) {
             }
             LOG.info("i = {}", i);
-            int roomWithBestResult = sizePerRoomIds.get(i).iterator().next();
+            int roomWithBestResult = getSmallestRoomId(sizePerRoomIds.get(i));
             LOG.info("Got room as best result: {}", roomWithBestResult);
 
             final RoomEntity roomEntity = databaseService.getContext()
@@ -174,5 +174,14 @@ public class RoomService extends LoggableService {
             );
             return roomEntity;
         }
+    }
+
+    private int getSmallestRoomId(Collection<Integer> roomIds) {
+        return databaseService.getContext()
+                .selectFrom(ROOM)
+                .where(ROOM.ROOM_ID.in(roomIds))
+                .orderBy(ROOM.ROOM_SIZE.asc())
+                .limit(1)
+                .fetchOne().getRoomId();
     }
 }

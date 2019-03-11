@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Calendar extends TableImpl<CalendarRecord> {
 
-    private static final long serialVersionUID = 702014845;
+    private static final long serialVersionUID = 1280476306;
 
     /**
      * The reference instance of <code>public.calendar</code>
@@ -133,7 +133,7 @@ public class Calendar extends TableImpl<CalendarRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.CALENDAR_PKEY);
+        return Arrays.<Index>asList(Indexes.CALENDAR_ISDEFAULT_EXCL, Indexes.CALENDAR_PKEY);
     }
 
     /**

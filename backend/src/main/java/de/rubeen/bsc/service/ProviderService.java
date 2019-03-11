@@ -3,8 +3,12 @@ package de.rubeen.bsc.service;
 import de.rubeen.bsc.entities.db.enums.Calprovider;
 import de.rubeen.bsc.entities.db.tables.records.CalendarRecord;
 import de.rubeen.bsc.entities.web.CalendarEntity;
-import de.rubeen.bsc.service.provider.*;
+import de.rubeen.bsc.service.provider.CalendarProvider;
+import de.rubeen.bsc.service.provider.GoogleProviderService;
+import de.rubeen.bsc.service.provider.OfficeProviderService;
+import de.rubeen.bsc.service.provider.PrototypeRoomProviderService;
 import org.apache.commons.lang3.NotImplementedException;
+import org.jooq.impl.DSL;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -87,16 +91,18 @@ public class ProviderService extends LoggableService {
     }
 
     public void setDefaultCalendar(String calendarID, String userID) {
-        databaseService.getContext().update(CALENDAR)
-                .set(CALENDAR.ISDEFAULT, true)
-                .where(CALENDAR.CALENDARID.eq(calendarID))
-                .and(CALENDAR.USER_ID.eq(loginService.getUserID(userID)))
-                .execute();
-        databaseService.getContext().update(CALENDAR)
-                .set(CALENDAR.ISDEFAULT, false)
-                .where(CALENDAR.CALENDARID.notEqual(calendarID))
-                .and(CALENDAR.USER_ID.eq(loginService.getUserID(userID)))
-                .execute();
+        databaseService.getContext().transaction(configuration -> {
+            DSL.using(configuration).update(CALENDAR)
+                    .set(CALENDAR.ISDEFAULT, false)
+                    .where(CALENDAR.CALENDARID.notEqual(calendarID))
+                    .and(CALENDAR.USER_ID.eq(loginService.getUserID(userID)))
+                    .execute();
+            DSL.using(configuration).update(CALENDAR)
+                    .set(CALENDAR.ISDEFAULT, true)
+                    .where(CALENDAR.CALENDARID.eq(calendarID))
+                    .and(CALENDAR.USER_ID.eq(loginService.getUserID(userID)))
+                    .execute();
+        });
     }
 
     public CalendarEntity getDefaultCalendar(String userID) {

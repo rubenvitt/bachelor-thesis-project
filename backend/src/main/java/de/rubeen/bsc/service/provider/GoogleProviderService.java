@@ -281,6 +281,7 @@ public class GoogleProviderService implements CalendarProvider {
             EventAttendee attendee;
             if ((attendee = creator.get()) != null)
                 attendees.add(attendee);
+            LOG.info("Creating GOOGLE-EVENT for {} ---- {}: {} with attendees {}", userId, appUser, calendarEvent, attendees);
             calendar.events().insert(calendarEvent.getCalendarId(),
                     new Event()
                             .setSource(new Event.Source().setTitle("My-Business-Day").setUrl(format("https://localhost:3333/callback?subject={0}", calendarEvent.getSubject())))
@@ -300,14 +301,20 @@ public class GoogleProviderService implements CalendarProvider {
 
     private List<EventAttendee> getEventAttendees(List<CalendarEvent.Attendee> attendees) {
         // FIXME: 2019-02-22 events will be created twice
+
         return attendees.parallelStream()
+                .map(attendee -> new EventAttendee()
+                        .setDisplayName(attendee.getName())
+                        .setEmail(attendee.getMail()))
+                .collect(Collectors.toList());
+        /*return attendees.parallelStream()
                 .map(attendee -> new EventAttendee()
                         .setDisplayName(
                                 getUserInfoPlus(attendee.getMail())
                                         .orElse(new Userinfoplus().setName(attendee.getName())).getName())
                         .setEmail(getUserInfoPlus(attendee.getMail())
                                 .orElse(new Userinfoplus().setEmail(attendee.getMail())).getEmail()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
     }
 
     @Override
