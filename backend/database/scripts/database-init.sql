@@ -42,9 +42,6 @@ create table calendar
   provider    calProvider   not null,
   user_id    int             not null references appUser (id),
   isDefault   boolean         not null default false
-
-  /*TODO: add constrain for only ONE Default:TRUE at each ID */
-  /*exclude (isDefault  WITH =) where ( isDefault )*/
 );
 
 create table room (

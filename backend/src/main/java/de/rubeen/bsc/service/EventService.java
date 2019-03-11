@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.Tables.APPUSER;
@@ -223,6 +224,7 @@ public class EventService extends LoggableService {
             Boolean first = true;
             List<Interval> resultTimes;
         };
+
         freeTimesPerAttendee
                 .forEach(intervals -> {
                     if (result.first) {
