@@ -7,7 +7,6 @@ const titles = {
     '404': '404',
     '500': '500',
     'calendar': 'Calendar',
-    'finished': 'Finished',
     'index': 'Dashboard',
     'new_meeting': 'New Meeting',
     'rooms':'rooms',

@@ -26,8 +26,8 @@ if (listGroup.length === 1) {
         function (content) {
             let items = "";
             content.forEach(event => {
-                let dateStart = new Date(event.startTime.millis);
-                let dateEnd = new Date(event.endTime.millis);
+                let dateStart = new Date(event.startTime);
+                let dateEnd = new Date(event.endTime);
                 let state = (dateStart < Date.now()
                     ? (dateEnd < Date.now()
                         ? EventState.past
@@ -35,8 +35,8 @@ if (listGroup.length === 1) {
                     : EventState.upcoming);
                 items += generateListItem(
                     event.subject,
-                    `${(event.startTime.hourOfDay).pad()}:${(event.startTime.minuteOfHour).pad()}`,
-                    `${(event.endTime.hourOfDay).pad()}:${(event.endTime.minuteOfHour).pad()}`,
+                    `${dateStart.getHours().pad()}:${dateStart.getMinutes().pad()}`,
+                    `${dateEnd.getHours().pad()}:${dateEnd.getMinutes().pad()}`,
                     state);
             });
             if (content.length === 0)

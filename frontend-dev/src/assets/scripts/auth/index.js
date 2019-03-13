@@ -2,9 +2,6 @@ import * as URLS from '../constants/urls';
 import {getFormData} from "../meeting-creation/form-sending-handler";
 
 if (document.getElementById('login-failure-alert') !== null) {
-    const loginMail = document.getElementById('login-email');
-    const loginPass = document.getElementById('login-password');
-    const failureDiv = document.getElementById('login-failure-alert');
     const loginForm = $('#login-form');
     const registerForm = $('#register-form');
 
