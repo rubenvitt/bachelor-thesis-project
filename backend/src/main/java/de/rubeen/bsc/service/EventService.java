@@ -161,6 +161,7 @@ public class EventService extends LoggableService {
             LOG.info("#1/4: Getting room...");
             // TODO: 2019-01-28 getRoom-CalendarID & provider to get freeTimes
             room = roomService.getRoomById(newEventEntity.getRoomId());
+            room.setEquipments(roomService.getEquipments(room.getId()));
             LOG.debug("Got room {} for event {}", room, newEventEntity);
         }
 
@@ -192,7 +193,7 @@ public class EventService extends LoggableService {
                 new CalendarEvent.Attendee(creatorAppUser.getName(), creatorAppUser.getMail()));
 
         {
-            LOG.info("getting roomEquipments as string");
+            LOG.info("getting roomEquipments for {} as string", room);
             final String roomEquipments = room.getEquipments().stream()
                     .map(equipmentEntity -> "- " + equipmentEntity.getName())
                     .collect(Collectors.joining("\n"));

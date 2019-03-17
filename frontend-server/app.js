@@ -6,6 +6,7 @@ var logger = require('morgan');
 var engines = require('consolidate');
 var proxy = require('http-proxy-middleware');
 const urls = require('./modules/constants/urls');
+const loginNecessary = require('./modules/validator').loginNecessary;
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -14,17 +15,6 @@ var authRouter = require('./routes/auth');
 var app = express();
 
 app.use(logger('dev'));
-
-//defining api above parsers - only url-rewriting!
-app.use('/api', proxy({
-    target: 'https://localhost:8443',
-    secure: false,
-    changeOrigin: true,
-    logLevel: 'debug',
-    pathRewrite: {
-        '^/api': '/'
-    }
-}));
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
@@ -38,6 +28,23 @@ app.use(session({
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/controller', authRouter);
+
+app.use('/api', function (req, res, next) {
+    console.log('check if user is authenticated...');
+    if (loginNecessary(req)) {
+        console.log("User not authenticated... Return 403");
+        res.sendStatus(403);
+    } else
+        next();
+}, proxy({
+    target: 'https://localhost:8443',
+    secure: false,
+    changeOrigin: true,
+    logLevel: 'debug',
+    pathRewrite: {
+        '^/api': '/'
+    }
+}));
 
 app.use(express.static(path.join(__dirname, '/public')));
 app.set('views', __dirname + "/public");
