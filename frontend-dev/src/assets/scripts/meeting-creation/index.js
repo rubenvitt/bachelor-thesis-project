@@ -1,13 +1,12 @@
 import * as URLS from "../constants/urls";
 import * as cookie from "../cookie";
+import {getUserID} from "../cookie";
 import * as calendar from '../calendar';
 import * as checkboxController from "../checkbox-in-list-with-badge";
 import * as formSender from './form-sending-handler';
 import * as localStorage from '../localStorage';
 import * as appUser from '../appuser'
 import * as clockPicker from '../clockpicker';
-import {getUserID} from "../cookie";
-import {getFormData} from "./form-sending-handler";
 
 const yesButton = $('#calendar-select-modal-yes');
 
@@ -113,6 +112,7 @@ function displayActiveCalendarsInModal(calendars) {
                         type: 'POST',
                         data:
                             JSON.stringify(content),
+                        dataType: 'text',
                         contentType: "application/json"
                     }
                 ).done(function () {

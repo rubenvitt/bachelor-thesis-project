@@ -17,28 +17,30 @@ var app = express();
 
 app.use(logger('dev'));
 
-app.use(express.json());
-app.use(express.urlencoded({extended: false}));
-app.use(cookieParser());
+
 app.use(session({
     secret: '4DAxTM<G2A<*|1FXS_M}8fuOj4+E`LC64~|Liu"VT&+*zGKg,c-;1}z<L{&&Aw0',
     resave: false,
     saveUninitialized: true
 }));
+app.use(cookieParser());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/controller', authRouter);
-
-app.use('/api', proxy({
+app.use('/api', indexRouter.apiFunction, proxy({
     target: 'https://localhost:8443',
     secure: false,
     changeOrigin: true,
-    logLevel: 'debug',
+    //logLevel: 'debug',
     pathRewrite: {
         '^/api': '/'
     }
 }));
+
+app.use(express.json());
+app.use(express.urlencoded({extended: false}));
+
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/controller', authRouter);
 
 app.use(express.static(path.join(__dirname, '/public')));
 app.set('views', __dirname + "/public");
