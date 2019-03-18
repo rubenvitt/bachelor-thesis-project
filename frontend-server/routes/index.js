@@ -77,6 +77,10 @@ router.get("/login", function (req, res) {
 
 router.apiFunction = function (req, res, next) {
     apiDebug(`checking if client is authenticated for ${req.path}`);
+    if (req.path === '/register') {
+        next();
+        return;
+    }
     if (showLoginIfNecessary(req)) {
         res.sendStatus(403);
         apiDebug(`client not authenticated for: ${req.path}`);

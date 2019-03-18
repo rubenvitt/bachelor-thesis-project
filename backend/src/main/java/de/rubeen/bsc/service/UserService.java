@@ -129,13 +129,4 @@ public class UserService extends LoggableService {
                 .fetchOne()
                 .map(record -> modelMapper.map(record, AppUserEntity.class));
     }
-
-    public void addUser(NewAppUserEntity newAppUserEntity) {
-        checkNotNull(newAppUserEntity);
-        databaseService.getContext()
-                .insertInto(APPUSER)
-                .columns(APPUSER.MAIL, APPUSER.NAME, APPUSER.PASSWORD, APPUSER.POSITION, APPUSER.AVATAR)
-                .values(newAppUserEntity.getMail(), newAppUserEntity.getName(), newAppUserEntity.getPassword(), newAppUserEntity.getPosition(), newAppUserEntity.getAvatar())
-                .execute();
-    }
 }

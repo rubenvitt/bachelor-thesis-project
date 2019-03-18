@@ -30,13 +30,6 @@ public class UserController {
         return userService.getWorkingHours(userId);
     }
 
-    @RequestMapping(path = "/register", method = RequestMethod.POST)
-    public void registerUser(HttpServletResponse response,
-                             @RequestBody NewAppUserEntity newAppUserEntity) {
-        userService.addUser(newAppUserEntity);
-        response.setStatus(HttpServletResponse.SC_CREATED);
-    }
-
     @RequestMapping(path = "/workingHours", method = RequestMethod.POST)
     public void setLoginHours(HttpServletResponse response,
                               @RequestParam(value = "user_id") String userId,

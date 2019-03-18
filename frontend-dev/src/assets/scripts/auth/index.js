@@ -36,9 +36,10 @@ if (document.getElementById('login-failure-alert') !== null) {
             avatar: $('#register-avatar').val()
         };
         $.ajax({
-            url: `${URLS.apiUrl}/user/register`,
+            url: `${URLS.apiUrl}/register`,
             type: 'POST',
             data: JSON.stringify(user),
+            dataType: 'text',
             contentType: 'application/json'
         }).done(function () {
             console.log('finished user-registering');

@@ -1,6 +1,7 @@
 package de.rubeen.bsc.controller;
 
 import de.rubeen.bsc.entities.web.LoginUser;
+import de.rubeen.bsc.entities.web.NewAppUserEntity;
 import de.rubeen.bsc.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,5 +26,12 @@ public class LoginController {
     public void login(@RequestBody LoginUser loginUser, HttpServletResponse response, HttpServletRequest request) {
         Boolean login = loginService.login(loginUser);
         response.setStatus(login ? HttpServletResponse.SC_OK : HttpServletResponse.SC_UNAUTHORIZED);
+    }
+
+    @RequestMapping(path = "/register", method = RequestMethod.POST)
+    public void registerUser(HttpServletResponse response,
+                             @RequestBody NewAppUserEntity newAppUserEntity) {
+        loginService.addUser(newAppUserEntity);
+        response.setStatus(HttpServletResponse.SC_CREATED);
     }
 }
