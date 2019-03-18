@@ -29,7 +29,6 @@ app.use('/api', indexRouter.apiFunction, proxy({
     target: 'https://localhost:8443',
     secure: false,
     changeOrigin: true,
-    //logLevel: 'debug',
     pathRewrite: {
         '^/api': '/'
     }
