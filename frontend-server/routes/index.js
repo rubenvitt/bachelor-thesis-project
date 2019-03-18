@@ -1,5 +1,6 @@
 var express = require('express');
 var debug = require('debug')('frontend-server:server');
+const apiDebug = require('debug')('frontend-server:server:api');
 var router = express.Router();
 const showLoginIfNecessary = require('../modules/validator').loginNecessary;
 
@@ -73,5 +74,16 @@ router.get("/login", function (req, res) {
     } else
         res.redirect("../");
 });
+
+router.apiFunction = function (req, res, next) {
+    apiDebug(`checking if client is authenticated for ${req.path}`);
+    if (showLoginIfNecessary(req)) {
+        res.sendStatus(403);
+        apiDebug(`client not authenticated for: ${req.path}`);
+    } else {
+        apiDebug(`client is authenticated for: ${req.path}`);
+        next();
+    }
+};
 
 module.exports = router;

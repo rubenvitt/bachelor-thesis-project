@@ -88,7 +88,7 @@ class CalendarControllerTest {
                 30, "durationUnit", "manTimeStart", "manTimeEnd",
                 List.of("roomValue", "roomValue2"), 1, List.of(1, 2, 3));
         String userId = "userId", calendarId = "calendarId";
-        calendarController.createNewEvent(eventEntity, response, userId, calendarId);
+        //calendarController.createNewEvent(eventEntity, response, userId, calendarId);
         //verify(eventService, only()).addEvent(any(), anyString(), anyString());
     }
 

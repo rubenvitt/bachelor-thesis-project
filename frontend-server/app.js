@@ -7,6 +7,7 @@ var engines = require('consolidate');
 var proxy = require('http-proxy-middleware');
 const urls = require('./modules/constants/urls');
 const loginNecessary = require('./modules/validator').loginNecessary;
+const debug = require('debug')('frontend-server:application');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -29,14 +30,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/controller', authRouter);
 
-app.use('/api', function (req, res, next) {
-    console.log('check if user is authenticated...');
-    if (loginNecessary(req)) {
-        console.log("User not authenticated... Return 403");
-        res.sendStatus(403);
-    } else
-        next();
-}, proxy({
+app.use('/api', proxy({
     target: 'https://localhost:8443',
     secure: false,
     changeOrigin: true,

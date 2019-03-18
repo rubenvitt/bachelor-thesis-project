@@ -1,5 +1,5 @@
 const sessions = require('./sessionsArray');
-const debug = require('debug')('frontend-server:server');
+const debug = require('debug')('frontend-server:auth-validator');
 
 const ex = module.exports = {};
 
