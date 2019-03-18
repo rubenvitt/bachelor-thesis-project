@@ -57,6 +57,10 @@ public class LoginService extends LoggableService {
 
     public Integer getUserID(String email) {
         LOG.info("Looking for user with mail: " + email);
-        return databaseService.getContext().select(APPUSER.ID).from(APPUSER).where(APPUSER.MAIL.eq(normalizeMail(email))).fetchOne(0, int.class);
+        return databaseService.getContext()
+                .select(APPUSER.ID)
+                .from(APPUSER)
+                .where(APPUSER.MAIL.eq(normalizeMail(email)))
+                .fetchOne(0, int.class);
     }
 }
