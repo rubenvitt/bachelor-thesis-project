@@ -1,16 +1,22 @@
 package de.rubeen.bsc.service;
 
 import de.rubeen.bsc.entities.db.tables.Appuser;
+import de.rubeen.bsc.entities.db.tables.Workinghours;
+import de.rubeen.bsc.entities.db.tables.records.AppuserRecord;
 import de.rubeen.bsc.entities.web.LoginUser;
 import de.rubeen.bsc.entities.web.NewAppUserEntity;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
+import java.sql.Time;
+import java.time.LocalTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static de.rubeen.bsc.entities.db.Tables.APPUSER;
+import static de.rubeen.bsc.entities.db.Tables.WORKINGHOURS;
 
 @Service
 public class LoginService extends LoggableService {
@@ -49,10 +55,20 @@ public class LoginService extends LoggableService {
     public void addUser(NewAppUserEntity newAppUserEntity) {
         checkNotNull(newAppUserEntity);
         databaseService.getContext()
-                .insertInto(Appuser.APPUSER)
-                .columns(Appuser.APPUSER.MAIL, Appuser.APPUSER.NAME, Appuser.APPUSER.PASSWORD, Appuser.APPUSER.POSITION, Appuser.APPUSER.AVATAR)
-                .values(newAppUserEntity.getMail(), newAppUserEntity.getName(), newAppUserEntity.getPassword(), newAppUserEntity.getPosition(), newAppUserEntity.getAvatar())
-                .execute();
+                .transaction(configuration -> {
+                    AppuserRecord appuserRecord = DSL.using(configuration)
+                            .insertInto(Appuser.APPUSER)
+                            .columns(Appuser.APPUSER.MAIL, Appuser.APPUSER.NAME, Appuser.APPUSER.PASSWORD, Appuser.APPUSER.POSITION, Appuser.APPUSER.AVATAR)
+                            .values(newAppUserEntity.getMail(), newAppUserEntity.getName(), newAppUserEntity.getPassword(), newAppUserEntity.getPosition(), newAppUserEntity.getAvatar())
+                            .returning(APPUSER.ID)
+                            .fetchOne();
+                    LOG.debug("Inserted user {} with ID {}", newAppUserEntity, appuserRecord.getId());
+                    DSL.using(configuration)
+                            .insertInto(Workinghours.WORKINGHOURS)
+                            .columns(WORKINGHOURS.USER_FK, WORKINGHOURS.STARTTIME, WORKINGHOURS.ENDTIME, WORKINGHOURS.MONDAY, WORKINGHOURS.TUESDAY, WORKINGHOURS.WEDNESDAY, WORKINGHOURS.THURSDAY, WORKINGHOURS.FRIDAY)
+                            .values(appuserRecord.getId(), Time.valueOf(LocalTime.of(8, 0)), Time.valueOf(LocalTime.of(12, 0)), true, true, true, true, true)
+                            .execute();
+                });
     }
 
     public Integer getUserID(String email) {

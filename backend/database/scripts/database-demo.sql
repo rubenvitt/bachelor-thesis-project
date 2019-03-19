@@ -45,4 +45,20 @@ values (1, 1),
        (4, 5);
 
 insert into workingHours (user_fk, startTime, endTime, monday, tuesday, wednesday, thursday, friday, saturday, sunday)
-VALUES (1, '08:00:00', '12:00:00', true, true, true, false, false, false, false);
+VALUES (1, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (2, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (3, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (4, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (5, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (6, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (7, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (8, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (9, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (10, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (11, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (12, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (13, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (14, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (15, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (16, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (17, '08:00:00', '12:00:00', true, true, true, false, false, false, false),

@@ -17,6 +17,7 @@ import static de.rubeen.bsc.entities.db.Tables.APPUSER;
 import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
 import static de.rubeen.bsc.service.TimeCalculationService.*;
 import static java.text.MessageFormat.format;
+import static java.util.Objects.isNull;
 
 @Service
 public class EventService extends LoggableService {
@@ -114,7 +115,7 @@ public class EventService extends LoggableService {
                     room.getName(), calendarId, startDateTime, endDateTime, attendees, creator);
             {
                 LOG.info("getting roomEquipments as string");
-                final String roomEquipments = room.getEquipments().stream()
+                final String roomEquipments = roomService.getEquipments(room.getId()).stream()
                         .map(equipmentEntity -> "- " + equipmentEntity.getName())
                         .collect(Collectors.joining("\n"));
                 calendarEvent.setDescription(calendarEvent.getDescription() + "\n------------------------------\nRoom-equipment:\nSize for "+room.getSize()+" people\n" + roomEquipments);
@@ -173,7 +174,7 @@ public class EventService extends LoggableService {
 
         Interval timeSlot = timeCalculationService.searchTimeSlot(unionOfTimeIntervals, newEventEntity);
         if (timeSlot == null) {
-            LOG.error("No timeSlot found for {} - {}", userMail, newEventEntity);
+            LOG.warn("No timeSlot found for {} - {}", userMail, newEventEntity);
             throw new CalendarProvider.CalendarException("Unable to find timeSlot for event.", null);
         } else
             LOG.debug("got timeSlot {} for {} - {}", timeSlot, userMail, newEventEntity);
@@ -209,11 +210,15 @@ public class EventService extends LoggableService {
                 LOG.info("Creating event for attendee: {}", attendee);
                 CalendarEntity defaultCalendar = providerService.getDefaultCalendar(attendee.getMail());
                 LOG.info("Default-calender for {} is {}", attendee, defaultCalendar);
-                try {
-                    providerService.getCalendarProvider(defaultCalendar.getCalendarID(), attendee.getMail())
-                            .createEvent(calendarEvent.withCalendarId(defaultCalendar.getCalendarID()), attendee.getMail());
-                } catch (CalendarProvider.CalendarException e) {
-                    LOG.error("Unable to create event {} for {}", calendarEvent, attendee);
+                if (isNull(defaultCalendar)) {
+                    LOG.warn("{} has no defaultCalendar - creating no event.", attendee);
+                } else {
+                    try {
+                        providerService.getCalendarProvider(defaultCalendar.getCalendarID(), attendee.getMail())
+                                .createEvent(calendarEvent.withCalendarId(defaultCalendar.getCalendarID()), attendee.getMail());
+                    } catch (CalendarProvider.CalendarException e) {
+                        LOG.error("Unable to create event {} for {}", calendarEvent, attendee);
+                    }
                 }
             }
         });
