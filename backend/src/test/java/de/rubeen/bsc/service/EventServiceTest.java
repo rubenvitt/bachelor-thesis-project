@@ -47,12 +47,12 @@ class EventServiceTest extends LoggableService {
     @Mock
     CalendarService calendarService;
 
-    @Mock
     TimeCalculationService timeCalculationService;
 
     @BeforeEach
     void setupEach() throws SQLException {
         initMocks(this);
+        timeCalculationService = new TimeCalculationService();
         MockDataProvider provider = mockExecuteContext -> {
             System.out.println(mockExecuteContext);
             return new MockResult[0];
@@ -156,9 +156,6 @@ class EventServiceTest extends LoggableService {
         when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, roomName, 3, Collections.emptyList()));
         when(roomService.getRoomByName(roomName)).thenReturn(new RoomEntity(roomId, roomName, 3, Collections.emptyList()));
 
-        when(timeCalculationService.getFreeTimes(any(), any(), any(), any())).thenCallRealMethod();
-        when(timeCalculationService.calculateFreeTimeWith(any(), anyCollection())).thenCallRealMethod();
-
         /*when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
                 List.of(
                         new Interval(DateTime.parse("2019-01-01"), DateTime.parse("2019-01-04").withTime(LocalTime.parse("09:00"))),
@@ -251,12 +248,6 @@ class EventServiceTest extends LoggableService {
         //Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end
         when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, roomName, 2, Collections.emptyList()));
         when(roomService.getRoomByName(roomName)).thenReturn(new RoomEntity(roomId, roomName, 2, Collections.emptyList()));
-        when(timeCalculationService.getFreeTimes(any(), any(), any(), any())).thenReturn(
-                List.of(
-                        new Interval(DateTime.parse("2019-01-01"), DateTime.parse("2019-01-04").withTime(LocalTime.parse("09:00"))),
-                        new Interval(DateTime.parse("2019-01-04").withTime(LocalTime.parse("15:00")), DateTime.parse("2019-01-08").withTime(LocalTime.parse("23:59")))
-                )
-        );
         when(providerService.getCalendarProvider(anyString(), anyString())).thenReturn(new CalendarProvider() {
             @Override
             public boolean createEvent(CalendarEvent calendarEvent, String userId) throws CalendarException {
