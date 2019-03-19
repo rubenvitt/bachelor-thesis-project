@@ -294,7 +294,6 @@ class EventServiceTest extends LoggableService {
                 .isEqualTo(6);
     }
 
-    @Test
     @DisplayName("TimeInterval-Union for attendees should be calculated correctly")
     @RepeatedTest(10)
     void unionForAttendeeTimeIntervalsTest() {
