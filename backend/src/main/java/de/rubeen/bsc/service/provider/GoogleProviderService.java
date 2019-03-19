@@ -43,8 +43,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.tables.Calendar.CALENDAR;
-import static de.rubeen.bsc.service.EventService.getBeginOfDay;
-import static de.rubeen.bsc.service.EventService.getEndOfDay;
+import static de.rubeen.bsc.service.TimeCalculationService.getBeginOfDay;
+import static de.rubeen.bsc.service.TimeCalculationService.getEndOfDay;
 import static java.text.MessageFormat.format;
 
 @Service

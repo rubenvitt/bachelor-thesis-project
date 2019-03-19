@@ -3,7 +3,6 @@ package de.rubeen.bsc.service;
 import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.*;
 import de.rubeen.bsc.service.provider.CalendarProvider;
-import de.rubeen.bsc.service.provider.GoogleProviderService;
 import de.rubeen.bsc.service.provider.PrototypeRoomProviderService;
 import de.rubeen.bsc.service.provider.TestProviderImplementation;
 import org.joda.time.DateTime;
@@ -13,7 +12,6 @@ import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
-import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +47,9 @@ class EventServiceTest extends LoggableService {
     @Mock
     CalendarService calendarService;
 
+    @Mock
+    TimeCalculationService timeCalculationService;
+
     @BeforeEach
     void setupEach() throws SQLException {
         initMocks(this);
@@ -60,7 +61,7 @@ class EventServiceTest extends LoggableService {
         //mock database
         when(databaseService.getContext()).thenReturn(DSL.using(connection, SQLDialect.POSTGRES));
         eventService = new EventService(providerService, loginService, roomService,
-                databaseService, userService, calendarService);
+                databaseService, userService, calendarService, timeCalculationService);
     }
 
     @Test
@@ -155,8 +156,8 @@ class EventServiceTest extends LoggableService {
         when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, roomName, 3, Collections.emptyList()));
         when(roomService.getRoomByName(roomName)).thenReturn(new RoomEntity(roomId, roomName, 3, Collections.emptyList()));
 
-        when(calendarService.getFreeTimes(any(), any(), any(), any())).thenCallRealMethod();
-        when(calendarService.calculateFreeTimeWith(any(), anyCollection())).thenCallRealMethod();
+        when(timeCalculationService.getFreeTimes(any(), any(), any(), any())).thenCallRealMethod();
+        when(timeCalculationService.calculateFreeTimeWith(any(), anyCollection())).thenCallRealMethod();
 
         /*when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
                 List.of(
@@ -250,7 +251,7 @@ class EventServiceTest extends LoggableService {
         //Stream<Interval> busyTimePeriods, Stream<LoginHoursEntity> workingHours, DateTime start, DateTime end
         when(roomService.getRoomById(roomId)).thenReturn(new RoomEntity(roomId, roomName, 2, Collections.emptyList()));
         when(roomService.getRoomByName(roomName)).thenReturn(new RoomEntity(roomId, roomName, 2, Collections.emptyList()));
-        when(calendarService.getFreeTimes(any(), any(), any(), any())).thenReturn(
+        when(timeCalculationService.getFreeTimes(any(), any(), any(), any())).thenReturn(
                 List.of(
                         new Interval(DateTime.parse("2019-01-01"), DateTime.parse("2019-01-04").withTime(LocalTime.parse("09:00"))),
                         new Interval(DateTime.parse("2019-01-04").withTime(LocalTime.parse("15:00")), DateTime.parse("2019-01-08").withTime(LocalTime.parse("23:59")))
@@ -316,7 +317,7 @@ class EventServiceTest extends LoggableService {
                 Interval.parse("2019-02-21T08:00:00.000+01:00/2019-02-21T16:00:00.000+01:00")
         );
         Set<Collection<Interval>> freeTimesPerAttendee = Set.of(user1, user2);
-        Collection<Interval> unionOfAttendeeFreeTimes = eventService.getUnionOfAttendeeFreeTimes(freeTimesPerAttendee);
+        Collection<Interval> unionOfAttendeeFreeTimes = timeCalculationService.getUnionOfAttendeeFreeTimes(freeTimesPerAttendee);
         assertThat(unionOfAttendeeFreeTimes)
                 .hasSize(2)
                 .containsExactly(Interval.parse("2019-02-18T10:00:00.000+01:00/2019-02-18T16:00:00.000+01:00"),
@@ -327,7 +328,7 @@ class EventServiceTest extends LoggableService {
     @DisplayName("Event-times should be calculated successfully with calendarService")
     void addEventWithRealCalendarService() throws SQLException {
         eventService = new EventService(providerService, loginService, roomService, databaseService, userService,
-                new CalendarService(loginService, databaseService));
+                new CalendarService(loginService, databaseService), timeCalculationService);
         when(providerService.getCalendarProvider(anyString(), anyString())).thenReturn(new TestProviderImplementation());
 
         /*

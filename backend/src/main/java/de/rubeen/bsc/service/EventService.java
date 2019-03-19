@@ -4,22 +4,18 @@ import de.rubeen.bsc.entities.provider.CalendarEvent;
 import de.rubeen.bsc.entities.web.*;
 import de.rubeen.bsc.helper.EventComparatorFactory;
 import de.rubeen.bsc.service.provider.CalendarProvider;
-import kotlin.Pair;
 import org.apache.commons.lang3.NotImplementedException;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
-import org.joda.time.Period;
+import org.joda.time.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static de.rubeen.bsc.entities.db.Tables.APPUSER;
 import static de.rubeen.bsc.entities.db.Tables.CALENDAR;
+import static de.rubeen.bsc.service.TimeCalculationService.*;
 import static java.text.MessageFormat.format;
 
 @Service
@@ -30,23 +26,17 @@ public class EventService extends LoggableService {
     private final DatabaseService databaseService;
     private final UserService userService;
     private final CalendarService calendarService;
+    private final TimeCalculationService timeCalculationService;
 
     @Autowired
-    public EventService(ProviderService providerService, LoginService loginService, RoomService roomService, DatabaseService databaseService, UserService userService, CalendarService calendarService) throws SQLException {
+    public EventService(ProviderService providerService, LoginService loginService, RoomService roomService, DatabaseService databaseService, UserService userService, CalendarService calendarService, TimeCalculationService timeCalculationService) throws SQLException {
         this.providerService = providerService;
         this.loginService = loginService;
         this.roomService = roomService;
         this.databaseService = databaseService;
         this.userService = userService;
         this.calendarService = calendarService;
-    }
-
-    public static final DateTime getBeginOfDay(DateTime day) {
-        return day.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
-    }
-
-    public static final DateTime getEndOfDay(DateTime day) {
-        return day.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(999);
+        this.timeCalculationService = timeCalculationService;
     }
 
     public List<EventEntity> getAllEventsForToday(String userMail) {
@@ -177,11 +167,11 @@ public class EventService extends LoggableService {
         final HashSet<Collection<Interval>> collect = attendeeUserTimeEntities.parallelStream()
                 .map(userTimeEntity -> userTimeEntity.getFreeTimesForEvent(newEventEntity))
                 .collect(Collectors.toCollection(HashSet::new));
-        final Collection<Interval> unionOfTimeIntervals = getUnionOfAttendeeFreeTimes(collect);
+        final Collection<Interval> unionOfTimeIntervals = timeCalculationService.getUnionOfAttendeeFreeTimes(collect);
         LOG.info("Union of timeIntervals: {}", unionOfTimeIntervals);
 
 
-        Interval timeSlot = searchTimeSlot(unionOfTimeIntervals, newEventEntity);
+        Interval timeSlot = timeCalculationService.searchTimeSlot(unionOfTimeIntervals, newEventEntity);
         if (timeSlot == null) {
             LOG.error("No timeSlot found for {} - {}", userMail, newEventEntity);
             throw new CalendarProvider.CalendarException("Unable to find timeSlot for event.", null);
@@ -231,59 +221,6 @@ public class EventService extends LoggableService {
         providerService.getRoomCalendarProvider(room.getId()).createEvent(calendarEvent, String.valueOf(room.getId()));
     }
 
-    Collection<Interval> getUnionOfAttendeeFreeTimes(Set<Collection<Interval>> freeTimesPerAttendee) {
-        LOG.debug("Searching for union of attendeeFreeTimes in {}", freeTimesPerAttendee);
-        var result = new Object() {
-            Boolean first = true;
-            List<Interval> resultTimes;
-        };
-
-        freeTimesPerAttendee
-                .forEach(intervals -> {
-                    if (result.first) {
-                        result.first = false;
-                        result.resultTimes = new LinkedList<>(intervals);
-                        return;
-                    }
-
-                    List<Interval> resultTimes = new LinkedList<>();
-                    intervals.stream()
-                            .filter(freeInterval -> result.resultTimes.stream()
-                                    .anyMatch(readableInterval -> {
-                                        //freeInterval should contain any interval from result-list
-                                        LOG.info("{} contains {} ? : {}", freeInterval, readableInterval, freeInterval.contains(readableInterval));
-                                        return !freeInterval.contains(readableInterval);
-                                    }))
-                            .map(freeInterval -> {
-                                List<Interval> list = result.resultTimes.stream()
-                                        .filter(readableInterval -> {
-                                            LOG.info("{} overlaps {} ? : {}", freeInterval, readableInterval, freeInterval.overlaps(readableInterval));
-                                            return freeInterval.overlaps(readableInterval);
-                                        })
-                                        .collect(Collectors.toList());
-                                LOG.info("creating pair of {} and {}", freeInterval, list);
-                                return new Pair<>(freeInterval, list);
-                            })
-                            .forEach(pair -> {
-                                        LOG.info("Using pair: {}", pair);
-                                        pair.component2().stream()
-                                                .forEach(interval -> {
-                                                    Interval addInterval = new Interval(
-                                                            pair.component1().getStart().isBefore(interval.getStart())
-                                                                    ? interval.getStart() : pair.component1().getStart(),
-                                                            pair.component1().getEnd().isAfter(interval.getEnd())
-                                                                    ? interval.getEnd() : pair.component1().getEnd()
-                                                    );
-                                                    LOG.info("Adding interval: {} --- data: {} & {}", addInterval, pair.component1(), interval);
-                                                    resultTimes.add(addInterval);
-                                                });
-                                    }
-                            );
-                    result.resultTimes = resultTimes;
-                });
-        return result.resultTimes;
-    }
-
     private List<Interval> getAllBusyTimes(String userMail, NewEventEntity newEventEntity) {
         return providerService.getAllCalendarEntities(userMail).parallelStream()
                 .map(calendarEntity -> {
@@ -305,76 +242,6 @@ public class EventService extends LoggableService {
                 .filter(Objects::nonNull)
                 .map(appUserEntity -> new CalendarEvent.Attendee(appUserEntity.getName(), appUserEntity.getMail()))
                 .collect(Collectors.toList());
-    }
-
-    private Interval searchTimeSlot(Collection<Interval> freeTimes, NewEventEntity newEventEntity) {
-        final LinkedList<Interval> resultIntervals = new LinkedList<>();
-        LOG.info("Looking for time-slots for {} in {}", newEventEntity, freeTimes);
-        Period eventPeriod = getMeetingDuration(newEventEntity.getMeetingDuration(), newEventEntity.getDurationUnit());
-        freeTimes.forEach(interval -> {
-            Period timeSlotPeriod = interval.toPeriod();
-            if (eventPeriod.getHours() < timeSlotPeriod.getHours()
-                    || (eventPeriod.getHours() == timeSlotPeriod.getHours()
-                    && eventPeriod.getMinutes() <= timeSlotPeriod.getMinutes())) {
-                LOG.info("found timeSlot: {} ({}) - {} ({})",
-                        interval.getStart().toLocalDate(), interval.getStart().toLocalTime(),
-                        interval.getEnd().toLocalDate(), interval.getEnd().toLocalTime());
-                resultIntervals.add(interval);
-            }
-        });
-        if (resultIntervals.isEmpty())
-            return null;
-        Interval selectedInterval = selectPeriodForMeeting(resultIntervals, newEventEntity);
-        return trimIntervalForMeeting(selectedInterval, eventPeriod);
-    }
-
-    private Interval trimIntervalForMeeting(Interval freeInterval, Period eventPeriod) {
-        LOG.debug("Trimming interval {} for period of meeting: {}", freeInterval, eventPeriod);
-        return new Interval(freeInterval.getStartMillis(), freeInterval.getStart()
-                .plus(eventPeriod)
-                .getMillis());
-    }
-
-    private Interval selectPeriodForMeeting(LinkedList<Interval> resultIntervals, NewEventEntity newEventEntity) {
-        // TODO: 2019-01-28 select perfect interval for specific meeting
-        //select first... :)
-        LOG.debug("Selecting first interval from {} for {}", resultIntervals, newEventEntity);
-        return resultIntervals.getFirst();
-    }
-
-    private Period getMeetingDuration(Integer meetingDuration, String durationUnit) {
-        switch (durationUnit.toLowerCase()) {
-            case "minutes":
-            case "minute":
-            case "min":
-                return new Period().withMinutes(meetingDuration);
-            case "hours":
-            case "hour":
-            case "h":
-                return new Period().withHours(meetingDuration);
-            default:
-                throw new IllegalArgumentException("meetingDuration not specified correctly");
-        }
-    }
-
-    private DateTime getBeginOfWeek(Integer weekNumber) {
-        if (weekNumber == null)
-            weekNumber = DateTime.now().getWeekOfWeekyear();
-        return getBeginOfDay(new DateTime().withWeekOfWeekyear(weekNumber).dayOfWeek().withMinimumValue());
-    }
-
-    private DateTime getEndOfWeek(Integer weekNumber) {
-        if (weekNumber == null)
-            weekNumber = DateTime.now().getWeekOfWeekyear();
-        return getEndOfDay(new DateTime().withWeekOfWeekyear(weekNumber).dayOfWeek().withMaximumValue());
-    }
-
-    private DateTime getEndOfToday() {
-        return getEndOfDay(DateTime.now());
-    }
-
-    private DateTime getBeginOfToday() {
-        return getBeginOfDay(DateTime.now());
     }
 
     public long getUserQualityValue(int userId, String startDate, String startTime, String endDate, String endTime) {
@@ -433,7 +300,6 @@ public class EventService extends LoggableService {
         return result;
     }
 
-
     private class UserTimeEntity {
         private final String userMail;
 
@@ -458,7 +324,7 @@ public class EventService extends LoggableService {
             LOG.info("calculate time-slot for meeting for user {}", userMail);
 
             Collection<Interval> freeTimes =
-                    calendarService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
+                    timeCalculationService.getFreeTimes(busyTimes.parallelStream(), workingHours.parallelStream(),
                             getBeginOfDay(DateTime.parse(newEventEntity.getAutoTimeDateStart())),
                             getEndOfDay(DateTime.parse(newEventEntity.getAutoTimeDateEnd())));
             LOG.debug("got freeTimes {} for {}", freeTimes, userMail);

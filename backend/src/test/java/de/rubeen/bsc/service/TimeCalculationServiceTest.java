@@ -17,19 +17,19 @@ import static org.assertj.core.api.Assertions.anyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-class CalendarServiceTest extends LoggableService {
+class TimeCalculationServiceTest extends LoggableService {
 
     @Mock
     LoginService loginService;
     @Mock
     DatabaseService databaseService;
 
-    private CalendarService calendarService;
+    private TimeCalculationService calendarService;
 
     @BeforeEach
     void setup() throws SQLException {
         initMocks(this);
-        calendarService = new CalendarService(loginService, databaseService);
+        calendarService = new TimeCalculationService();
     }
 
     @Test
