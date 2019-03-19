@@ -61,4 +61,4 @@ VALUES (1, '08:00:00', '12:00:00', true, true, true, false, false, false, false)
        (14, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
        (15, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
        (16, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
-       (17, '08:00:00', '12:00:00', true, true, true, false, false, false, false),
+       (17, '08:00:00', '12:00:00', true, true, true, false, false, false, false);
