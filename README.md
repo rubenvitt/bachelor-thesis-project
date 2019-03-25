@@ -1,7 +1,11 @@
 # My Business Day
 
 ## Installation & Start
-#### Create docker-postgres:
+#### Create docker-postgres
+```bash
+cd backend/database && docker build -t database . && docker run -d -p 5432:5432 --name postgres --restart always database
+```
+#### run database from docker:
 ```bash
 docker run -d -p 5432:5432 --name postgres --restart always docker.fme.de/r.vitt/bsc/database
 ```
