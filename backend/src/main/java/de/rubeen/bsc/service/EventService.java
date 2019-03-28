@@ -230,7 +230,8 @@ public class EventService extends LoggableService {
         return providerService.getAllCalendarEntities(userMail).parallelStream()
                 .map(calendarEntity -> {
                     try {
-                        return providerService.getCalendarProvider(calendarEntity.getCalendarID(), userMail).getBusyTimes(userMail, newEventEntity);
+                        return providerService.getCalendarProvider(calendarEntity.getCalendarID(), userMail)
+                                .getBusyTimes(userMail, newEventEntity);
                     } catch (CalendarProvider.CalendarException e) {
                         LOG.error("Unable to get busy-Times for {}", userMail, e);
                     }

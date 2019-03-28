@@ -10,6 +10,7 @@ class OfficeProviderServiceTest {
 
     @Test
     void dateConvertingTest() {
+        //PRECONDITIONS
         DateTime dateTime = new DateTime()
                 .withYear(2019)
                 .withMonthOfYear(1)
@@ -18,9 +19,13 @@ class OfficeProviderServiceTest {
                 .withMinuteOfHour(14)
                 .withSecondOfMinute(12)
                 .withMillisOfSecond(133);
-
         String shouldBe = "2019-01-29T08:14:12.133Z";
-        assertThat(OfficeProviderService.convertDateToString(dateTime))
+
+        //when...
+        var dateToString = OfficeProviderService.convertDateToString(dateTime);
+
+        //then...
+        assertThat(dateToString)
                 .isEqualTo(shouldBe);
     }
 
