@@ -298,17 +298,12 @@ public class TimeCalculationService extends LoggableService {
                     if (result.first) {
                         result.first = false;
                         result.resultTimes = new LinkedList<>(intervals);
+                        LOG.debug("Creating new resultTimes-List...: {}", result.resultTimes);
                         return;
                     }
 
                     List<Interval> resultTimes = new LinkedList<>();
                     intervals.stream()
-                            .filter(freeInterval -> result.resultTimes.stream()
-                                    .anyMatch(readableInterval -> {
-                                        //freeInterval should contain any interval from result-list
-                                        LOG.info("{} contains {} ? : {}", freeInterval, readableInterval, freeInterval.contains(readableInterval));
-                                        return !freeInterval.contains(readableInterval);
-                                    }))
                             .map(freeInterval -> {
                                 List<Interval> list = result.resultTimes.stream()
                                         .filter(readableInterval -> {
@@ -334,6 +329,7 @@ public class TimeCalculationService extends LoggableService {
                                                 });
                                     }
                             );
+                    LOG.info("Result-Interval for {} is: {}", intervals, resultTimes);
                     result.resultTimes = resultTimes;
                 });
         return result.resultTimes;

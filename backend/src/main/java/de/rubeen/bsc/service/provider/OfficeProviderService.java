@@ -195,6 +195,9 @@ public class OfficeProviderService extends LoggableService implements CalendarPr
              */
         } catch (IOException e) {
             throw new CalendarException("Unable to get token for user " + userId, e);
+        } catch (NullPointerException e) {
+            LOG.error("NullPointerException at officeProvider-Service", e);
+            return Collections.emptyList();
         }
 
 
