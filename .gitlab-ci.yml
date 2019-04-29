@@ -26,9 +26,10 @@ backend-test:
     - cd backend
     - mvn test -Dskip.jooq.generation=true
   only:
-    - changes:
-        - backend/**/*
-    - web
+    refs:
+      - web
+    changes:
+      - backend/**/*
   tags:
     - docker
 
@@ -43,9 +44,10 @@ backend-build:
     - cd backend
     - mvn package -DskipTests -Dskip.jooq.generation=true
   only:
-    - changes:
-        - backend/**/*
-    - web
+    refs:
+      - web
+    changes:
+      - backend/**/*
   tags:
     - docker
 
@@ -69,9 +71,10 @@ backend-deploy-docker:
     - cd backend
     - mvn clean compile jib:build -Djib.to.auth.username=gitlab-ci-token -Djib.to.auth.password=$CI_BUILD_TOKEN -Dskip.jooq.generation=true
   only:
-    - changes:
-        - backend/**/*
-    - web
+    refs:
+      - web
+    changes:
+      - backend/**/*
   tags:
     - docker
 
@@ -87,10 +90,11 @@ frontend-build:
     - npm install
     - npm run build || true #true, because build will "fail"
   only:
-    - changes:
-        - frontend-dev/**/*
-        - frontend-server/**/*
-    - web
+    refs:
+      - web
+    changes:
+      - frontend-dev/**/*
+      - frontend-server/**/*
   tags:
     - docker
 
@@ -105,10 +109,11 @@ frontend-deploy-docker:
     - docker build -t docker.fme.de/r.vitt/bsc/frontend .
     - docker push docker.fme.de/r.vitt/bsc/frontend
   only:
-    - changes:
-        - frontend-dev/**/*
-        - frontend-server/**/*
-    - web
+    refs:
+      - web
+    changes:
+      - frontend-dev/**/*
+      - frontend-server/**/*
   tags:
     - docker
 
@@ -123,6 +128,7 @@ database-deploy-docker:
     - docker build -t docker.fme.de/r.vitt/bsc/database .
     - docker push docker.fme.de/r.vitt/bsc/database
   only:
-    - changes:
-        - backend/database/**/*
-    - web
+    refs:
+      - web
+    changes:
+      - backend/database/**/*
