@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.3"
 
 services:
   frontend:
@@ -8,6 +8,9 @@ services:
 
   backend:
     image: docker.fme.de/r.vitt/bsc/backend
+    restart: unless-stopped
+    environment:
+      - DB_HOST=database
     ports:
       - 8443:8443
     depends_on:
