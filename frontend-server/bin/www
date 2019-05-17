@@ -4,8 +4,10 @@
  * Module dependencies.
  */
 const app = require('../app');
+const httpApp = require('../app');
 const debug = require('debug')('frontend-server:server');
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -22,11 +24,14 @@ const options = {
  */
 const port = normalizePort(process.env.PORT || '3333');
 app.set('port', port);
+const httpPort = normalizePort('5555');
+httpApp.set('port', port);
 
 /**
  * Create HTTP server.
  */
 var server = https.createServer(options, app);
+var httpServer = http.createServer(httpApp);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -34,6 +39,10 @@ var server = https.createServer(options, app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+httpServer.listen(httpApp.get('port'));
+httpServer.on('error', onError);
+httpServer.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
