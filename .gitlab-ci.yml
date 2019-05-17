@@ -69,6 +69,7 @@ backend-deploy-docker:
   stage: deploy
   script:
     - cd backend
+    - mvn package -DskipTests -Dskip.jooq.generation=true
     - mvn dockerfile:build
     - mvn dockerfile:push
   only:
