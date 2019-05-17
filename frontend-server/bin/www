@@ -25,7 +25,7 @@ const options = {
 const port = normalizePort(process.env.PORT || '3333');
 app.set('port', port);
 const httpPort = normalizePort('5555');
-httpApp.set('port', port);
+httpApp.set('port', httpPort);
 
 /**
  * Create HTTP server.
